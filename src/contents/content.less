@@ -1,0 +1,78 @@
+.content-view {
+  font-size: 30px;
+}
+
+.__mark {
+  position: relative;
+  margin: unset;
+  padding: unset;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  display: inline;
+  background-color: unset;
+  border-radius: 0.3em;
+  // text-decoration: wavy underline #99f;
+  // text-underline-offset: 2px;
+}
+
+.__word_known {
+  color: inherit;
+  background-color: unset;
+}
+
+.__word_unknown {
+  background: rgba(70, 104, 227, 0.5);
+}
+
+.__word_half {
+  background: rgba(235, 98, 24, 0.5);
+}
+
+.__word_card {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  max-width: 400px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #999;
+  background-color: bisque;
+  font-size: 12px;
+  color: rgba(143, 170, 229, 0.5);
+  box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
+
+  #__word_context {
+    color: #666;
+    a {
+      color: #3366bb;
+    }
+  }
+
+  .__buttons_container {
+    display: flex;
+    flex-direction: space-between;
+    button {
+      padding: 2px 10px;
+      margin-right: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      white-space: nowrap;
+      color: #000;
+      font-size: 12px;
+      &[data-class='__word_known'] {
+        background-color: rgba(133, 219, 146, 0.5);
+        &:hover {
+          background-color: rgba(133, 219, 146, 0.8);
+        }
+      }
+      &[data-class='__word_half'] {
+        background-color: rgba(235, 98, 24, 0.5);
+        &:hover {
+          background-color: rgba(235, 98, 24, 0.8);
+        }
+      }
+    }
+  }
+}
