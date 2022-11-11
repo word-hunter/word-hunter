@@ -1,4 +1,5 @@
 import styles from './app.module.less'
+import { Settings } from './settings'
 
 function setAllKnownInContextScript() {
   window.__markAsAllKnown()
@@ -20,9 +21,17 @@ export const App = () => {
   }
 
   return (
-    <div className={styles.popup}>
-      <button onClick={onSetAllKnown}>👻 set all words as known</button>
-      <button onClick={onDirectToWordBook}>📗 open word book</button>
+    <div className={styles.page}>
+      <div className={styles.buttons}>
+        <button onClick={onSetAllKnown}>👻 set all words as known</button>
+        <button onClick={onDirectToWordBook}>📗 open word book</button>
+      </div>
+      <div>
+        <details>
+          <summary>Settings</summary>
+          <Settings />
+        </details>
+      </div>
     </div>
   )
 }

@@ -10,7 +10,12 @@
 There are three types of words on the web page, **unknown**, **known**, and **known a litte**,
 "unknown" and "known a litte" will be highlighted.
 
-> unknown ---> known a little ---> known
+<pre>
+   ┌────────► known a little ──────┐
+   │                               │
+   │                               ▼
+unknown ────────────────────────► known
+</pre>
 
 At first, all the words on the web page are "unknown" by default. You can hover over the words and mark them as "known", and the words will no longer be highlighted.
 

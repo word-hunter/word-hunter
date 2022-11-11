@@ -2,6 +2,7 @@ import './content.less'
 
 import {
   classes,
+  defaultColors,
   Dict,
   HalfKnownWordMap,
   invalidTags,
@@ -28,6 +29,7 @@ function createCardNode() {
     <div class="__buttons_container">
       <button data-class="${classes.known}">😀 known</button>
       <button data-class="${classes.half}">🙁 known a little</button>
+      <style></style>
      </div>`
   document.body.appendChild(cardNode)
   return cardNode
@@ -144,6 +146,24 @@ function markAsAllKnown() {
 
 // this function expose to be called in popup page
 window.__markAsAllKnown = markAsAllKnown
+
+function setColorStyle() {
+  chrome.storage.local.get('colors', result => {
+    const colors = result.colors || defaultColors
+    const styleNode = cardNode.querySelector('style')!
+    styleNode.textContent = `
+      .__word_unknown {
+        background: ${colors[0]};
+      }
+      .__word_half {
+        background: ${colors[1]};
+      }
+    `
+  })
+}
+
+// this function expose to be called in popup page
+window.__setColorStyle = setColorStyle
 
 function hidePopup(e: Event) {
   const node = e.target as HTMLElement
@@ -276,6 +296,7 @@ function readStorageAndHighlight() {
 }
 
 function init() {
+  setColorStyle()
   readStorageAndHighlight()
   bindEvents()
 }

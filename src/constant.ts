@@ -60,3 +60,5 @@ export const invalidTags = [
 
 export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
+
+export const defaultColors = ['#9FB0EF', '#F2AD89']
