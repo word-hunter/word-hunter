@@ -266,7 +266,11 @@ function readStorageAndHighlight() {
     chrome.storage.local.get([WordType.known, WordType.half], result => {
       wordsKnown = result[WordType.known] || {}
       wordsHalf = result[WordType.half] || {}
-      highlight(dict, wordsKnown, wordsHalf)
+      setTimeout(() => {
+        highlight(dict, wordsKnown, wordsHalf)
+        // many web pages client hydration after dom loaded, it will override our highlight
+        // so we need to delay a while to highlight
+      }, 300)
     })
   })
 }

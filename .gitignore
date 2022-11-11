@@ -7,3 +7,4 @@ dist
 output
 tsconfig.tsbuildinfo
 .vscode
+dist.zip
