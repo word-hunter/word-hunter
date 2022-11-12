@@ -35,9 +35,13 @@ function createCardNode() {
   return cardNode
 }
 
-const cardNode = createCardNode()
+// node reference is not stable in github page, so we need to get it every time
+function getCardNode() {
+  return (document.querySelector('.' + classes.card) as HTMLElement) || createCardNode()
+}
 
 function renderWrodContext(context?: WordContext) {
+  const cardNode = getCardNode()
   const contextNode = cardNode.querySelector('#__word_context')!
   const halfButton = cardNode.querySelectorAll('button')![1]
   if (context) {
@@ -58,6 +62,7 @@ function renderWrodContext(context?: WordContext) {
 function hidePopupDelay(ms: number) {
   timerHideRef && clearTimeout(timerHideRef)
   timerHideRef = setTimeout(() => {
+    const cardNode = getCardNode()
     cardNode.style.display = 'none'
   }, ms)
 }
@@ -150,7 +155,7 @@ window.__markAsAllKnown = markAsAllKnown
 function setColorStyle() {
   chrome.storage.local.get('colors', result => {
     const colors = result.colors || defaultColors
-    const styleNode = cardNode.querySelector('style')!
+    const styleNode = getCardNode().querySelector('style')!
     styleNode.textContent = `
       .__word_unknown {
         background: ${colors[0]};
@@ -186,6 +191,7 @@ function showPopup(node: HTMLElement) {
     renderWrodContext(undefined)
   }
 
+  const cardNode = getCardNode()
   cardNode.style.display = 'block'
   const { x: x, y: y, height: n_height } = node.getBoundingClientRect()
   const { width: width, height: height } = cardNode.getBoundingClientRect()
@@ -225,6 +231,7 @@ function bindEvents() {
     node.addEventListener('mouseleave', hidePopup)
   })
 
+  const cardNode = getCardNode()
   cardNode.addEventListener('click', e => {
     const node = e.target as HTMLElement
     if (node.tagName === 'BUTTON') {

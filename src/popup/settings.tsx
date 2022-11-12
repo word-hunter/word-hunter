@@ -8,7 +8,6 @@ export const Settings = () => {
   useEffect(() => {
     chrome.storage.local.get(['colors'], result => {
       const colors = result['colors'] ?? defaultColors
-      console.log(colors)
       setColors(colors)
     })
   }, [])
