@@ -10,3 +10,10 @@ export const getFaviconUrl = () => {
   }
   return ''
 }
+
+export const downloadAsJsonFile = (content: string, filename: string) => {
+  const a = document.createElement('a')
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content)
+  a.download = filename
+  a.click()
+}
