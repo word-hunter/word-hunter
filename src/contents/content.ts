@@ -180,6 +180,7 @@ function toggleZenMode() {
       const word = node.textContent!.toLowerCase()
       if (wordCache[word]) return
       const nodeCopy = node.cloneNode(true) as HTMLElement
+      ;(nodeCopy as any).__shadow = node
       zenModeNode.appendChild(nodeCopy)
       wordCache[word] = true
     })
@@ -233,7 +234,11 @@ function showPopup(node: HTMLElement) {
   cardNode.style.top = `${top}px`
 
   // set current node for popup
-  curMarkNode = node
+  if (document.querySelector('.' + classes.zen_mode)) {
+    curMarkNode = (node as any).__shadow
+  } else {
+    curMarkNode = node
+  }
 }
 
 function bindEvents() {
