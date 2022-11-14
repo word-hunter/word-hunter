@@ -6,4 +6,5 @@ declare module '*.less' {
 declare interface Window {
   __markAsAllKnown: () => void
   __setColorStyle: () => void
+  __toggleZenMode: () => void
 }

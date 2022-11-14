@@ -80,3 +80,31 @@
     }
   }
 }
+
+body:has(.__zen_mode) {
+  overflow: hidden;
+  .__word_card {
+    z-index: 2000000000;
+  }
+}
+
+.__zen_mode {
+  display: flex;
+  flex-wrap: wrap;
+  position: fixed;
+  z-index: 1000000000;
+  inset: 0;
+  padding: 40px;
+  background-color: antiquewhite;
+  justify-content: space-evenly;
+  align-content: flex-start;
+  overflow: auto;
+  gap: 30px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: Inter, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans,
+    Helvetica Neue, sans-serif;
+  mark {
+    padding: 0 2px;
+  }
+}

@@ -170,6 +170,28 @@ function setColorStyle() {
 // this function expose to be called in popup page
 window.__setColorStyle = setColorStyle
 
+function toggleZenMode() {
+  let zenModeNode = document.querySelector('.' + classes.zen_mode) as HTMLElement
+  if (!zenModeNode) {
+    zenModeNode = document.createElement('div')
+    zenModeNode.className = classes.zen_mode
+    const wordCache = {}
+    document.querySelectorAll('.' + classes.mark).forEach(node => {
+      const word = node.textContent!.toLowerCase()
+      if (wordCache[word]) return
+      const nodeCopy = node.cloneNode(true) as HTMLElement
+      zenModeNode.appendChild(nodeCopy)
+      wordCache[word] = true
+    })
+    document.body.appendChild(zenModeNode)
+  } else {
+    zenModeNode.remove()
+  }
+}
+
+// this function expose to be called in popup page
+window.__toggleZenMode = toggleZenMode
+
 function hidePopup(e: Event) {
   const node = e.target as HTMLElement
   if (node.classList.contains(classes.mark) || node.classList.contains(classes.card)) {
@@ -229,6 +251,14 @@ function bindEvents() {
     }
 
     node.addEventListener('mouseleave', hidePopup)
+  })
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.querySelector('.' + classes.zen_mode)) {
+        toggleZenMode()
+      }
+    }
   })
 
   const cardNode = getCardNode()

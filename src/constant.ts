@@ -21,7 +21,8 @@ export const classes = {
   known: '__word_known',
   unknown: '__word_unknown',
   half: '__word_half',
-  card: '__word_card'
+  card: '__word_card',
+  zen_mode: '__zen_mode'
 }
 
 export enum WordType {

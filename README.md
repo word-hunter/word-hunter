@@ -33,7 +33,8 @@ After you mark as many words as possible for "known", the words highlighted are 
 
 ## How to mark faster
 
-- Mark the really not too familiar words on the page as "known a little"
+- Click the icon of extension on the toolbar, then click "toogle zen mode" button in the pop-up panel.
+- Mark the words you are not too familiar with on the page as "known a little"
 - Click the icon of extension on the toolbar, then click "set all words as known" button in the pop-up panel.
 
 <img width="300px" src="./screensnap/screensnap_3.jpg" />
