@@ -5,10 +5,6 @@
    <p align="center">Discover new english <mark>words</mark> you don't know on any web page</p>
 </p>
 
-## Installation
-
-[Chrome Extension Store](https://chrome.google.com/webstore/detail/word-hunter/nigkedajkofkhoedhgiipmigiebldaem)
-
 ## How to use
 
 There are three types of words on the web page, **unknown**, **known**, and **known a litte**,
