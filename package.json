@@ -1,6 +1,6 @@
 {
   "name": "word-hunter",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "engines": {
     "node": ">=12"
   },
