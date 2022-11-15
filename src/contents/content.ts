@@ -13,7 +13,7 @@ import {
   wordReplaceRegex,
   WordType
 } from '../constant'
-import { emphasizeWordInText, getFaviconUrl } from '../utils'
+import { emphasizeWordInText, getFaviconUrl, invertHexColor } from '../utils'
 
 let curMarkNode: HTMLElement
 let timerShowRef: ReturnType<typeof setTimeout>
@@ -159,9 +159,11 @@ function setColorStyle() {
     const styleNode = getCardNode().querySelector('style')!
     styleNode.textContent = `
       .__word_unknown {
+        color: ${invertHexColor(colors[0])};
         background: ${colors[0]};
       }
       .__word_half {
+         color: ${invertHexColor(colors[1])};
         background: ${colors[1]};
       }
     `
