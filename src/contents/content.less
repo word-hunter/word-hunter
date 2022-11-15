@@ -89,22 +89,30 @@ body:has(.__zen_mode) {
 }
 
 .__zen_mode {
-  display: flex;
-  flex-wrap: wrap;
+  display: block;
   position: fixed;
   z-index: 1000000000;
   inset: 0;
   padding: 40px;
   background-color: antiquewhite;
-  justify-content: space-evenly;
-  align-content: flex-start;
   overflow: auto;
-  gap: 30px 5px;
   font-size: 12px;
   line-height: 1.5;
   font-family: Inter, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans,
     Helvetica Neue, sans-serif;
+
+  columns: 10rem;
+  column-gap: 7rem;
+  column-rule: 4px dotted turquoise;
+  word-break: break-all;
   mark {
+    display: inline-block;
+    break-inside: avoid;
+    white-space: nowrap;
     padding: 0 2px;
+    margin: 5px 5px;
+    &:nth-child(20n) {
+      margin-bottom: 50px;
+    }
   }
 }
