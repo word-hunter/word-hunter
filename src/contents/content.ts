@@ -16,8 +16,8 @@ import {
 import { emphasizeWordInText, getFaviconUrl } from '../utils'
 
 let curMarkNode: HTMLElement
-let timerShowRef: NodeJS.Timeout
-let timerHideRef: NodeJS.Timeout
+let timerShowRef: ReturnType<typeof setTimeout>
+let timerHideRef: ReturnType<typeof setTimeout>
 let wordsKnown: WordMap = {}
 let wordsHalf: HalfKnownWordMap = {}
 
@@ -40,7 +40,7 @@ function getCardNode() {
   return (document.querySelector('.' + classes.card) as HTMLElement) || createCardNode()
 }
 
-function renderWrodContext(context?: WordContext) {
+function renderWordContext(context?: WordContext) {
   const cardNode = getCardNode()
   const contextNode = cardNode.querySelector('#__word_context')!
   const halfButton = cardNode.querySelectorAll('button')![1]
@@ -77,7 +77,8 @@ function getWordTextContent(node: HTMLElement) {
     const postSentences = fragement[1].split('.')
     const preContent = preSentences.length > 1 ? preSentences[preSentences.length - 1] : preSentences[0]
     const postContent = postSentences.length > 1 ? postSentences[0] + '.' : postSentences[0]
-    return preContent + word + postContent
+    const result = preContent + word + postContent
+    return result.length > 300 ? word : result
   }
   return context
 }
@@ -209,9 +210,9 @@ function showPopup(node: HTMLElement) {
   const isKnownHalf = node.classList.contains(classes.half)
   if (isKnownHalf) {
     const context = wordsHalf[node.textContent!.toLowerCase()] as WordContext
-    renderWrodContext(context)
+    renderWordContext(context)
   } else {
-    renderWrodContext(undefined)
+    renderWordContext(undefined)
   }
 
   const cardNode = getCardNode()
