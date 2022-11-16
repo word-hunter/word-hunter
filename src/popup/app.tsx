@@ -24,9 +24,14 @@ export const App = () => {
     executeScript(() => window.__toggleZenMode())
   }
 
+  const onReHighlight = () => {
+    executeScript(() => window.__reHighlight())
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.buttons}>
+        <button onClick={onReHighlight}>️🔄 highlight again</button>
         <button onClick={onFastModeToggle}>⚡️ toggle zen mode</button>
         <button onClick={onSetAllKnown}>👻 set all words as known</button>
         <button onClick={onDirectToWordBook}>📗 open word book</button>

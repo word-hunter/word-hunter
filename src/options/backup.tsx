@@ -59,7 +59,7 @@ export const Backup = () => {
 
   const onBackup = () => {
     chrome.storage.local.get([WordType.half, WordType.known], result => {
-      const now = new Date()
+      const now = Date.now()
       const fileName = `word_hunter_backup_${timeformatter.format(now)}_${now}.json`
       downloadAsJsonFile(
         JSON.stringify({

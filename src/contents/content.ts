@@ -20,6 +20,7 @@ let timerShowRef: ReturnType<typeof setTimeout>
 let timerHideRef: ReturnType<typeof setTimeout>
 let wordsKnown: WordMap = {}
 let wordsHalf: HalfKnownWordMap = {}
+let dict: Dict = {}
 
 function createCardNode() {
   const cardNode = document.createElement('div')
@@ -291,6 +292,9 @@ function getTextNodes(node: Node): Node[] {
 function highlight(dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap) {
   const textNodes = getTextNodes(document.body)
   for (const node of textNodes) {
+    // skip if node is already highlighted when re-highlight
+    if (node.parentElement?.classList.contains(classes.mark)) continue
+
     const text = node.nodeValue || ''
     const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
       const w = word.toLowerCase()
@@ -315,9 +319,16 @@ function highlight(dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap)
   }
 }
 
+function reHighlight() {
+  highlight(dict, wordsKnown, wordsHalf)
+}
+
+// this function expose to be called in popup page
+window.__reHighlight = reHighlight
+
 function readStorageAndHighlight() {
   chrome.storage.local.get(['dict'], result => {
-    const dict: Dict = result.dict || {}
+    dict = result.dict || {}
     chrome.storage.local.get([WordType.known, WordType.half], result => {
       wordsKnown = result[WordType.known] || {}
       wordsHalf = result[WordType.half] || {}
