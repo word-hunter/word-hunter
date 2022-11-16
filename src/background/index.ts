@@ -16,38 +16,39 @@ function updateBadge(wordsKnown: WordMap) {
 async function setup() {
   const storage = chrome.storage.local
 
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    const { action, word, context, words } = request
-    switch (action) {
-      case Messages.set_known:
-        storage.get([WordType.known, WordType.half], result => {
-          const knownWords = { ...(result[WordType.known] ?? {}), [word]: 0 }
-          const halfWords = result[WordType.half] ?? {}
-          if (word in halfWords) {
-            delete halfWords[word]
-            storage.set({ [WordType.known]: knownWords, [WordType.half]: halfWords })
-          } else {
-            storage.set({ [WordType.known]: knownWords })
-          }
-          updateBadge(knownWords)
-        })
-        sendResponse(true)
-        break
-      case Messages.set_known_half:
-        storage.get([WordType.half], result => {
-          storage.set({ [WordType.half]: { ...(result[WordType.half] ?? {}), [word]: context } })
-        })
-        sendResponse(true)
-        break
-      case Messages.set_all_known:
-        storage.get([WordType.known], result => {
-          const addedWords = words.reduce((acc, cur) => ({ ...acc, [cur]: 0 }), {})
-          const knownWords = { ...(result[WordType.known] ?? {}), ...addedWords }
-          storage.set({ [WordType.known]: knownWords })
-          updateBadge(knownWords)
-        })
-        sendResponse(true)
-        break
+  chrome.runtime.onConnect.addListener(port => {
+    if (port.name === 'word-hunter') {
+      port.onMessage.addListener(async msg => {
+        const { action, word, context, words } = msg
+        switch (action) {
+          case Messages.set_known:
+            storage.get([WordType.known, WordType.half], result => {
+              const knownWords = { ...(result[WordType.known] ?? {}), [word]: 0 }
+              const halfWords = result[WordType.half] ?? {}
+              if (word in halfWords) {
+                delete halfWords[word]
+                storage.set({ [WordType.known]: knownWords, [WordType.half]: halfWords })
+              } else {
+                storage.set({ [WordType.known]: knownWords })
+              }
+              updateBadge(knownWords)
+            })
+            break
+          case Messages.set_known_half:
+            storage.get([WordType.half], result => {
+              storage.set({ [WordType.half]: { ...(result[WordType.half] ?? {}), [word]: context } })
+            })
+            break
+          case Messages.set_all_known:
+            storage.get([WordType.known], result => {
+              const addedWords = words.reduce((acc, cur) => ({ ...acc, [cur]: 0 }), {})
+              const knownWords = { ...(result[WordType.known] ?? {}), ...addedWords }
+              storage.set({ [WordType.known]: knownWords })
+              updateBadge(knownWords)
+            })
+            break
+        }
+      })
     }
   })
 

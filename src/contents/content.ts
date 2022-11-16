@@ -61,9 +61,9 @@ function renderWordContext(context?: WordContext) {
 
 function hidePopupDelay(ms: number) {
   timerHideRef && clearTimeout(timerHideRef)
+  const cardNode = getCardNode()
   timerHideRef = setTimeout(() => {
-    const cardNode = getCardNode()
-    cardNode.style.display = 'none'
+    cardNode.style.visibility = 'hidden'
   }, ms)
 }
 
@@ -83,22 +83,20 @@ function getWordTextContent(node: HTMLElement) {
   return context
 }
 
+const messageSender = chrome.runtime.connect({ name: 'word-hunter' })
+
 function markAsKnown() {
   const word = curMarkNode?.textContent?.toLowerCase() || ''
   if (!wordRegex.test(word)) return
 
   wordsKnown[word!] = 0
-  chrome.runtime.sendMessage({ action: Messages.set_known, word }, response => {
-    console.log(response)
-    if (response === true) {
-      document.querySelectorAll('.' + classes.mark).forEach(node => {
-        if (node.textContent?.toLowerCase() === word) {
-          node.className = classes.known
-        }
-      })
-      hidePopupDelay(100)
+  messageSender.postMessage({ action: Messages.set_known, word })
+  document.querySelectorAll('.' + classes.mark).forEach(node => {
+    if (node.textContent?.toLowerCase() === word) {
+      node.className = classes.known
     }
   })
+  hidePopupDelay(0)
 }
 
 function markAsKnownHalf() {
@@ -114,19 +112,15 @@ function markAsKnownHalf() {
   }
   wordsHalf[word] = context
 
-  chrome.runtime.sendMessage({ action: Messages.set_known_half, word, context }, response => {
-    console.log(response)
-    if (response === true) {
-      document.querySelectorAll('.' + classes.unknown).forEach(node => {
-        if (node.textContent?.toLowerCase() === word) {
-          node.classList.remove(classes.unknown)
-          node.classList.add(classes.half)
-          node.classList.add(classes.mark)
-        }
-      })
-      hidePopupDelay(100)
+  messageSender.postMessage({ action: Messages.set_known_half, word, context })
+  document.querySelectorAll('.' + classes.unknown).forEach(node => {
+    if (node.textContent?.toLowerCase() === word) {
+      node.classList.remove(classes.unknown)
+      node.classList.add(classes.half)
+      node.classList.add(classes.mark)
     }
   })
+  hidePopupDelay(100)
 }
 
 function markAsAllKnown() {
@@ -139,15 +133,11 @@ function markAsAllKnown() {
     }
   })
 
-  chrome.runtime.sendMessage({ action: Messages.set_all_known, words }, response => {
-    console.log(response)
-    if (response === true) {
-      nodes.forEach(node => {
-        node.className = classes.known
-      })
-      hidePopupDelay(100)
-    }
+  messageSender.postMessage({ action: Messages.set_all_known, words })
+  nodes.forEach(node => {
+    node.className = classes.known
   })
+  hidePopupDelay(100)
 }
 
 // this function expose to be called in popup page
@@ -204,7 +194,7 @@ function hidePopup(e: Event) {
 
   if (node.classList.contains(classes.mark)) {
     timerShowRef && clearTimeout(timerShowRef)
-    node.removeEventListener('moveleave', hidePopup)
+    node.removeEventListener('mouseleave', hidePopup)
   }
 }
 
@@ -218,7 +208,7 @@ function showPopup(node: HTMLElement) {
   }
 
   const cardNode = getCardNode()
-  cardNode.style.display = 'block'
+  cardNode.style.visibility = 'visible'
   const { x: x, y: y, height: n_height } = node.getBoundingClientRect()
   const { width: width, height: height } = cardNode.getBoundingClientRect()
 
@@ -334,7 +324,7 @@ function readStorageAndHighlight() {
       setTimeout(() => {
         highlight(dict, wordsKnown, wordsHalf)
         // many web pages client hydration after dom loaded, it will override our highlight
-        // so we need to delay a while to highlight
+        // so, we need to delay awhile for highlight
       }, 300)
     })
   })
