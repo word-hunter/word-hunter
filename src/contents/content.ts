@@ -21,6 +21,7 @@ let timerHideRef: ReturnType<typeof setTimeout>
 let wordsKnown: WordMap = {}
 let wordsHalf: HalfKnownWordMap = {}
 let dict: Dict = {}
+let messagePort: chrome.runtime.Port
 
 function createCardNode() {
   const cardNode = document.createElement('div')
@@ -84,14 +85,19 @@ function getWordTextContent(node: HTMLElement) {
   return context
 }
 
-const messageSender = chrome.runtime.connect({ name: 'word-hunter' })
+function connectPort() {
+  messagePort = chrome.runtime.connect({ name: 'word-hunter' })
+  messagePort.onDisconnect.addListener(() => {
+    connectPort()
+  })
+}
 
 function markAsKnown() {
   const word = curMarkNode?.textContent?.toLowerCase() || ''
   if (!wordRegex.test(word)) return
 
   wordsKnown[word!] = 0
-  messageSender.postMessage({ action: Messages.set_known, word })
+  messagePort.postMessage({ action: Messages.set_known, word })
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (node.textContent?.toLowerCase() === word) {
       node.className = classes.known
@@ -113,7 +119,7 @@ function markAsKnownHalf() {
   }
   wordsHalf[word] = context
 
-  messageSender.postMessage({ action: Messages.set_known_half, word, context })
+  messagePort.postMessage({ action: Messages.set_known_half, word, context })
   document.querySelectorAll('.' + classes.unknown).forEach(node => {
     if (node.textContent?.toLowerCase() === word) {
       node.classList.remove(classes.unknown)
@@ -134,7 +140,7 @@ function markAsAllKnown() {
     }
   })
 
-  messageSender.postMessage({ action: Messages.set_all_known, words })
+  messagePort.postMessage({ action: Messages.set_all_known, words })
   nodes.forEach(node => {
     node.className = classes.known
   })
@@ -342,6 +348,7 @@ function readStorageAndHighlight() {
 }
 
 function init() {
+  connectPort()
   setColorStyle()
   readStorageAndHighlight()
   bindEvents()
