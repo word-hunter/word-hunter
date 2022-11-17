@@ -305,7 +305,7 @@ function highlight(dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap)
     const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
       const w = word.toLowerCase()
       if (w in dict) {
-        if (w in wordsKnown && w !== 'shift') {
+        if (w in wordsKnown) {
           return origin
         } else if (w in wordsHalf) {
           return `${prefix}<mark class="${classes.mark} ${classes.half}">${word}</mark>${postfix}`
