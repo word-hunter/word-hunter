@@ -37,11 +37,9 @@ async function setup() {
   chrome.runtime.onConnect.addListener(port => {
     if (port.name === 'word-hunter') {
       const tabId = port.sender?.tab?.id
-      console.log('tabId', tabId)
       autoDisconnectDelay(port, tabId)
 
       port.onMessage.addListener(async msg => {
-        console.log(port.sender?.id, port.sender?.tab?.id)
         const { action, word, context, words } = msg
         switch (action) {
           case Messages.set_known:

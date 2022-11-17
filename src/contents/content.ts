@@ -301,11 +301,11 @@ function highlight(dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap)
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
 
-    const text = node.nodeValue || ''
+    const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;')
     const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
       const w = word.toLowerCase()
       if (w in dict) {
-        if (w in wordsKnown) {
+        if (w in wordsKnown && w !== 'shift') {
           return origin
         } else if (w in wordsHalf) {
           return `${prefix}<mark class="${classes.mark} ${classes.half}">${word}</mark>${postfix}`
