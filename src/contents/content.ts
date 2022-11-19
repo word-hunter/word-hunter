@@ -281,14 +281,14 @@ function bindEvents() {
   cardNode.addEventListener('mouseleave', hidePopup)
 }
 
-function getTextNodes(node: Node): Node[] {
+function getTextNodes(node: Node): CharacterData[] {
   if (node.nodeType === Node.TEXT_NODE) {
-    return [node]
+    return [node as CharacterData]
   } else if (invalidTags.includes(node.nodeName)) {
     return []
   }
 
-  const textNodes: Node[] = []
+  const textNodes: CharacterData[] = []
   for (const childNode of node.childNodes) {
     textNodes.push(...getTextNodes(childNode))
   }
