@@ -307,16 +307,16 @@ function highlight(textNodes: CharacterData[], dict: Dict, wordsKnown: WordMap, 
         if (w in wordsKnown) {
           return origin
         } else if (w in wordsHalf) {
-          return `${prefix}<mark class="${classes.mark} ${classes.half}">${word}</mark>${postfix}`
+          return `${prefix}<w-mark class="${classes.mark} ${classes.half}">${word}</w-mark>${postfix}`
         } else {
-          return `${prefix}<mark class="${classes.mark} ${classes.unknown}">${word}</mark>${postfix}`
+          return `${prefix}<w-mark class="${classes.mark} ${classes.unknown}">${word}</w-mark>${postfix}`
         }
       } else {
         return origin
       }
     })
     if (text !== html) {
-      const newNode = document.createElement('span')
+      const newNode = document.createElement('w-mark-parent')
       newNode.className = classes.mark_parent
       newNode.innerHTML = html
       node.parentNode?.replaceChild(newNode, node)
@@ -334,9 +334,6 @@ function readStorageAndHighlight() {
     highlight(textNodes, dict, wordsKnown, wordsHalf)
   })
 }
-
-// this function expose to be called in popup page
-window.__reHighlight = readStorageAndHighlight
 
 function observeDomChange() {
   const observer = new MutationObserver(mutations => {

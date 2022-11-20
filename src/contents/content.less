@@ -1,9 +1,7 @@
 .__mark {
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
   display: inline;
-  background-color: unset;
+  padding-inline: 0.1em;
+  margin-inline: -0.1em;
   border-radius: 0.3em;
   // text-decoration: wavy underline #99f;
   // text-underline-offset: 2px;
@@ -57,6 +55,7 @@
     button {
       padding: 2px 10px;
       margin-right: 10px;
+      width: max-content;
       border-radius: 4px;
       border: 1px solid #ccc;
       cursor: pointer;
@@ -103,7 +102,7 @@ body:has(.__zen_mode) {
   column-gap: 7rem;
   column-rule: 4px dotted turquoise;
   word-break: break-all;
-  mark {
+  w-mark {
     display: inline-block;
     break-inside: avoid;
     white-space: nowrap;
