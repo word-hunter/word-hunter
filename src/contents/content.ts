@@ -295,8 +295,7 @@ function getTextNodes(node: Node): CharacterData[] {
   return textNodes
 }
 
-function highlight(dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap) {
-  const textNodes = getTextNodes(document.body)
+function highlight(textNodes: CharacterData[], dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap) {
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
@@ -318,32 +317,53 @@ function highlight(dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap)
     })
     if (text !== html) {
       const newNode = document.createElement('span')
-      newNode.className = '__mark_parent'
+      newNode.className = classes.mark_parent
       newNode.innerHTML = html
       node.parentNode?.replaceChild(newNode, node)
     }
   }
 }
 
-function reHighlight() {
-  highlight(dict, wordsKnown, wordsHalf)
+function readStorageAndHighlight() {
+  chrome.storage.local.get(['dict', WordType.known, WordType.half], result => {
+    dict = result.dict || {}
+    wordsKnown = result[WordType.known] || {}
+    wordsHalf = result[WordType.half] || {}
+
+    const textNodes = getTextNodes(document.body)
+    highlight(textNodes, dict, wordsKnown, wordsHalf)
+  })
 }
 
 // this function expose to be called in popup page
-window.__reHighlight = reHighlight
+window.__reHighlight = readStorageAndHighlight
 
-function readStorageAndHighlight() {
-  chrome.storage.local.get(['dict'], result => {
-    dict = result.dict || {}
-    chrome.storage.local.get([WordType.known, WordType.half], result => {
-      wordsKnown = result[WordType.known] || {}
-      wordsHalf = result[WordType.half] || {}
-      setTimeout(() => {
-        highlight(dict, wordsKnown, wordsHalf)
-        // many web pages client hydration after dom loaded, it will override our highlight
-        // so, we need to delay awhile for highlight
-      }, 300)
+function observeDomChange() {
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            highlight([node as CharacterData], dict, wordsKnown, wordsHalf)
+          } else {
+            if (
+              (node as HTMLElement).classList?.contains(classes.mark) ||
+              (node as HTMLElement).classList?.contains(classes.mark_parent)
+            ) {
+              return false
+            }
+            const textNodes = getTextNodes(node)
+            highlight(textNodes, dict, wordsKnown, wordsHalf)
+          }
+        })
+      }
     })
+  })
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: false
   })
 }
 
@@ -352,6 +372,7 @@ function init() {
   setColorStyle()
   readStorageAndHighlight()
   bindEvents()
+  observeDomChange()
 }
 
 init()

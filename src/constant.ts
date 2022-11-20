@@ -18,6 +18,7 @@ export type HalfKnownWordMap = {
 
 export const classes = {
   mark: '__mark',
+  mark_parent: '__mark_parent',
   known: '__word_known',
   unknown: '__word_unknown',
   half: '__word_half',
