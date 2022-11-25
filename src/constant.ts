@@ -35,7 +35,8 @@ export enum WordType {
 export enum Messages {
   'set_known' = 'set_known',
   'set_known_half' = 'set_known_half',
-  'set_all_known' = 'set_all_known'
+  'set_all_known' = 'set_all_known',
+  'play_audio' = 'play_audio'
 }
 
 export const invalidTags = [

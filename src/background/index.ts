@@ -13,6 +13,21 @@ function updateBadge(wordsKnown: WordMap) {
   chrome.action.setBadgeBackgroundColor({ color: '#bbb' }, () => {})
 }
 
+const createAudioWindow = async (audio: string) => {
+  let url = chrome.runtime.getURL('./public/audio.html')
+  url = `${url}?audio=${encodeURIComponent(audio)}`
+  console.log(url)
+  await chrome.windows.create({
+    type: 'popup',
+    focused: false,
+    top: 1,
+    left: 1,
+    height: 1,
+    width: 1,
+    url
+  })
+}
+
 /**
  * https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension/66618269#66618269
  * chrome connection will be auto disconnected after 5 minutes
@@ -67,6 +82,9 @@ async function setup() {
               storage.set({ [WordType.known]: knownWords })
               updateBadge(knownWords)
             })
+            break
+          case Messages.play_audio:
+            createAudioWindow(msg.audio)
             break
         }
       })

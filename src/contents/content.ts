@@ -326,9 +326,9 @@ function bindEvents() {
       }
     }
 
-    if (node.getAttribute('data-src-mp3')) {
-      const audio = new Audio(node.getAttribute('data-src-mp3')!)
-      audio.play().catch(console.warn)
+    const audioSrc = node.getAttribute('data-src-mp3')
+    if (audioSrc) {
+      messagePort.postMessage({ action: Messages.play_audio, audio: audioSrc })
     }
   })
 
