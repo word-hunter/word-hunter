@@ -75,10 +75,7 @@ export const Wordbook = () => {
               </td>
               <td>
                 <div className={styles.source_item}>
-                  {!!item.favicon && <img src={item.favicon} width="16" height="16" />}
-                  <a href={item.url}>
-                    <i>{item.url}</i>
-                  </a>
+                  <a href={item.url}>{item.favicon ? <img src={item.favicon} width="16" height="16" /> : '🔗'}</a>
                 </div>
               </td>
               <td>{timeformatter.format(item.timestamp)}</td>

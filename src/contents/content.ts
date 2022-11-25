@@ -1,5 +1,6 @@
 import './content.less'
 
+import { loadingImgDataUri } from '../assets/img'
 import {
   classes,
   defaultColors,
@@ -14,6 +15,7 @@ import {
   WordType
 } from '../constant'
 import { emphasizeWordInText, getFaviconUrl, invertHexColor } from '../utils'
+import collins from '../utils/collins'
 
 let curMarkNode: HTMLElement
 let timerShowRef: ReturnType<typeof setTimeout>
@@ -27,6 +29,7 @@ function createCardNode() {
   const cardNode = document.createElement('div')
   cardNode.className = classes.card
   cardNode.innerHTML = `
+    <div id="__word_def"></div>
     <div id="__word_context"></div>
     <div class="__buttons_container">
       <button data-class="${classes.known}">😀 known</button>
@@ -42,17 +45,40 @@ function getCardNode() {
   return (document.querySelector('.' + classes.card) as HTMLElement) || createCardNode()
 }
 
-function renderWordContext(context?: WordContext) {
+async function renderDict(node?: HTMLElement) {
+  const dictNode = getCardNode().querySelector('#__word_def')!
+  if (!node) {
+    dictNode.innerHTML = ''
+    return false
+  } else {
+    dictNode.innerHTML = `<div class="__dict_loading"><img src="${loadingImgDataUri}" /></div>`
+    const word = node!.textContent!.toLowerCase()
+    try {
+      const def = await collins.lookup(word)
+      if (curMarkNode !== node) return false
+      const html = collins.render(def)
+      dictNode.innerHTML = html
+    } catch (e) {
+      console.error(e)
+      dictNode.innerHTML = '😭 not found definition'
+    }
+
+    adjustCardPosition(node)
+  }
+}
+
+function renderWordContext(node: HTMLElement) {
+  const isKnownHalf = node.classList.contains(classes.half)
   const cardNode = getCardNode()
   const contextNode = cardNode.querySelector('#__word_context')!
   const halfButton = cardNode.querySelectorAll('button')![1]
-  if (context) {
+  if (isKnownHalf) {
+    const context = wordsHalf[node.textContent!.toLowerCase()] as WordContext
     contextNode.innerHTML = `
-      <div>${emphasizeWordInText(context.text, context.word, 'mark')}</div>
       <div>
-        <a href="${context.url}" target="_blank">${context.url}</a>
+        ${emphasizeWordInText(context.text, context.word)}
+        <a href="${context.url}" target="_blank"> 🔗</a>
       </div>
-      <hr />
     `
     halfButton.style.display = 'none'
   } else {
@@ -65,7 +91,8 @@ function hidePopupDelay(ms: number) {
   timerHideRef && clearTimeout(timerHideRef)
   const cardNode = getCardNode()
   timerHideRef = setTimeout(() => {
-    cardNode.style.visibility = 'hidden'
+    cardNode.classList.remove('__card_visible')
+    cardNode.classList.add('__card_hidden')
   }, ms)
 }
 
@@ -127,7 +154,7 @@ function markAsKnownHalf() {
       node.classList.add(classes.mark)
     }
   })
-  hidePopupDelay(100)
+  hidePopupDelay(0)
 }
 
 function markAsAllKnown() {
@@ -144,7 +171,7 @@ function markAsAllKnown() {
   nodes.forEach(node => {
     node.className = classes.known
   })
-  hidePopupDelay(100)
+  hidePopupDelay(0)
 }
 
 // this function expose to be called in popup page
@@ -157,11 +184,11 @@ function setColorStyle() {
     styleNode.textContent = `
       .__word_unknown {
         color: ${invertHexColor(colors[0])};
-        background: ${colors[0]};
+        background-color: ${colors[0]};
       }
       .__word_half {
          color: ${invertHexColor(colors[1])};
-        background: ${colors[1]};
+        background-color: ${colors[1]};
       }
     `
   })
@@ -195,43 +222,20 @@ window.__toggleZenMode = toggleZenMode
 
 function hidePopup(e: Event) {
   const node = e.target as HTMLElement
+  timerShowRef && clearTimeout(timerShowRef)
   if (node.classList.contains(classes.mark) || node.classList.contains(classes.card)) {
     hidePopupDelay(500)
   }
 
   if (node.classList.contains(classes.mark)) {
-    timerShowRef && clearTimeout(timerShowRef)
     node.removeEventListener('mouseleave', hidePopup)
   }
 }
 
 function showPopup(node: HTMLElement) {
-  const isKnownHalf = node.classList.contains(classes.half)
-  if (isKnownHalf) {
-    const context = wordsHalf[node.textContent!.toLowerCase()] as WordContext
-    renderWordContext(context)
-  } else {
-    renderWordContext(undefined)
-  }
-
   const cardNode = getCardNode()
-  cardNode.style.visibility = 'visible'
-  const { x: x, y: y, height: n_height } = node.getBoundingClientRect()
-  const { width: width, height: height } = cardNode.getBoundingClientRect()
-
-  let left = x - 10
-  let top = y - height - 5
-  // if overflow right viewport
-  if (left + width > window.innerWidth) {
-    left = window.innerWidth - width - 30 // 30 px from right (include scrollbar)
-  }
-  // if overflow top viewport
-  if (top - height < 0) {
-    top = y + n_height + 10 // bottom of word
-  }
-
-  cardNode.style.left = `${left}px`
-  cardNode.style.top = `${top}px`
+  cardNode.classList.remove('__card_hidden')
+  cardNode.classList.add('__card_visible')
 
   // set current node for popup
   if (document.querySelector('.' + classes.zen_mode)) {
@@ -239,23 +243,60 @@ function showPopup(node: HTMLElement) {
   } else {
     curMarkNode = node
   }
+
+  adjustCardPosition(node)
+}
+
+function adjustCardPosition(markNode: HTMLElement) {
+  const cardNode = getCardNode()
+  const { x: x, y: y, width: m_width, height: m_height } = markNode.getBoundingClientRect()
+  const { width: c_width, height: c_height } = cardNode.getBoundingClientRect()
+
+  let left = x + m_width + 10
+  let top = y - 20
+  // if overflow right viewport
+  if (left + c_width > window.innerWidth) {
+    if (x > c_width) {
+      left = x - c_width - 5
+    } else {
+      left = window.innerWidth - c_width - 30
+      top = y + m_height + 10
+    }
+  }
+  // if overflow top viewport
+  if (top < 0) {
+    top = 10
+  }
+
+  if (top + c_height > window.innerHeight) {
+    top = window.innerHeight - c_height - 10
+  }
+
+  cardNode.style.left = `${left}px`
+  cardNode.style.top = `${top}px`
 }
 
 function bindEvents() {
-  document.addEventListener('mouseover', (e: MouseEvent) => {
+  document.addEventListener('mouseover', async (e: MouseEvent) => {
     const node = e.target as HTMLElement
+
     if (node.classList.contains('__mark')) {
+      renderWordContext(node)
+      renderDict(node)
+
       timerShowRef && clearTimeout(timerShowRef)
       timerShowRef = setTimeout(() => {
         showPopup(node)
       }, 200)
+
+      timerHideRef && clearTimeout(timerHideRef)
+      node.addEventListener('mouseleave', hidePopup)
     }
 
-    if (node.classList.contains(classes.card) || node.classList.contains(classes.mark)) {
+    const cardNode = getCardNode()
+    if (cardNode === node || cardNode.contains(node)) {
       timerHideRef && clearTimeout(timerHideRef)
     }
-
-    node.addEventListener('mouseleave', hidePopup)
   })
 
   document.addEventListener('keydown', e => {
@@ -275,6 +316,11 @@ function bindEvents() {
       } else if (node.dataset.class === classes.half) {
         markAsKnownHalf()
       }
+    }
+
+    if (node.getAttribute('data-src-mp3')) {
+      const audio = new Audio(node.getAttribute('data-src-mp3')!)
+      audio.play().catch(console.warn)
     }
   })
 
@@ -336,6 +382,7 @@ function readStorageAndHighlight() {
 }
 
 function observeDomChange() {
+  const cardNode = getCardNode()
   const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
       if (mutation.type === 'childList') {
@@ -345,7 +392,8 @@ function observeDomChange() {
           } else {
             if (
               (node as HTMLElement).classList?.contains(classes.mark) ||
-              (node as HTMLElement).classList?.contains(classes.mark_parent)
+              (node as HTMLElement).classList?.contains(classes.mark_parent) ||
+              cardNode.contains(node)
             ) {
               return false
             }
