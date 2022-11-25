@@ -45,17 +45,26 @@ function getCardNode() {
   return (document.querySelector('.' + classes.card) as HTMLElement) || createCardNode()
 }
 
+function getNodeWord(node: HTMLElement | Node | undefined) {
+  if (!node) return ''
+  return (node.textContent ?? '').toLowerCase()
+}
+
 async function renderDict(node?: HTMLElement) {
   const dictNode = getCardNode().querySelector('#__word_def')!
   if (!node) {
     dictNode.innerHTML = ''
     return false
   } else {
-    dictNode.innerHTML = `<div class="__dict_loading"><img src="${loadingImgDataUri}" /></div>`
-    const word = node!.textContent!.toLowerCase()
+    dictNode.innerHTML = `<div class="__dict_loading"><img src="${loadingImgDataUri}" alt="loading" /></div>`
+    const word = getNodeWord(node)
     try {
       const def = await collins.lookup(word)
-      if (curMarkNode !== node) return false
+      const curWord = getNodeWord(curMarkNode)
+      if (word !== curWord) {
+        console.info('word changed, skip render', word, curWord)
+        return false
+      }
       const html = collins.render(def)
       dictNode.innerHTML = html
     } catch (e) {
@@ -73,7 +82,7 @@ function renderWordContext(node: HTMLElement) {
   const contextNode = cardNode.querySelector('#__word_context')!
   const halfButton = cardNode.querySelectorAll('button')![1]
   if (isKnownHalf) {
-    const context = wordsHalf[node.textContent!.toLowerCase()] as WordContext
+    const context = wordsHalf[getNodeWord(node)] as WordContext
     contextNode.innerHTML = `
       <div>
         ${emphasizeWordInText(context.text, context.word)}
@@ -120,13 +129,13 @@ function connectPort() {
 }
 
 function markAsKnown() {
-  const word = curMarkNode?.textContent?.toLowerCase() || ''
+  const word = getNodeWord(curMarkNode)
   if (!wordRegex.test(word)) return
 
   wordsKnown[word!] = 0
   messagePort.postMessage({ action: Messages.set_known, word })
   document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (node.textContent?.toLowerCase() === word) {
+    if (getNodeWord(node) === word) {
       node.className = classes.known
     }
   })
@@ -134,7 +143,7 @@ function markAsKnown() {
 }
 
 function markAsKnownHalf() {
-  const word = curMarkNode?.textContent?.toLowerCase() || ''
+  const word = getNodeWord(curMarkNode)
   if (!wordRegex.test(word)) return
 
   const context: WordContext = {
@@ -148,7 +157,7 @@ function markAsKnownHalf() {
 
   messagePort.postMessage({ action: Messages.set_known_half, word, context })
   document.querySelectorAll('.' + classes.unknown).forEach(node => {
-    if (node.textContent?.toLowerCase() === word) {
+    if (getNodeWord(node) === word) {
       node.classList.remove(classes.unknown)
       node.classList.add(classes.half)
       node.classList.add(classes.mark)
@@ -161,7 +170,7 @@ function markAsAllKnown() {
   const nodes = document.querySelectorAll('.' + classes.unknown)
   const words: string[] = []
   nodes.forEach(node => {
-    const word = node.textContent!.toLowerCase()
+    const word = getNodeWord(node)
     if (wordRegex.test(word)) {
       words.push(word)
     }
@@ -204,7 +213,7 @@ function toggleZenMode() {
     zenModeNode.className = classes.zen_mode
     const wordCache = {}
     document.querySelectorAll('.' + classes.mark).forEach(node => {
-      const word = node.textContent!.toLowerCase()
+      const word = getNodeWord(node)
       if (wordCache[word]) return
       const nodeCopy = node.cloneNode(true) as HTMLElement
       ;(nodeCopy as any).__shadow = node
@@ -236,14 +245,6 @@ function showPopup(node: HTMLElement) {
   const cardNode = getCardNode()
   cardNode.classList.remove('__card_hidden')
   cardNode.classList.add('__card_visible')
-
-  // set current node for popup
-  if (document.querySelector('.' + classes.zen_mode)) {
-    curMarkNode = (node as any).__shadow
-  } else {
-    curMarkNode = node
-  }
-
   adjustCardPosition(node)
 }
 
@@ -281,6 +282,13 @@ function bindEvents() {
     const node = e.target as HTMLElement
 
     if (node.classList.contains('__mark')) {
+      // set current node for popup
+      if (document.querySelector('.' + classes.zen_mode)) {
+        curMarkNode = (node as any).__shadow
+      } else {
+        curMarkNode = node
+      }
+
       renderWordContext(node)
       renderDict(node)
 
