@@ -125,7 +125,7 @@ function renderPornounciations(pronounciations: CollinsData['pronounciations']) 
     .map(
       pron => `
       <div>
-        <span>
+        <span data-src-mp3="${pron.audio}">
           ${pron.audio ? `<a data-src-mp3="${pron.audio}"> /${pron.text}/ 🔈</a>` : '/' + pron.text + '/'}
           <a href="${pronunciationGuideUrl}" target="_blank">ⓘ</a> 
         </span>

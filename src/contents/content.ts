@@ -326,7 +326,7 @@ function bindEvents() {
       }
     }
 
-    const audioSrc = node.getAttribute('data-src-mp3')
+    const audioSrc = node.getAttribute('data-src-mp3') || node.parentElement?.getAttribute('data-src-mp3')
     if (audioSrc) {
       messagePort.postMessage({ action: Messages.play_audio, audio: audioSrc })
     }
