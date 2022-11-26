@@ -15,7 +15,6 @@ import {
 import { invertHexColor } from '../utils'
 import collins from '../utils/collins'
 
-let curMarkNode: HTMLElement
 let curWord = ''
 let timerShowRef: ReturnType<typeof setTimeout>
 let timerHideRef: ReturnType<typeof setTimeout>
@@ -23,16 +22,20 @@ let wordsKnown: WordMap = {}
 let dict: Dict = {}
 let messagePort: chrome.runtime.Port
 let zenExcludeWords: string[] = []
+let dictHistory: string[] = []
 
 function createCardNode() {
   const cardNode = document.createElement('div')
   cardNode.className = classes.card
   cardNode.innerHTML = `
-    <div id="__word_def"></div>
     <div class="__buttons_container">
-      <button data-class="${classes.known}">😀 known</button>
+      <button data-class="${classes.known}" disabled>😀 known</button>
+      <span></span>
+      <i class="i-history-back disabled" title="back"></i>
       <style></style>
-     </div>`
+    </div>
+    <div id="__word_def"></div>
+     `
   document.body.appendChild(cardNode)
   return cardNode
 }
@@ -47,15 +50,34 @@ function getNodeWord(node: HTMLElement | Node | undefined) {
   return (node.textContent ?? '').toLowerCase()
 }
 
-async function renderDict(node?: HTMLElement) {
-  const dictNode = getCardNode().querySelector('#__word_def')!
-  if (!node) {
+function setDictHistory(words: string[]) {
+  const cardNode = getCardNode()
+  const historyNode = cardNode.querySelector('.i-history-back')!
+  dictHistory = words
+  if (dictHistory.length > 1) {
+    historyNode.classList.remove('disabled')
+  } else {
+    historyNode.classList.add('disabled')
+  }
+}
+
+async function renderDict(word: string) {
+  const cardNode = getCardNode()
+  const dictNode = cardNode.querySelector('#__word_def')!
+  const titleNode = cardNode.querySelector('span')! as HTMLElement
+  titleNode.textContent = word
+
+  if (!word) {
     dictNode.innerHTML = ''
     return false
   } else {
-    const isInCard = dictNode.contains(node)
+    const knownBtn = cardNode.querySelector('button')! as HTMLButtonElement
+    if (word in wordsKnown) {
+      knownBtn.setAttribute('disabled', 'disabled')
+    } else {
+      knownBtn.removeAttribute('disabled')
+    }
     dictNode.innerHTML = `<div class="__dict_loading"><img src="${loadingImgDataUri}" alt="loading" /></div>`
-    const word = getNodeWord(node)
     try {
       const def = await collins.lookup(word)
       if (word !== curWord) {
@@ -65,14 +87,8 @@ async function renderDict(node?: HTMLElement) {
       const html = collins.render(def)
       dictNode.innerHTML = html
     } catch (e) {
-      console.error(e)
+      console.warn(e)
       dictNode.innerHTML = '😭 not found definition'
-    }
-
-    if (isInCard) {
-      adjustCardPosition(curMarkNode.getBoundingClientRect())
-    } else {
-      adjustCardPosition(node.getBoundingClientRect())
     }
   }
 }
@@ -83,6 +99,7 @@ function hidePopupDelay(ms: number) {
   timerHideRef = setTimeout(() => {
     cardNode.classList.remove('__card_visible')
     cardNode.classList.add('__card_hidden')
+    setDictHistory([])
   }, ms)
 }
 
@@ -192,11 +209,10 @@ function hidePopup(e: Event) {
   }
 }
 
-function showPopup(node: HTMLElement) {
+function showPopup() {
   const cardNode = getCardNode()
   cardNode.classList.remove('__card_hidden')
   cardNode.classList.add('__card_visible')
-  adjustCardPosition(node.getBoundingClientRect())
 }
 
 function adjustCardPosition(rect: DOMRect) {
@@ -233,19 +249,15 @@ function bindEvents() {
     const node = e.target as HTMLElement
 
     if (node.classList.contains('__mark')) {
-      // set current node for popup
-      if (document.querySelector('.' + classes.zen_mode)) {
-        curMarkNode = (node as any).__shadow
-      } else {
-        curMarkNode = node
-      }
       curWord = getNodeWord(node)
 
-      renderDict(node)
+      renderDict(curWord)
+      setDictHistory([curWord])
+      adjustCardPosition(node.getBoundingClientRect())
 
       timerShowRef && clearTimeout(timerShowRef)
       timerShowRef = setTimeout(() => {
-        showPopup(node)
+        showPopup()
       }, 200)
 
       timerHideRef && clearTimeout(timerHideRef)
@@ -283,8 +295,19 @@ function bindEvents() {
 
     if (node.tagName === 'A' && node.dataset.href) {
       curWord = getNodeWord(node)
-      renderDict(node)
+      renderDict(curWord)
+      setDictHistory([...dictHistory, curWord])
       return false
+    }
+
+    if (node.classList.contains('i-history-back')) {
+      dictHistory.pop()
+      setDictHistory(dictHistory)
+      const prevWord = dictHistory[dictHistory.length - 1]
+      if (prevWord) {
+        curWord = prevWord
+        prevWord && renderDict(prevWord)
+      }
     }
   })
 
@@ -348,16 +371,16 @@ function observeDomChange() {
     mutations.forEach(mutation => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
+          if (
+            (node as HTMLElement).classList?.contains(classes.mark) ||
+            (node as HTMLElement).classList?.contains(classes.mark_parent) ||
+            cardNode.contains(node)
+          ) {
+            return false
+          }
           if (node.nodeType === Node.TEXT_NODE) {
             highlight([node as CharacterData], dict, wordsKnown)
           } else {
-            if (
-              (node as HTMLElement).classList?.contains(classes.mark) ||
-              (node as HTMLElement).classList?.contains(classes.mark_parent) ||
-              cardNode.contains(node)
-            ) {
-              return false
-            }
             const textNodes = getTextNodes(node)
             highlight(textNodes, dict, wordsKnown)
           }
