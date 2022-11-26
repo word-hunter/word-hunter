@@ -18,6 +18,7 @@ import { emphasizeWordInText, getFaviconUrl, invertHexColor } from '../utils'
 import collins from '../utils/collins'
 
 let curMarkNode: HTMLElement
+let curWord = ''
 let timerShowRef: ReturnType<typeof setTimeout>
 let timerHideRef: ReturnType<typeof setTimeout>
 let wordsKnown: WordMap = {}
@@ -56,11 +57,11 @@ async function renderDict(node?: HTMLElement) {
     dictNode.innerHTML = ''
     return false
   } else {
+    const isInCard = dictNode.contains(node)
     dictNode.innerHTML = `<div class="__dict_loading"><img src="${loadingImgDataUri}" alt="loading" /></div>`
     const word = getNodeWord(node)
     try {
       const def = await collins.lookup(word)
-      const curWord = getNodeWord(curMarkNode)
       if (word !== curWord) {
         console.info('word changed, skip render', word, curWord)
         return false
@@ -72,7 +73,11 @@ async function renderDict(node?: HTMLElement) {
       dictNode.innerHTML = '😭 not found definition'
     }
 
-    adjustCardPosition(node)
+    if (isInCard) {
+      adjustCardPosition(curMarkNode.getBoundingClientRect())
+    } else {
+      adjustCardPosition(node.getBoundingClientRect())
+    }
   }
 }
 
@@ -129,13 +134,12 @@ function connectPort() {
 }
 
 function markAsKnown() {
-  const word = getNodeWord(curMarkNode)
-  if (!wordRegex.test(word)) return
+  if (!wordRegex.test(curWord)) return
 
-  wordsKnown[word!] = 0
-  messagePort.postMessage({ action: Messages.set_known, word })
+  wordsKnown[curWord!] = 0
+  messagePort.postMessage({ action: Messages.set_known, word: curWord })
   document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (getNodeWord(node) === word) {
+    if (getNodeWord(node) === curWord) {
       node.className = classes.known
     }
   })
@@ -143,7 +147,7 @@ function markAsKnown() {
 }
 
 function markAsKnownHalf() {
-  const word = getNodeWord(curMarkNode)
+  const word = curWord
   if (!wordRegex.test(word)) return
 
   const context: WordContext = {
@@ -245,12 +249,12 @@ function showPopup(node: HTMLElement) {
   const cardNode = getCardNode()
   cardNode.classList.remove('__card_hidden')
   cardNode.classList.add('__card_visible')
-  adjustCardPosition(node)
+  adjustCardPosition(node.getBoundingClientRect())
 }
 
-function adjustCardPosition(markNode: HTMLElement) {
+function adjustCardPosition(rect: DOMRect) {
   const cardNode = getCardNode()
-  const { x: x, y: y, width: m_width, height: m_height } = markNode.getBoundingClientRect()
+  const { x: x, y: y, width: m_width, height: m_height } = rect
   const { width: c_width, height: c_height } = cardNode.getBoundingClientRect()
 
   let left = x + m_width + 10
@@ -287,6 +291,7 @@ function bindEvents() {
         curMarkNode = (node as any).__shadow
       } else {
         curMarkNode = node
+        curWord = getNodeWord(node)
       }
 
       renderWordContext(node)
@@ -318,6 +323,7 @@ function bindEvents() {
   const cardNode = getCardNode()
   cardNode.addEventListener('click', e => {
     const node = e.target as HTMLElement
+
     if (node.tagName === 'BUTTON') {
       if (node.dataset.class === classes.known) {
         markAsKnown()
@@ -329,6 +335,12 @@ function bindEvents() {
     const audioSrc = node.getAttribute('data-src-mp3') || node.parentElement?.getAttribute('data-src-mp3')
     if (audioSrc) {
       messagePort.postMessage({ action: Messages.play_audio, audio: audioSrc })
+    }
+
+    if (node.tagName === 'A' && node.dataset.href) {
+      curWord = getNodeWord(node)
+      renderDict(node)
+      return false
     }
   })
 

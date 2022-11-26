@@ -48,10 +48,6 @@
     transition: opacity 0.2s, height 0.2s, width 0.2s;
   }
 
-  .__mark {
-    pointer-events: none;
-  }
-
   #__word_context {
     div {
       max-width: 430px;
@@ -251,9 +247,7 @@ body:has(.__zen_mode) {
   .__definition {
     padding-left: 1.5em;
     padding-bottom: 1em;
-    b {
-      color: #c12d30;
-    }
+
     > div:nth-child(1) {
       span:nth-child(1) {
         margin-left: -1.3em;
@@ -281,14 +275,22 @@ body:has(.__zen_mode) {
     .__def_text {
       margin-bottom: 0.5em;
       line-height: 1.5em;
+      b {
+        color: #c12d30;
+      }
     }
     .__example {
+      > div {
+        margin-left: 2em;
+        padding-left: 1em;
+      }
       > div:nth-child(1) {
         font-style: italic;
         font-size: 13px;
         line-height: 1.5;
         &::before {
           content: '■';
+          margin-left: -1em;
           color: rgba(0, 0, 0, 0.3);
         }
       }

@@ -71,14 +71,14 @@ function praseDefinitions(root: Element) {
       const text = ex.querySelector('.quote')?.textContent ?? ex.textContent ?? ''
       const type = ex.querySelector('.type-syntax')?.textContent ?? ''
       const audio = ex.querySelector<HTMLElement>('[data-src-mp3]')?.dataset.srcMp3
-      const synonyms = Array.from(ex.querySelector('.thes')?.querySelectorAll('a') ?? []).map(a => {
-        const text = a.textContent ?? ''
-        const url = a.getAttribute('href') ?? ''
-        return { text, url }
-      })
       return { text, type, audio, synonyms }
     })
-    return { type, cefrLevel, defText, examples, isSense: false }
+    const synonyms = Array.from(defNode.querySelector('.thes')?.querySelectorAll('a.form') ?? []).map(a => {
+      const text = a.textContent ?? ''
+      const url = a.getAttribute('href') ?? ''
+      return { text, url }
+    })
+    return { type, cefrLevel, defText, examples, synonyms, isSense: false }
   })
   return definitions.filter(d => d !== null)
 }
@@ -86,9 +86,10 @@ function praseDefinitions(root: Element) {
 function parseSense(defNode: Element) {
   const sense = defNode.querySelector('.sense') ?? defNode.querySelector('.xr')
   return {
-    defText: sense?.innerHTML ?? '',
+    defText: (sense?.innerHTML ?? '').replace('href="', 'data-href="'),
     isSense: true,
     examples: [],
+    synonyms: [],
     cefrLevel: undefined,
     type: undefined
   }
@@ -143,7 +144,7 @@ function renderDefinition(definitions: CollinsData['definitions'], word: string)
             <div>
               <span>${i + 1}.</span>
               <span>${def.type || (def.isSense ? 'sence' : '')}</span>
-              ${def?.cefrLevel ? `<a target="_blank" href="${cefrLabelGuideUrl}">${def.cefrLevel ?? ''}</a>` : ''}
+              ${def.cefrLevel ? `<a target="_blank" href="${cefrLabelGuideUrl}">${def.cefrLevel ?? ''}</a>` : ''}
             </div>
             <div class="__def_text">${def.isSense ? def.defText : emphasizeWordInText(def.defText, word)}</div>
             <div>${def.examples
@@ -153,11 +154,17 @@ function renderDefinition(definitions: CollinsData['definitions'], word: string)
                   <div>${emphasizeWordInText(ex.text, word)}${
                   ex.audio ? `<a data-src-mp3="${ex.audio}"> 🔈</a>` : ''
                 }</div>
-                  <div>${ex.synonyms.map(syn => `<a href="${syn.url}">${syn.text}</a>`).join('')}</div>
                 </div>
               `
               })
               .join('')}</div>
+              ${
+                def.synonyms.length
+                  ? `<div class="__synonyms">Synonyms: ${def.synonyms
+                      .map(syn => `<a data-href="${syn.url}">${syn.text}</a>`)
+                      .join(', ')}</div>`
+                  : ''
+              }
           </div>
           `
     )
