@@ -291,8 +291,8 @@ function bindEvents() {
         curMarkNode = (node as any).__shadow
       } else {
         curMarkNode = node
-        curWord = getNodeWord(node)
       }
+      curWord = getNodeWord(node)
 
       renderWordContext(node)
       renderDict(node)
