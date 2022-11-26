@@ -16,7 +16,6 @@ function updateBadge(wordsKnown: WordMap) {
 const createAudioWindow = async (audio: string) => {
   let url = chrome.runtime.getURL('./public/audio.html')
   url = `${url}?audio=${encodeURIComponent(audio)}`
-  console.log(url)
   await chrome.windows.create({
     type: 'popup',
     focused: false,
@@ -55,24 +54,13 @@ async function setup() {
       autoDisconnectDelay(port, tabId)
 
       port.onMessage.addListener(async msg => {
-        const { action, word, context, words } = msg
+        const { action, word, words } = msg
         switch (action) {
           case Messages.set_known:
-            storage.get([WordType.known, WordType.half], result => {
+            storage.get([WordType.known], result => {
               const knownWords = { ...(result[WordType.known] ?? {}), [word]: 0 }
-              const halfWords = result[WordType.half] ?? {}
-              if (word in halfWords) {
-                delete halfWords[word]
-                storage.set({ [WordType.known]: knownWords, [WordType.half]: halfWords })
-              } else {
-                storage.set({ [WordType.known]: knownWords })
-              }
+              storage.set({ [WordType.known]: knownWords })
               updateBadge(knownWords)
-            })
-            break
-          case Messages.set_known_half:
-            storage.get([WordType.half], result => {
-              storage.set({ [WordType.half]: { ...(result[WordType.half] ?? {}), [word]: context } })
             })
             break
           case Messages.set_all_known:

@@ -16,8 +16,9 @@ export const App = () => {
       executeScript(() => window.__markAsAllKnown())
   }
 
-  const onDirectToWordBook = () => {
+  const onDirectToOption = () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('options.html') })
+    return false
   }
 
   const onFastModeToggle = () => {
@@ -29,12 +30,16 @@ export const App = () => {
       <div className={styles.buttons}>
         <button onClick={onFastModeToggle}>⚡️ toggle zen mode</button>
         <button onClick={onSetAllKnown}>👻 set all words as known</button>
-        <button onClick={onDirectToWordBook}>📗 open word book</button>
       </div>
       <div>
         <details>
           <summary>Settings</summary>
           <Settings />
+          <div className={styles.link}>
+            <a onClick={onDirectToOption} href="#">
+              Options
+            </a>
+          </div>
         </details>
       </div>
     </div>

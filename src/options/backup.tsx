@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 
+import styles from './backup.module.less'
 import { WordType } from '../constant'
 import { downloadAsJsonFile } from '../utils'
 
@@ -23,21 +24,19 @@ export const Backup = () => {
       try {
         const json = JSON.parse(data)
 
-        if (!json[WordType.half] || !json[WordType.known]) {
+        if (!json[WordType.known]) {
           alert('invalid file ❗️')
           return
         }
 
-        chrome.storage.local.get([WordType.half, WordType.known], resule => {
-          const half = resule[WordType.half] || {}
+        chrome.storage.local.get([WordType.known], resule => {
           const known = resule[WordType.known] || {}
 
-          const newHalf = { ...half, ...json[WordType.half] }
           const newKnown = { ...known, ...json[WordType.known] }
 
           chrome.storage.local.set(
             {
-              [WordType.half]: newHalf,
+              ['half']: {},
               [WordType.known]: newKnown
             },
             () => {
@@ -58,12 +57,11 @@ export const Backup = () => {
   }
 
   const onBackup = () => {
-    chrome.storage.local.get([WordType.half, WordType.known], result => {
+    chrome.storage.local.get([WordType.known], result => {
       const now = Date.now()
       const fileName = `word_hunter_backup_${timeformatter.format(now)}_${now}.json`
       downloadAsJsonFile(
         JSON.stringify({
-          [WordType.half]: result[WordType.half],
           [WordType.known]: result[WordType.known]
         }),
         fileName
@@ -72,7 +70,7 @@ export const Backup = () => {
   }
 
   return (
-    <>
+    <div className={styles.container}>
       <dialog id="restoreDialog" ref={dialogRef}>
         <form method="dialog">
           <div style={{ marginBottom: '20px' }}>
@@ -83,6 +81,6 @@ export const Backup = () => {
       </dialog>
       <button onClick={showModal}>restore</button>
       <button onClick={onBackup}>backup</button>
-    </>
+    </div>
   )
 }

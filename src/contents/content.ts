@@ -5,16 +5,14 @@ import {
   classes,
   defaultColors,
   Dict,
-  HalfKnownWordMap,
   invalidTags,
   Messages,
-  WordContext,
   WordMap,
   wordRegex,
   wordReplaceRegex,
   WordType
 } from '../constant'
-import { emphasizeWordInText, getFaviconUrl, invertHexColor } from '../utils'
+import { invertHexColor } from '../utils'
 import collins from '../utils/collins'
 
 let curMarkNode: HTMLElement
@@ -22,19 +20,17 @@ let curWord = ''
 let timerShowRef: ReturnType<typeof setTimeout>
 let timerHideRef: ReturnType<typeof setTimeout>
 let wordsKnown: WordMap = {}
-let wordsHalf: HalfKnownWordMap = {}
 let dict: Dict = {}
 let messagePort: chrome.runtime.Port
+let zenExcludeWords: string[] = []
 
 function createCardNode() {
   const cardNode = document.createElement('div')
   cardNode.className = classes.card
   cardNode.innerHTML = `
     <div id="__word_def"></div>
-    <div id="__word_context"></div>
     <div class="__buttons_container">
       <button data-class="${classes.known}">😀 known</button>
-      <button data-class="${classes.half}">🙁 known a little</button>
       <style></style>
      </div>`
   document.body.appendChild(cardNode)
@@ -81,26 +77,6 @@ async function renderDict(node?: HTMLElement) {
   }
 }
 
-function renderWordContext(node: HTMLElement) {
-  const isKnownHalf = node.classList.contains(classes.half)
-  const cardNode = getCardNode()
-  const contextNode = cardNode.querySelector('#__word_context')!
-  const halfButton = cardNode.querySelectorAll('button')![1]
-  if (isKnownHalf) {
-    const context = wordsHalf[getNodeWord(node)] as WordContext
-    contextNode.innerHTML = `
-      <div>
-        ${emphasizeWordInText(context.text, context.word)}
-        <a href="${context.url}" target="_blank"> 🔗</a>
-      </div>
-    `
-    halfButton.style.display = 'none'
-  } else {
-    contextNode.innerHTML = ''
-    halfButton.style.display = 'unset'
-  }
-}
-
 function hidePopupDelay(ms: number) {
   timerHideRef && clearTimeout(timerHideRef)
   const cardNode = getCardNode()
@@ -108,22 +84,6 @@ function hidePopupDelay(ms: number) {
     cardNode.classList.remove('__card_visible')
     cardNode.classList.add('__card_hidden')
   }, ms)
-}
-
-function getWordTextContent(node: HTMLElement) {
-  const word = node.textContent!
-  const contextNode = node.parentNode?.parentNode?.nodeName === 'P' ? node.parentNode?.parentNode : node.parentNode
-  const context = contextNode?.textContent || ''
-  if (context.length > 300) {
-    const fragement = context.split(word)
-    const preSentences = fragement[0].split('.')
-    const postSentences = fragement[1].split('.')
-    const preContent = preSentences.length > 1 ? preSentences[preSentences.length - 1] : preSentences[0]
-    const postContent = postSentences.length > 1 ? postSentences[0] + '.' : postSentences[0]
-    const result = preContent + word + postContent
-    return result.length > 300 ? word : result
-  }
-  return context
 }
 
 function connectPort() {
@@ -146,42 +106,20 @@ function markAsKnown() {
   hidePopupDelay(0)
 }
 
-function markAsKnownHalf() {
-  const word = curWord
-  if (!wordRegex.test(word)) return
-
-  const context: WordContext = {
-    url: location.href,
-    text: getWordTextContent(curMarkNode),
-    word: word,
-    timestamp: Date.now(),
-    favicon: getFaviconUrl()
-  }
-  wordsHalf[word] = context
-
-  messagePort.postMessage({ action: Messages.set_known_half, word, context })
-  document.querySelectorAll('.' + classes.unknown).forEach(node => {
-    if (getNodeWord(node) === word) {
-      node.classList.remove(classes.unknown)
-      node.classList.add(classes.half)
-      node.classList.add(classes.mark)
-    }
-  })
-  hidePopupDelay(0)
-}
-
 function markAsAllKnown() {
   const nodes = document.querySelectorAll('.' + classes.unknown)
   const words: string[] = []
+  const toMarkedNotes: Element[] = []
   nodes.forEach(node => {
     const word = getNodeWord(node)
-    if (wordRegex.test(word)) {
+    if (wordRegex.test(word) && !zenExcludeWords.includes(word)) {
       words.push(word)
+      toMarkedNotes.push(node)
     }
   })
 
   messagePort.postMessage({ action: Messages.set_all_known, words })
-  nodes.forEach(node => {
+  toMarkedNotes.forEach(node => {
     node.className = classes.known
   })
   hidePopupDelay(0)
@@ -198,10 +136,6 @@ function setColorStyle() {
       .__word_unknown {
         color: ${invertHexColor(colors[0])};
         background-color: ${colors[0]};
-      }
-      .__word_half {
-         color: ${invertHexColor(colors[1])};
-        background-color: ${colors[1]};
       }
     `
   })
@@ -225,6 +159,19 @@ function toggleZenMode() {
       wordCache[word] = true
     })
     document.body.appendChild(zenModeNode)
+
+    zenExcludeWords = []
+    zenModeNode.addEventListener('click', e => {
+      const node = e.target as HTMLElement
+      if ((e.metaKey || e.ctrlKey) && node.classList.contains(classes.unknown)) {
+        if (node.classList.contains(classes.excluded)) {
+          zenExcludeWords = zenExcludeWords.filter(w => w !== curWord)
+        } else {
+          zenExcludeWords.push(getNodeWord(node))
+        }
+        node.classList.toggle(classes.excluded)
+      }
+    })
   } else {
     zenModeNode.remove()
   }
@@ -294,7 +241,6 @@ function bindEvents() {
       }
       curWord = getNodeWord(node)
 
-      renderWordContext(node)
       renderDict(node)
 
       timerShowRef && clearTimeout(timerShowRef)
@@ -327,8 +273,6 @@ function bindEvents() {
     if (node.tagName === 'BUTTON') {
       if (node.dataset.class === classes.known) {
         markAsKnown()
-      } else if (node.dataset.class === classes.half) {
-        markAsKnownHalf()
       }
     }
 
@@ -361,7 +305,7 @@ function getTextNodes(node: Node): CharacterData[] {
   return textNodes
 }
 
-function highlight(textNodes: CharacterData[], dict: Dict, wordsKnown: WordMap, wordsHalf: HalfKnownWordMap) {
+function highlight(textNodes: CharacterData[], dict: Dict, wordsKnown: WordMap) {
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
@@ -372,8 +316,6 @@ function highlight(textNodes: CharacterData[], dict: Dict, wordsKnown: WordMap, 
       if (w in dict) {
         if (w in wordsKnown) {
           return origin
-        } else if (w in wordsHalf) {
-          return `${prefix}<w-mark class="${classes.mark} ${classes.half}">${word}</w-mark>${postfix}`
         } else {
           return `${prefix}<w-mark class="${classes.mark} ${classes.unknown}">${word}</w-mark>${postfix}`
         }
@@ -391,13 +333,12 @@ function highlight(textNodes: CharacterData[], dict: Dict, wordsKnown: WordMap, 
 }
 
 function readStorageAndHighlight() {
-  chrome.storage.local.get(['dict', WordType.known, WordType.half], result => {
+  chrome.storage.local.get(['dict', WordType.known], result => {
     dict = result.dict || {}
     wordsKnown = result[WordType.known] || {}
-    wordsHalf = result[WordType.half] || {}
 
     const textNodes = getTextNodes(document.body)
-    highlight(textNodes, dict, wordsKnown, wordsHalf)
+    highlight(textNodes, dict, wordsKnown)
   })
 }
 
@@ -408,7 +349,7 @@ function observeDomChange() {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
           if (node.nodeType === Node.TEXT_NODE) {
-            highlight([node as CharacterData], dict, wordsKnown, wordsHalf)
+            highlight([node as CharacterData], dict, wordsKnown)
           } else {
             if (
               (node as HTMLElement).classList?.contains(classes.mark) ||
@@ -418,7 +359,7 @@ function observeDomChange() {
               return false
             }
             const textNodes = getTextNodes(node)
-            highlight(textNodes, dict, wordsKnown, wordsHalf)
+            highlight(textNodes, dict, wordsKnown)
           }
         })
       }

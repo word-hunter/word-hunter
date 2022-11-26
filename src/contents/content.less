@@ -16,10 +16,6 @@
   background-color: rgba(70, 104, 227, 0.5);
 }
 
-.__word_half {
-  background-color: rgba(235, 98, 24, 0.5);
-}
-
 .__word_card {
   position: fixed;
   z-index: 10000;
@@ -46,32 +42,6 @@
     visibility: visible;
     opacity: 1;
     transition: opacity 0.2s, height 0.2s, width 0.2s;
-  }
-
-  #__word_context {
-    div {
-      max-width: 430px;
-      margin: -10px auto 20px auto;
-      color: #666;
-      word-break: break-all;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-
-      padding: 10px;
-      background-color: rgba(240, 230, 165, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 255px 15px 225px 15px / 12px 225px 15px 225px;
-      a {
-        color: #3366bb;
-        word-break: break-all;
-      }
-      b {
-        color: #c12d30;
-        font-weight: normal;
-      }
-    }
   }
 
   #__word_def {
@@ -146,12 +116,6 @@
           background-color: rgba(133, 219, 146, 0.8);
         }
       }
-      &[data-class='__word_half'] {
-        background-color: rgba(235, 98, 24, 0.5);
-        &:hover {
-          background-color: rgba(235, 98, 24, 0.8);
-        }
-      }
     }
   }
 }
@@ -187,6 +151,10 @@ body:has(.__zen_mode) {
     margin: 5px 5px;
     &:nth-child(20n) {
       margin-bottom: 50px;
+    }
+
+    &.__excluded {
+      opacity: 0.2;
     }
   }
 }

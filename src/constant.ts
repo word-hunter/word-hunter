@@ -12,29 +12,23 @@ export type WordContext = {
 
 export type WordMap = Dict
 
-export type HalfKnownWordMap = {
-  [key: string]: WordContext
-}
-
 export const classes = {
   mark: '__mark',
   mark_parent: '__mark_parent',
   known: '__word_known',
   unknown: '__word_unknown',
-  half: '__word_half',
   card: '__word_card',
-  zen_mode: '__zen_mode'
+  zen_mode: '__zen_mode',
+  excluded: '__excluded'
 }
 
 export enum WordType {
   'known' = 'known',
-  'unknown' = 'unknown',
-  'half' = 'half'
+  'unknown' = 'unknown'
 }
 
 export enum Messages {
   'set_known' = 'set_known',
-  'set_known_half' = 'set_known_half',
   'set_all_known' = 'set_all_known',
   'play_audio' = 'play_audio'
 }
@@ -64,4 +58,4 @@ export const invalidTags = [
 export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
 
-export const defaultColors = ['#9FB0EF', '#F2AD89']
+export const defaultColors = ['#9FB0EF']

@@ -14,8 +14,7 @@ export const Settings = () => {
 
   const onColorChange = e => {
     const target = e.nativeEvent.target
-    const index = Number(target.dataset.index)
-    const newColors = index === 0 ? [target.value, colors[1]] : [colors[0], target.value]
+    const newColors = [target.value]
     setColors(newColors)
     chrome.storage.local.set({ colors: newColors }, () => {
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
@@ -45,17 +44,6 @@ export const Settings = () => {
               name="color_unknown"
               data-index="0"
               value={colors[0]}
-              onChange={onColorChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="color_half_known">known a little:</label>
-            <input
-              type="color"
-              id="color_half_known"
-              name="color_half_known"
-              data-index="1"
-              value={colors[1]}
               onChange={onColorChange}
             />
           </div>
