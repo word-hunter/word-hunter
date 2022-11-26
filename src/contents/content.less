@@ -114,6 +114,9 @@
 
     a {
       text-decoration: none;
+      &[data-href] {
+        text-decoration: underline;
+      }
     }
   }
 
@@ -246,7 +249,7 @@ body:has(.__zen_mode) {
 
   .__definition {
     padding-left: 1.5em;
-    padding-bottom: 1em;
+    padding-bottom: 2em;
 
     > div:nth-child(1) {
       span:nth-child(1) {
@@ -273,7 +276,7 @@ body:has(.__zen_mode) {
     }
 
     .__def_text {
-      margin-bottom: 0.5em;
+      margin: 0.5em 0;
       line-height: 1.5em;
       b {
         color: #c12d30;
@@ -294,6 +297,9 @@ body:has(.__zen_mode) {
           color: rgba(0, 0, 0, 0.3);
         }
       }
+    }
+    .__synonyms {
+      margin-top: 0.5em;
     }
   }
 
