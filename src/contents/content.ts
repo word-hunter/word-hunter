@@ -68,7 +68,7 @@ async function renderDict(word: string) {
   const cardNode = getCardNode()
   const dictNode = cardNode.querySelector('#__word_def')!
   const titleNode = cardNode.querySelector('span')! as HTMLElement
-  titleNode.textContent = word
+  titleNode.innerHTML = `<a target="_blank" href="https://www.collinsdictionary.com/dictionary/english/${word}">${word}</a>`
 
   if (!word) {
     dictNode.innerHTML = ''
