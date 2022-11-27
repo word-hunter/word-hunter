@@ -23,6 +23,7 @@ let dict: Dict = {}
 let messagePort: chrome.runtime.Port
 let zenExcludeWords: string[] = []
 let dictHistory: string[] = []
+let inDirecting = false
 
 function createCardNode() {
   const cardNode = document.createElement('div')
@@ -107,7 +108,6 @@ function hidePopupDelay(ms: number) {
 
 function clearTimerHideRef() {
   timerHideRef && clearTimeout(timerHideRef)
-  timerHideRef = 0
 }
 
 function connectPort() {
@@ -262,9 +262,9 @@ function bindEvents() {
     const cardNode = getCardNode()
 
     if (node.classList.contains('__mark')) {
-      // skip show popup if card is open and mouse is not moving
-      // this only happen when redirect in card dictnary
-      if (!timerHideRef && cardNode.classList.contains('__card_visible')) {
+      // skip when redirecting in card dictnary
+      if (inDirecting) {
+        inDirecting = false
         return false
       }
       curWord = getNodeWord(node)
@@ -317,8 +317,11 @@ function bindEvents() {
 
     if (node.tagName === 'A' && node.dataset.href) {
       curWord = getNodeWord(node)
+      inDirecting = true
+      const rect = node.getBoundingClientRect()
       renderDict(curWord).then(() => {
-        adjustCardPosition(node.getBoundingClientRect(), true)
+        adjustCardPosition(rect, true)
+        inDirecting = false
       })
       setDictHistory([...dictHistory, curWord])
       return false
@@ -330,9 +333,12 @@ function bindEvents() {
       const prevWord = dictHistory[dictHistory.length - 1]
       if (prevWord) {
         curWord = prevWord
+        inDirecting = true
+        const rect = node.getBoundingClientRect()
         prevWord &&
           renderDict(prevWord).then(() => {
-            adjustCardPosition(node.getBoundingClientRect(), true)
+            adjustCardPosition(rect, true)
+            inDirecting = false
           })
       }
     }
