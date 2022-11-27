@@ -2,7 +2,7 @@ import { emphasizeWordInText } from '../utils'
 
 const apiBase = 'https://www.collinsdictionary.com/dictionary/english/'
 const pronunciationGuideUrl = 'https://blog.collinsdictionary.com/ipa-pronunciation-guide-cobuild/'
-const cefrLabelGuideUrl = 'https://blog.collinsdictionary.com/ipa-pronunciation-guide-cobuild/'
+const cefrLabelGuideUrl = 'https://blog.collinsdictionary.com/cefr-labels-explained/'
 
 const getPageUrl = (word: string) => `${apiBase}${encodeURIComponent(word.replace(/\s+/g, '-'))}`
 

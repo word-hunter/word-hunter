@@ -16,8 +16,8 @@ import { invertHexColor } from '../utils'
 import collins from '../utils/collins'
 
 let curWord = ''
-let timerShowRef: ReturnType<typeof setTimeout>
-let timerHideRef: ReturnType<typeof setTimeout>
+let timerShowRef: number
+let timerHideRef: number
 let wordsKnown: WordMap = {}
 let dict: Dict = {}
 let messagePort: chrome.runtime.Port
@@ -31,7 +31,9 @@ function createCardNode() {
     <div class="__buttons_container">
       <button data-class="${classes.known}" disabled>😀 known</button>
       <span></span>
-      <i class="i-history-back disabled" title="back"></i>
+      <a class="__btn-back disabled" title="back">
+        <i class="i-history-back"></i>
+      </a>
       <style></style>
     </div>
     <div id="__word_def"></div>
@@ -52,7 +54,7 @@ function getNodeWord(node: HTMLElement | Node | undefined) {
 
 function setDictHistory(words: string[]) {
   const cardNode = getCardNode()
-  const historyNode = cardNode.querySelector('.i-history-back')!
+  const historyNode = cardNode.querySelector('.__btn-back')!
   dictHistory = words
   if (dictHistory.length > 1) {
     historyNode.classList.remove('disabled')
@@ -94,13 +96,18 @@ async function renderDict(word: string) {
 }
 
 function hidePopupDelay(ms: number) {
-  timerHideRef && clearTimeout(timerHideRef)
+  clearTimerHideRef()
   const cardNode = getCardNode()
-  timerHideRef = setTimeout(() => {
+  timerHideRef = window.setTimeout(() => {
     cardNode.classList.remove('__card_visible')
     cardNode.classList.add('__card_hidden')
     setDictHistory([])
   }, ms)
+}
+
+function clearTimerHideRef() {
+  timerHideRef && clearTimeout(timerHideRef)
+  timerHideRef = 0
 }
 
 function connectPort() {
@@ -215,10 +222,10 @@ function showPopup() {
   cardNode.classList.add('__card_visible')
 }
 
-function adjustCardPosition(rect: DOMRect) {
+function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
   const cardNode = getCardNode()
   const { x: x, y: y, width: m_width, height: m_height } = rect
-  const { width: c_width, height: c_height } = cardNode.getBoundingClientRect()
+  const { x: c_x, y: c_y, width: c_width, height: c_height } = cardNode.getBoundingClientRect()
 
   let left = x + m_width + 10
   let top = y - 20
@@ -240,33 +247,46 @@ function adjustCardPosition(rect: DOMRect) {
     top = window.innerHeight - c_height - 10
   }
 
-  cardNode.style.left = `${left}px`
-  cardNode.style.top = `${top}px`
+  if (!onlyOutsideViewport || c_y < 0 || c_y + c_height > window.innerHeight) {
+    cardNode.style.top = `${top}px`
+  }
+
+  if (!onlyOutsideViewport || c_x < 0 || c_x + c_width > window.innerWidth) {
+    cardNode.style.left = `${left}px`
+  }
 }
 
 function bindEvents() {
   document.addEventListener('mouseover', async (e: MouseEvent) => {
     const node = e.target as HTMLElement
+    const cardNode = getCardNode()
 
     if (node.classList.contains('__mark')) {
+      // skip show popup if card is open and mouse is not moving
+      // this only happen when redirect in card dictnary
+      if (!timerHideRef && cardNode.classList.contains('__card_visible')) {
+        return false
+      }
       curWord = getNodeWord(node)
 
-      renderDict(curWord)
+      const rect = node.getBoundingClientRect()
+      adjustCardPosition(rect)
+      renderDict(curWord).then(() => {
+        adjustCardPosition(rect)
+      })
       setDictHistory([curWord])
-      adjustCardPosition(node.getBoundingClientRect())
 
       timerShowRef && clearTimeout(timerShowRef)
-      timerShowRef = setTimeout(() => {
+      timerShowRef = window.setTimeout(() => {
         showPopup()
       }, 200)
 
-      timerHideRef && clearTimeout(timerHideRef)
+      clearTimerHideRef()
       node.addEventListener('mouseleave', hidePopup)
     }
 
-    const cardNode = getCardNode()
     if (cardNode === node || cardNode.contains(node)) {
-      timerHideRef && clearTimeout(timerHideRef)
+      clearTimerHideRef()
     }
   })
 
@@ -285,28 +305,35 @@ function bindEvents() {
     if (node.tagName === 'BUTTON') {
       if (node.dataset.class === classes.known) {
         markAsKnown()
+        return false
       }
     }
 
     const audioSrc = node.getAttribute('data-src-mp3') || node.parentElement?.getAttribute('data-src-mp3')
     if (audioSrc) {
       messagePort.postMessage({ action: Messages.play_audio, audio: audioSrc })
+      return false
     }
 
     if (node.tagName === 'A' && node.dataset.href) {
       curWord = getNodeWord(node)
-      renderDict(curWord)
+      renderDict(curWord).then(() => {
+        adjustCardPosition(node.getBoundingClientRect(), true)
+      })
       setDictHistory([...dictHistory, curWord])
       return false
     }
 
-    if (node.classList.contains('i-history-back')) {
+    if (node.classList.contains('__btn-back') || node.parentElement?.classList.contains('__btn-back')) {
       dictHistory.pop()
       setDictHistory(dictHistory)
       const prevWord = dictHistory[dictHistory.length - 1]
       if (prevWord) {
         curWord = prevWord
-        prevWord && renderDict(prevWord)
+        prevWord &&
+          renderDict(prevWord).then(() => {
+            adjustCardPosition(node.getBoundingClientRect(), true)
+          })
       }
     }
   })
