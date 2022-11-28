@@ -47,6 +47,7 @@ export const invalidTags = [
   'ABBR',
   'AREA',
   'CODE',
+  'PRE',
   'AUDIO',
   'VIDEO',
   'CANVAS',

@@ -42,8 +42,11 @@ function praseFrequency(root: Element) {
 }
 
 function parseNote(root: Element) {
-  const note = root.querySelector('.note')?.textContent ?? ''
+  const note = root.querySelector('.note')?.innerHTML ?? ''
   return note
+    .replace(/<span class="hi rend-u">(.*)<\/span>/gi, '<u>$1</u>')
+    .replace(/<img .*\/?>|<span[^>]*>|<\/span>|<a[^>]*class="pronIPASymbol"[^>]*>/gi, '')
+    .replace(/<a class="hwd_sound[^>]*data-src-mp3="(.*)"[^>]*>/gi, '<a data-src-mp3="$1"> 🔈')
 }
 
 function prasePronounciations(root: Element) {
