@@ -15,6 +15,7 @@
 }
 
 .__word_unknown {
+  pointer-events: auto;
   background-color: rgba(70, 104, 227, 0.5);
   -webkit-text-fill-color: currentColor !important;
 }
@@ -36,7 +37,8 @@
   -webkit-font-smoothing: antialiased;
   box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
 
-  a {
+  a,
+  a:link {
     text-decoration: none;
     color: #0069c2;
     &[data-href] {

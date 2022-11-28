@@ -5,7 +5,7 @@
    <p align="center">Discover new english <mark>words</mark> you don't know on any web page</p>
 </p>
 
-## How to use
+## How it works
 
 At first, all the words on the web page are "unknown" by default. You can hover over the words and mark them as "known", and the words will no longer be highlighted.
 

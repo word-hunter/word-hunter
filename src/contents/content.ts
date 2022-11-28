@@ -72,7 +72,6 @@ async function renderDict(word: string) {
 
   if (!word) {
     dictNode.innerHTML = ''
-    return false
   } else {
     const knownBtn = cardNode.querySelector('button')! as HTMLButtonElement
     if (word in wordsKnown) {
@@ -85,6 +84,7 @@ async function renderDict(word: string) {
       const def = await collins.lookup(word)
       if (word !== curWord) {
         console.info('word changed, skip render', word, curWord)
+        // return false to indicate the word is changed
         return false
       }
       const html = collins.render(def)
@@ -94,6 +94,7 @@ async function renderDict(word: string) {
       dictNode.innerHTML = '😭 not found definition'
     }
   }
+  return true
 }
 
 function hidePopupDelay(ms: number) {
@@ -271,8 +272,8 @@ function bindEvents() {
 
       const rect = node.getBoundingClientRect()
       adjustCardPosition(rect)
-      renderDict(curWord).then(() => {
-        adjustCardPosition(rect)
+      renderDict(curWord).then(success => {
+        success && adjustCardPosition(rect)
       })
       setDictHistory([curWord])
 
@@ -311,16 +312,18 @@ function bindEvents() {
 
     const audioSrc = node.getAttribute('data-src-mp3') || node.parentElement?.getAttribute('data-src-mp3')
     if (audioSrc) {
+      e.stopImmediatePropagation()
       messagePort.postMessage({ action: Messages.play_audio, audio: audioSrc })
       return false
     }
 
     if (node.tagName === 'A' && node.dataset.href) {
+      e.stopImmediatePropagation()
       curWord = getNodeWord(node)
       inDirecting = true
       const rect = node.getBoundingClientRect()
-      renderDict(curWord).then(() => {
-        adjustCardPosition(rect, true)
+      renderDict(curWord).then(success => {
+        success && adjustCardPosition(rect, true)
         inDirecting = false
       })
       setDictHistory([...dictHistory, curWord])
@@ -328,6 +331,7 @@ function bindEvents() {
     }
 
     if (node.classList.contains('__btn-back') || node.parentElement?.classList.contains('__btn-back')) {
+      e.stopImmediatePropagation()
       dictHistory.pop()
       setDictHistory(dictHistory)
       const prevWord = dictHistory[dictHistory.length - 1]
@@ -336,8 +340,8 @@ function bindEvents() {
         inDirecting = true
         const rect = node.getBoundingClientRect()
         prevWord &&
-          renderDict(prevWord).then(() => {
-            adjustCardPosition(rect, true)
+          renderDict(prevWord).then(success => {
+            success && adjustCardPosition(rect, true)
             inDirecting = false
           })
       }

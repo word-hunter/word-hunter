@@ -1,6 +1,6 @@
 export const emphasizeWordInText = (text: string, word: string, tag: string = 'b') => {
-  const regex = new RegExp(word, 'gi')
-  return text.replace(regex, `<${tag}>${word}</${tag}>`)
+  const regex = new RegExp('(<.*>)?' + word + '(</.*>)?', 'gi')
+  return text.replace(regex, `$1<${tag}>${word}</${tag}>$2`)
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {

@@ -42,6 +42,7 @@ export const invalidTags = [
   'CODE',
   'NOSCRIPT',
   'NOFRAMES',
+  'INTPU',
   'TEXTAREA',
   'ABBR',
   'AREA',

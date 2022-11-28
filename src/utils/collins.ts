@@ -62,7 +62,12 @@ function praseDefinitions(root: Element) {
   const defNodes = root.querySelectorAll('.definitions .hom')
 
   const definitions = Array.from(defNodes).map(defNode => {
-    const defText = defNode.querySelector('.def')?.textContent ?? ''
+    const defText =
+      defNode
+        .querySelector('.def')
+        ?.innerHTML?.replaceAll('href="', 'data-href="')
+        .replace(/<span class="hi rend-sup".*<\/span>/gi, '') ?? ''
+
     if (!defText) return parseSense(defNode)
 
     const type = defNode.querySelector('.pos')?.textContent ?? ''

@@ -1,7 +1,7 @@
 {
   "name": "Word Hunter",
   "description": "Discover new words you don't know",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "manifest_version": 3,
   "background": {
     "service_worker": "background.js"
