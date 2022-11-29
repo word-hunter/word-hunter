@@ -6,6 +6,7 @@ import {
   defaultColors,
   Dict,
   invalidTags,
+  keepTextNodeHosts,
   Messages,
   WordMap,
   wordRegex,
@@ -24,6 +25,7 @@ let messagePort: chrome.runtime.Port
 let zenExcludeWords: string[] = []
 let dictHistory: string[] = []
 let inDirecting = false
+const shouldKeepOriginNode = keepTextNodeHosts.includes(location.hostname)
 
 function createCardNode() {
   const cardNode = document.createElement('div')
@@ -384,10 +386,21 @@ function highlight(textNodes: CharacterData[], dict: Dict, wordsKnown: WordMap) 
       }
     })
     if (text !== html) {
-      const newNode = document.createElement('w-mark-parent')
-      newNode.className = classes.mark_parent
-      newNode.innerHTML = html
-      node.parentNode?.replaceChild(newNode, node)
+      if (shouldKeepOriginNode) {
+        node.parentElement?.insertAdjacentHTML(
+          'afterend',
+          `<w-mark-parent class="${classes.mark_parent}">${html}</w-mark-parent>`
+        )
+        // move the origin text node into a isolate node, but don't delete it
+        // this is for campatible with some website which use the origin text node always
+        const newNode = document.createElement('div')
+        newNode.appendChild(node)
+      } else {
+        const newNode = document.createElement('w-mark-parent')
+        newNode.className = classes.mark_parent
+        newNode.innerHTML = html
+        node.replaceWith(newNode)
+      }
     }
   }
 }
@@ -409,6 +422,8 @@ function observeDomChange() {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
           if (
+            !node.isConnected ||
+            !node.parentNode?.isConnected ||
             (node as HTMLElement).classList?.contains(classes.mark) ||
             (node as HTMLElement).classList?.contains(classes.mark_parent) ||
             cardNode.contains(node)
