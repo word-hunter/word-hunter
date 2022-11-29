@@ -434,20 +434,27 @@ function observeDomChange() {
 }
 
 function getPageStatistics() {
-  const words = Array.from(getTextNodes(document.body)).reduce((acc, node) => {
-    const text = node.nodeValue || ''
-    const words = text
-      .split(' ')
-      .map(w => w.toLowerCase())
-      .filter(w => wordRegex.test(w) && w in dict)
-    return [...acc, ...words]
-  }, [] as string[])
+  console.time('getPageStatistics')
+  const textNodes = Array.from(getTextNodes(document.body))
+  const splitWordReg = /[\s\.,|?|!\(\)\[\]\{\}\/\\]+/
+  const words: string[] = []
+  textNodes.forEach(node => {
+    const textValue = node.nodeValue || ''
+    const wordsInText = textValue.split(splitWordReg)
+    wordsInText.forEach(w => {
+      const word = w.toLowerCase()
+      if (word in dict) {
+        words.push(word)
+      }
+    })
+  })
   const wordCount = [...new Set(words)].length
 
   const unknownWords = Array.from(document.querySelectorAll('.' + classes.unknown)).map(w =>
     (w as HTMLElement).innerText.toLowerCase()
   )
   const unknownCount = [...new Set(unknownWords)].length
+  console.timeEnd('getPageStatistics')
   return [unknownCount, wordCount] as const
 }
 

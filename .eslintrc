@@ -47,6 +47,7 @@
     "prefer-const": "warn",
     "prefer-template": "off",
     "prefer-destructuring": "warn",
+    "no-useless-escape": "off",
     "no-console": "off"
   },
   "overrides": []
