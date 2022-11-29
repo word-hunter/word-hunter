@@ -27,3 +27,15 @@ export const invertHexColor = (hex: string) => {
   // https://stackoverflow.com/a/3943023/112731
   return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? '#000000' : '#FFFFFF'
 }
+
+export function executeScript<T>(func: () => T): Promise<{ result: T }[]> {
+  return new Promise(resolve => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async tabs => {
+      const curId = tabs[0].id
+      if (curId) {
+        const result = await chrome.scripting.executeScript({ target: { tabId: curId }, func: func })
+        resolve(result as any)
+      }
+    })
+  })
+}

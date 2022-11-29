@@ -433,6 +433,27 @@ function observeDomChange() {
   })
 }
 
+function getPageStatistics() {
+  const words = Array.from(getTextNodes(document.body)).reduce((acc, node) => {
+    const text = node.nodeValue || ''
+    const words = text
+      .split(' ')
+      .map(w => w.toLowerCase())
+      .filter(w => wordRegex.test(w) && w in dict)
+    return [...acc, ...words]
+  }, [] as string[])
+  const wordCount = [...new Set(words)].length
+
+  const unknownWords = Array.from(document.querySelectorAll('.' + classes.unknown)).map(w =>
+    (w as HTMLElement).innerText.toLowerCase()
+  )
+  const unknownCount = [...new Set(unknownWords)].length
+  return [unknownCount, wordCount] as const
+}
+
+// this function expose to be called in popup page
+window.__getPageStatistics = getPageStatistics
+
 function init() {
   connectPort()
   setColorStyle()

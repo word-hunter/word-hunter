@@ -1,5 +1,6 @@
 import styles from './app.module.less'
 import { Settings } from './settings'
+import { Statistics } from './statistics'
 
 export const executeScript = (func: () => void) => {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
@@ -27,9 +28,10 @@ export const App = () => {
 
   return (
     <div className={styles.page}>
+      <Statistics />
       <div className={styles.buttons}>
-        <button onClick={onFastModeToggle}>⚡️ toggle zen mode</button>
-        <button onClick={onSetAllKnown}>👻 set all words as known</button>
+        <button onClick={onFastModeToggle}>⚡️ Toggle zen mode</button>
+        <button onClick={onSetAllKnown}>👻 Set all words as known</button>
       </div>
       <div>
         <details>
