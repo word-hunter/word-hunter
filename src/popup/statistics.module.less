@@ -2,15 +2,23 @@
   display: flex;
   width: 200px;
   margin: 30px auto 10px auto;
-  padding-bottom: 20px;
+  padding-bottom: 10px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid #eee;
-  progress {
-    height: 10px;
-    width: 130px;
-    margin: 10px 0;
+  .pie {
+    margin-top: 20px;
+    width: 100px;
     background: #ccc;
+    border-radius: 50%;
+    border: 0.15em solid #fff;
+    box-shadow: 0 0.075em 0.2em 0.05em rgba(0, 0, 0, 0.25);
+    background-origin: border-box;
+    transform: rotate(-90deg);
+    circle {
+      fill: none;
+      stroke-width: 32;
+      transition: stroke-dasharray 0.5s ease-in;
+    }
   }
 }

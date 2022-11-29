@@ -23,25 +23,18 @@ export const Statistics = () => {
     })
   }, [])
 
+  const percent = (counts[0] / counts[1]) * 100
+
   return (
     <div className={styles.container}>
       <div>
         Page Stats: <span style={{ color: colors[0] }}>{counts[0]}</span> / {counts[1]}
       </div>
-      <div>
-        <progress id="stat" max={counts[1]} value={counts[0]} />
-      </div>
-      <style>
-        {`
-          progress::-webkit-progress-value {
-            background: ${colors[0]};
-          }
-
-          progress::-webkit-progress-bar {
-            background: #ccc;
-          }
-      `}
-      </style>
+      <svg viewBox="0 0 64 64" className={styles.pie}>
+        <circle r="25%" cx="50%" cy="50%" style={{ strokeDasharray: `${percent} 100`, stroke: colors[0] }}>
+          <title>unknown</title>
+        </circle>
+      </svg>
     </div>
   )
 }
