@@ -418,6 +418,9 @@ function observeDomChange() {
           if (node.nodeType === Node.TEXT_NODE) {
             highlight([node as CharacterData], dict, wordsKnown)
           } else {
+            if ((node as HTMLElement).isContentEditable || node.parentElement?.isContentEditable) {
+              return false
+            }
             const textNodes = getTextNodes(node)
             highlight(textNodes, dict, wordsKnown)
           }
@@ -448,12 +451,12 @@ function getPageStatistics() {
       }
     })
   })
-  const wordCount = [...new Set(words)].length
+  const wordCount = new Set(words).size
 
   const unknownWords = Array.from(document.querySelectorAll('.' + classes.unknown)).map(w =>
     (w as HTMLElement).innerText.toLowerCase()
   )
-  const unknownCount = [...new Set(unknownWords)].length
+  const unknownCount = new Set(unknownWords).size
   console.timeEnd('getPageStatistics')
   return [unknownCount, wordCount] as const
 }
