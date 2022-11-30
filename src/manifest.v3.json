@@ -27,7 +27,8 @@
     {
       "matches": ["http://*/*", "https://*/*", "<all_urls>"],
       "js": ["js/content.js"],
-      "css": ["css/content.css"]
+      "css": ["css/content.css"],
+      "all_frames": true
     }
   ]
 }
