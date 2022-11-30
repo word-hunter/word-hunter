@@ -176,7 +176,7 @@ function toggleZenMode() {
   if (!zenModeNode) {
     zenModeNode = document.createElement('div')
     zenModeNode.className = classes.zen_mode
-    const wordCache = {}
+    const wordCache: Record<string, boolean> = {}
     document.querySelectorAll('.' + classes.mark).forEach(node => {
       const word = getNodeWord(node)
       if (wordCache[word]) return

@@ -1,8 +1,5 @@
-import ReactDOM from 'react-dom'
-
+/* @refresh reload */
+import { render } from 'solid-js/web'
 import { App } from './app'
 
-const rootEl = document.createElement('div')
-document.body.appendChild(rootEl)
-
-ReactDOM.render(<App />, rootEl)
+render(() => <App />, document.getElementById('app') ?? document.body)

@@ -18,7 +18,7 @@ export const App = () => {
   }
 
   const onDirectToOption = () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('options.html') })
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })
     return false
   }
 
@@ -27,18 +27,18 @@ export const App = () => {
   }
 
   return (
-    <div className={styles.page}>
+    <div class={styles.page}>
       <Statistics />
-      <div className={styles.buttons}>
-        <button onClick={onFastModeToggle}>⚡️ Toggle zen mode</button>
-        <button onClick={onSetAllKnown}>👻 Set all words as known</button>
+      <div class={styles.buttons}>
+        <button onclick={onFastModeToggle}>⚡️ Toggle zen mode</button>
+        <button onclick={onSetAllKnown}>👻 Set all words as known</button>
       </div>
       <div>
         <details>
           <summary>Settings</summary>
           <Settings />
-          <div className={styles.link}>
-            <a onClick={onDirectToOption} href="#">
+          <div class={styles.link}>
+            <a onclick={onDirectToOption} href="#">
               Options
             </a>
           </div>

@@ -1,7 +1,7 @@
 import { Dict, Messages, WordMap, WordType } from '../constant'
 
 async function readDict(): Promise<Dict> {
-  const url = chrome.runtime.getURL('./public/dict.json')
+  const url = chrome.runtime.getURL('dict.json')
   const res = await fetch(url)
   const dict = await res.text()
   return JSON.parse(dict)
@@ -14,7 +14,7 @@ function updateBadge(wordsKnown: WordMap) {
 }
 
 const createAudioWindow = async (audio: string) => {
-  let url = chrome.runtime.getURL('./public/audio.html')
+  let url = chrome.runtime.getURL('audio.html')
   url = `${url}?audio=${encodeURIComponent(audio)}`
   await chrome.windows.create({
     type: 'popup',

@@ -3,7 +3,7 @@ import { Backup } from './backup'
 
 export const App = () => {
   return (
-    <div className={styles.page}>
+    <div class={styles.page}>
       <Backup />
     </div>
   )

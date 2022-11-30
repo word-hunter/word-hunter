@@ -1,7 +1,6 @@
-declare module '*.less' {
-  const classes: { [className: string]: string }
-  export default classes
-}
+/// <reference types="vite/client" />
+
+declare const __APP_VERSION__: string
 
 declare interface Window {
   __markAsAllKnown: () => void

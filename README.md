@@ -1,6 +1,6 @@
 <p align="center">
    <br/>
-   <img width="150px" src="./src/public/icon.png" />
+   <img width="150px" src="./public/icon.png" />
    <h3 align="center">Word hunter</h3>
    <p align="center">Discover new english <mark>words</mark> you don't know on any web page</p>
 </p>

@@ -1,5 +1,3 @@
-import { useRef } from 'react'
-
 import styles from './backup.module.less'
 import { WordType } from '../constant'
 import { downloadAsJsonFile } from '../utils'
@@ -7,11 +5,11 @@ import { downloadAsJsonFile } from '../utils'
 const timeformatter = new Intl.DateTimeFormat('en-US')
 
 export const Backup = () => {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  let dialogRef: HTMLDialogElement
+  let fileRef: HTMLInputElement
 
   const onRestore = () => {
-    const fileList = fileRef.current?.files
+    const fileList = fileRef.files
     if (!fileList?.length) {
       alert('no files')
       return false
@@ -40,8 +38,7 @@ export const Backup = () => {
               [WordType.known]: newKnown
             },
             () => {
-              alert('restore success ✅ \n will reload this page')
-              window.location.reload()
+              alert('restore success ✅')
             }
           )
         })
@@ -53,7 +50,7 @@ export const Backup = () => {
   }
 
   const showModal = () => {
-    dialogRef.current?.showModal()
+    dialogRef.showModal()
   }
 
   const onBackup = () => {
@@ -70,17 +67,17 @@ export const Backup = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <dialog id="restoreDialog" ref={dialogRef}>
+    <div class={styles.container}>
+      <dialog id="restoreDialog" ref={dialogRef!}>
         <form method="dialog">
-          <div style={{ marginBottom: '20px' }}>
-            <input type="file" accept=".json" ref={fileRef} />
+          <div style={{ 'margin-bottom': '20px' }}>
+            <input type="file" accept=".json" ref={fileRef!} />
           </div>
-          <button onClick={onRestore}>confirm</button>
+          <button onclick={onRestore}>confirm</button>
         </form>
       </dialog>
-      <button onClick={showModal}>restore</button>
-      <button onClick={onBackup}>backup</button>
+      <button onclick={showModal}>restore</button>
+      <button onclick={onBackup}>backup</button>
     </div>
   )
 }

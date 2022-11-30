@@ -1,4 +1,4 @@
-import { emphasizeWordInText } from '../utils'
+import { emphasizeWordInText } from '.'
 
 const apiBase = 'https://www.collinsdictionary.com/dictionary/english/'
 const pronunciationGuideUrl = 'https://blog.collinsdictionary.com/ipa-pronunciation-guide-cobuild/'
@@ -6,7 +6,9 @@ const cefrLabelGuideUrl = 'https://blog.collinsdictionary.com/cefr-labels-explai
 
 const getPageUrl = (word: string) => `${apiBase}${encodeURIComponent(word.replace(/\s+/g, '-'))}`
 
-const cache = {}
+type CollinsData = ReturnType<typeof parseDocument>
+
+const cache: Record<string, CollinsData> = {}
 
 export async function lookup(word: string) {
   if (cache[word]) return cache[word]
@@ -16,7 +18,7 @@ export async function lookup(word: string) {
   return data
 }
 
-async function fetchDocument(word) {
+async function fetchDocument(word: string) {
   const url = getPageUrl(word)
   const res = await fetch(url)
   const html = await res.text()
@@ -79,7 +81,7 @@ function praseDefinitions(root: Element) {
       const text = ex.querySelector('.quote')?.textContent ?? ex.textContent ?? ''
       const type = ex.querySelector('.type-syntax')?.textContent ?? ''
       const audio = ex.querySelector<HTMLElement>('[data-src-mp3]')?.dataset.srcMp3
-      return { text, type, audio, synonyms }
+      return { text, type, audio }
     })
     const synonyms = Array.from(defNode.querySelector('.thes')?.querySelectorAll('a.form') ?? []).map(a => {
       const text = a.textContent ?? ''
@@ -94,7 +96,9 @@ function praseDefinitions(root: Element) {
 function parseSense(defNode: Element) {
   const sense = defNode.querySelector('.sense') ?? defNode.querySelector('.xr')
   return {
-    defText: (sense?.innerHTML ?? '').replace('href="', 'data-href="'),
+    defText: (sense?.innerHTML ?? '')
+      .replace('href="', 'data-href="')
+      .replace(/<span class="hi rend-sup".*<\/span>/gi, ''),
     isSense: true,
     examples: [],
     synonyms: [],
@@ -103,15 +107,13 @@ function parseSense(defNode: Element) {
   }
 }
 
-type CollinsData = ReturnType<typeof parseDocument>
-
 export function render(def: CollinsData) {
   const { word, frequency, note, definitions, pronounciations } = def
   const html = `
     <div class="__dict_collins">
       <div class="__title">
         <div class="__prons">
-          ${renderPornounciations(pronounciations)} 
+          ${renderPornounciations(pronounciations)}
         </div>
         ${renderFrequency(frequency)}
       </div>
@@ -136,7 +138,7 @@ function renderPornounciations(pronounciations: CollinsData['pronounciations']) 
       <div>
         <span data-src-mp3="${pron.audio}">
           ${pron.audio ? `<a data-src-mp3="${pron.audio}"> /${pron.text}/ 🔈</a>` : '/' + pron.text + '/'}
-          <a href="${pronunciationGuideUrl}" target="_blank">ⓘ</a> 
+          <a href="${pronunciationGuideUrl}" target="_blank">ⓘ</a>
         </span>
       </div>
     `
