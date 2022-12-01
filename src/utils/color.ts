@@ -3,10 +3,12 @@ import { defaultColors } from '../constant'
 
 const [colors, setColors] = createSignal<string[]>(defaultColors)
 
-chrome.storage.local.get(['colors'], result => {
-  const colors = result['colors'] ?? defaultColors
-  setColors(colors)
-})
+function getColors() {
+  chrome.storage.local.get('colors', result => {
+    const colors = result['colors'] ?? defaultColors
+    setColors(colors)
+  })
+}
 
 const updateColors = (newColors: string[]) => {
   setColors(newColors)
@@ -24,5 +26,10 @@ const updateColors = (newColors: string[]) => {
     })
   })
 }
+
+// this function expose to be called in popup page
+window.__setColorStyle = getColors
+
+getColors()
 
 export { colors, updateColors }

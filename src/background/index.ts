@@ -1,6 +1,6 @@
-import { Dict, Messages, WordMap, WordType } from '../constant'
+import { Messages, WordMap, WordType } from '../constant'
 
-async function readDict(): Promise<Dict> {
+async function readDict(): Promise<WordMap> {
   const url = chrome.runtime.getURL('dict.json')
   const res = await fetch(url)
   const dict = await res.text()

@@ -3,7 +3,7 @@
     "composite": true,
     "module": "ESNext",
     "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "moduleResolution": "Node"
   },
   "include": ["vite.config.ts", "src/manifest.tsx"]

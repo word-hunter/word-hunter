@@ -1,17 +1,15 @@
-import { emphasizeWordInText } from '.'
-
 const apiBase = 'https://www.collinsdictionary.com/dictionary/english/'
-const pronunciationGuideUrl = 'https://blog.collinsdictionary.com/ipa-pronunciation-guide-cobuild/'
-const cefrLabelGuideUrl = 'https://blog.collinsdictionary.com/cefr-labels-explained/'
+export const pronunciationGuideUrl = 'https://blog.collinsdictionary.com/ipa-pronunciation-guide-cobuild/'
+export const cefrLabelGuideUrl = 'https://blog.collinsdictionary.com/cefr-labels-explained/'
 
 const getPageUrl = (word: string) => `${apiBase}${encodeURIComponent(word.replace(/\s+/g, '-'))}`
 
-type CollinsData = ReturnType<typeof parseDocument>
+export type CollinsData = ReturnType<typeof parseDocument>
 
 const cache: Record<string, CollinsData> = {}
 
 export async function lookup(word: string) {
-  if (cache[word]) return cache[word]
+  if (cache[word]) return Promise.resolve(cache[word])
   const doc = await fetchDocument(word)
   const data = parseDocument(doc, word)
   cache[word] = data
@@ -105,88 +103,4 @@ function parseSense(defNode: Element) {
     cefrLevel: undefined,
     type: undefined
   }
-}
-
-export function render(def: CollinsData) {
-  const { word, frequency, note, definitions, pronounciations } = def
-  const html = `
-    <div class="__dict_collins">
-      <div class="__title">
-        <div class="__prons">
-          ${renderPornounciations(pronounciations)}
-        </div>
-        ${renderFrequency(frequency)}
-      </div>
-      ${renderNote(note)}
-      <div class="__definitions">
-        ${renderDefinition(definitions, word)}
-      </div>
-    </div>`
-  return html
-}
-
-function renderFrequency(frequency: number) {
-  return `
-      <span class="__frequency" title="Word Frequency ${frequency}">${'<i></i>'.repeat(frequency)}</span>
-  `
-}
-
-function renderPornounciations(pronounciations: CollinsData['pronounciations']) {
-  return pronounciations
-    .map(
-      pron => `
-      <div>
-        <span data-src-mp3="${pron.audio}">
-          ${pron.audio ? `<a data-src-mp3="${pron.audio}"> /${pron.text}/ 🔈</a>` : '/' + pron.text + '/'}
-          <a href="${pronunciationGuideUrl}" target="_blank">ⓘ</a>
-        </span>
-      </div>
-    `
-    )
-    .join('')
-}
-
-function renderDefinition(definitions: CollinsData['definitions'], word: string) {
-  return definitions
-    .map(
-      (def, i) => `
-          <div class="__definition">
-            <div>
-              <span>${i + 1}.</span>
-              <span>${def.type || (def.isSense ? 'sence' : '')}</span>
-              ${def.cefrLevel ? `<a target="_blank" href="${cefrLabelGuideUrl}">${def.cefrLevel ?? ''}</a>` : ''}
-            </div>
-            <div class="__def_text">${def.isSense ? def.defText : emphasizeWordInText(def.defText, word)}</div>
-            <div>${def.examples
-              .map(ex => {
-                return `
-                <div class="__example">
-                  <div>${emphasizeWordInText(ex.text, word)}${
-                  ex.audio ? `<a data-src-mp3="${ex.audio}"> 🔈</a>` : ''
-                }</div>
-                </div>
-              `
-              })
-              .join('')}</div>
-              ${
-                def.synonyms.length
-                  ? `<div class="__synonyms">Synonyms: ${def.synonyms
-                      .map(syn => `<a data-href="${syn.url}">${syn.text}</a>`)
-                      .join(', ')}</div>`
-                  : ''
-              }
-          </div>
-          `
-    )
-    .join('')
-}
-
-function renderNote(note?: string) {
-  if (!note) return ''
-  return `<div class="__note">${note}</div>`
-}
-
-export default {
-  lookup,
-  render
 }

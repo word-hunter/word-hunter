@@ -1,28 +1,8 @@
 @import url('../assets/icon.less');
 
-.__mark {
-  display: inline;
-  padding-inline: 0.1em;
-  margin-inline: -0.1em;
-  border-radius: 0.3em;
-  // text-decoration: wavy underline #99f;
-  // text-underline-offset: 2px;
-}
-
-.__word_known {
-  color: inherit;
-  background-color: unset;
-}
-
-.__word_unknown {
-  pointer-events: auto;
-  background-color: rgba(70, 104, 227, 0.5);
-  -webkit-text-fill-color: currentColor !important;
-}
-
 .__word_card {
   position: fixed;
-  z-index: 10000;
+  z-index: 2000000000;
   min-width: 300px;
   opacity: 0;
   visibility: hidden;
@@ -148,45 +128,6 @@
   }
 }
 
-body:has(.__zen_mode) {
-  overflow: hidden;
-  .__word_card {
-    z-index: 2000000000;
-  }
-}
-
-.__zen_mode {
-  display: block;
-  position: fixed;
-  z-index: 1000000000;
-  inset: 0;
-  padding: 40px;
-  background-color: antiquewhite;
-  overflow: auto;
-  font-size: 12px;
-  line-height: 1.5;
-  font-family: BlinkMacSystemFont, sans-serif;
-
-  columns: 10rem;
-  column-gap: 7rem;
-  column-rule: 4px dotted turquoise;
-  word-break: break-all;
-  w-mark {
-    display: inline-block;
-    break-inside: avoid;
-    white-space: nowrap;
-    padding: 0 2px;
-    margin: 5px 5px;
-    &:nth-child(20n) {
-      margin-bottom: 50px;
-    }
-
-    &.__excluded {
-      opacity: 0.2;
-    }
-  }
-}
-
 .__dict_loading {
   display: flex;
   justify-content: center;
@@ -264,6 +205,7 @@ body:has(.__zen_mode) {
       a {
         font-size: 12px;
         padding: 1px 10px 0px 10px;
+        margin-left: 0.5em;
         border-radius: 6px;
         background-color: #c12d30;
         color: #fff;
@@ -296,6 +238,9 @@ body:has(.__zen_mode) {
     }
     .__synonyms {
       margin-top: 0.5em;
+      a {
+        margin-left: 0.5em;
+      }
     }
   }
 

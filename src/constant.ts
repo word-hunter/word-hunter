@@ -1,4 +1,4 @@
-export type Dict = {
+export type WordMap = {
   [key: string]: 0
 }
 
@@ -9,8 +9,6 @@ export type WordContext = {
   timestamp: number
   favicon?: string
 }
-
-export type WordMap = Dict
 
 export const classes = {
   mark: '__mark',
