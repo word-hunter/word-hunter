@@ -9,9 +9,8 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+    "types": ["vite/client", "chrome"],
     "noEmit": true,
-    "types": ["chrome"],
     "isolatedModules": true
   },
   "exclude": ["node_modules", "build", "audio.js"]
