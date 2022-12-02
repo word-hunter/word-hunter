@@ -7,6 +7,7 @@ import { classes, Messages } from '../constant'
 import {
   init as highlightInit,
   markAsKnown,
+  isInDict,
   getMessagePort,
   getKnwonWords,
   zenExcludeWords,
@@ -68,13 +69,22 @@ customElement('wh-card', () => {
     }
   }
 
+  const onCardDoubleClick = (e: MouseEvent) => {
+    const selection = document.getSelection()
+    const word = selection?.toString().trim().toLowerCase()
+    if (word && isInDict(word)) {
+      setCurWord(word)
+      setDictHistory([...dictHistory(), word])
+    }
+  }
+
   const onDictSettle = () => {
     adjustCardPosition(rect, inDirecting)
     inDirecting = false
   }
 
   return (
-    <div class="__word_card" onclick={onCardClick} onmouseleave={hidePopup}>
+    <div class="__word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
       <div class="__buttons_container">
         <button data-class={classes.known} disabled={curWord() in getKnwonWords()} onclick={onKnown}>
           😀 known

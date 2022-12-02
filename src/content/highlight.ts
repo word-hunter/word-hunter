@@ -190,6 +190,10 @@ export function getKnwonWords() {
   return wordsKnown
 }
 
+export function isInDict(word: string) {
+  return word?.toLowerCase() in dict
+}
+
 export function getMessagePort() {
   return messagePort
 }

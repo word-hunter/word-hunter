@@ -33,7 +33,7 @@ const createAudioWindow = async (audio: string) => {
  * so, we manually disconnect it after 4 minutes, then reconnect it in context script
  * to make sure the connection is always alive
  */
-function autoDisconnectDelay(port, tabId?: number) {
+function autoDisconnectDelay(port: chrome.runtime.Port, tabId?: number) {
   if (!tabId) return
   setTimeout(() => {
     chrome.tabs.query({ currentWindow: true }, tabs => {
@@ -65,7 +65,7 @@ async function setup() {
             break
           case Messages.set_all_known:
             storage.get([WordType.known], result => {
-              const addedWords = words.reduce((acc, cur) => ({ ...acc, [cur]: 0 }), {})
+              const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 0 }), {})
               const knownWords = { ...(result[WordType.known] ?? {}), ...addedWords }
               storage.set({ [WordType.known]: knownWords })
               updateBadge(knownWords)

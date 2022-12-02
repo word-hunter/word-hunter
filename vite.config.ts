@@ -6,7 +6,8 @@ import manifest from './manifest.json'
 export default defineConfig({
   build: {
     outDir: 'build',
-    target: 'esnext'
+    target: 'esnext',
+    sourcemap: true
   },
   plugins: [solidPlugin(), crx({ manifest: manifest as ManifestV3Export })]
 })
