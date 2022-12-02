@@ -30,6 +30,7 @@
     "vite-plugin-solid": "^2.4.0"
   },
   "dependencies": {
+    "@webcomponents/custom-elements": "^1.5.1",
     "solid-element": "^1.6.2",
     "solid-js": "^1.6.2"
   }

@@ -1,3 +1,4 @@
+import '@webcomponents/custom-elements'
 import { render } from 'solid-js/web'
 import { ZenMode } from './card'
 import { invertHexColor } from '../utils'

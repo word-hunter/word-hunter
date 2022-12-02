@@ -1,22 +1,12 @@
 import { defineConfig } from 'vite'
-import { crx } from '@crxjs/vite-plugin'
 import solidPlugin from 'vite-plugin-solid'
+import { crx, ManifestV3Export } from '@crxjs/vite-plugin'
+import manifest from './manifest.json'
 
-import manifest from './src/manifest.jsx'
-
-export default defineConfig(({ mode }) => {
-  return {
-    build: {
-      emptyOutDir: true,
-      outDir: 'build',
-      target: 'esnext',
-      polyfillDynamicImport: false,
-      rollupOptions: {
-        output: {
-          chunkFileNames: 'assets/chunk-[hash].js'
-        }
-      }
-    },
-    plugins: [crx({ manifest }), solidPlugin()]
-  }
+export default defineConfig({
+  build: {
+    outDir: 'build',
+    target: 'esnext'
+  },
+  plugins: [solidPlugin(), crx({ manifest: manifest as ManifestV3Export })]
 })
