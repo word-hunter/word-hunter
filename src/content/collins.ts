@@ -10,10 +10,15 @@ const cache: Record<string, CollinsData> = {}
 
 export async function lookup(word: string) {
   if (cache[word]) return Promise.resolve(cache[word])
-  const doc = await fetchDocument(word)
-  const data = parseDocument(doc, word)
-  cache[word] = data
-  return data
+  try {
+    const doc = await fetchDocument(word)
+    const data = parseDocument(doc, word)
+    cache[word] = data
+    return data
+  } catch (e) {
+    console.warn(e)
+    return null
+  }
 }
 
 async function fetchDocument(word: string) {
@@ -26,7 +31,7 @@ async function fetchDocument(word: string) {
 
 function parseDocument(doc: Document, word: string) {
   const root = doc.querySelector('.dictlink:has(.def)') ?? doc.querySelector('.dictlink')
-  if (!root) throw new Error('invalid response')
+  if (!root) return null
 
   const frequency = praseFrequency(root)
   const note = parseNote(root)
