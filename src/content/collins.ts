@@ -1,12 +1,8 @@
 const apiBase = 'https://www.collinsdictionary.com/dictionary/english/'
-export const pronunciationGuideUrl = 'https://blog.collinsdictionary.com/ipa-pronunciation-guide-cobuild/'
-export const cefrLabelGuideUrl = 'https://blog.collinsdictionary.com/cefr-labels-explained/'
 
 const getPageUrl = (word: string) => `${apiBase}${encodeURIComponent(word.replace(/\s+/g, '-'))}`
 
-export type CollinsData = ReturnType<typeof parseDocument>
-
-const cache: Record<string, CollinsData> = {}
+const cache: Record<string, string> = {}
 
 export async function lookup(word: string) {
   if (cache[word]) return Promise.resolve(cache[word])
@@ -17,7 +13,7 @@ export async function lookup(word: string) {
     return data
   } catch (e) {
     console.warn(e)
-    return null
+    return ''
   }
 }
 
@@ -30,82 +26,84 @@ async function fetchDocument(word: string) {
 }
 
 function parseDocument(doc: Document, word: string) {
-  const root = doc.querySelector('.dictlink:has(.def)') ?? doc.querySelector('.dictlink')
-  if (!root) return null
+  const root = doc.querySelector('#main_content .res_cell_center')
+  if (!root) return ''
 
-  const frequency = praseFrequency(root)
-  const note = parseNote(root)
-  const definitions = praseDefinitions(root)
-  const pronounciations = prasePronounciations(root)
-  return { word, frequency, note, definitions, pronounciations }
-}
+  const toRemoveSelectors = [
+    '.navigation',
+    'h1.entry_title',
+    '.share-button',
+    '.share-overlay',
+    '.popup-overlay',
+    'input',
+    'label',
+    'script',
+    'style',
+    'noscript',
+    'iframe',
+    '.cobuild-logo',
+    '.socialButtons',
+    '.mpuslot_b-container',
+    '.copyright',
+    '.cB-hook',
+    '.beta',
+    '.link_logo_information',
+    '[data-type-block="Word usage trends"]',
+    '[data-type-block="Word lists"]',
+    '.type-thesaurus',
+    '.extra-link',
+    '.carousel-title',
+    '.btmslot_a-container',
+    '.pronIPASymbol img',
+    '.ex-info',
+    '.pB-quiz',
+    '.specialQuiz',
+    '.new-from-collins',
+    '.homnum',
+    '.suggest_new_word_wrapper',
+    '.miniWordle'
+  ]
 
-function praseFrequency(root: Element) {
-  const frequencyNode = root.querySelector('.word-frequency-img')
-  const frequency = frequencyNode?.getAttribute('data-band') ?? '0'
-  return Number(frequency)
-}
-
-function parseNote(root: Element) {
-  const note = root.querySelector('.note')?.innerHTML ?? ''
-  return note
-    .replace(/<span class="hi rend-u">(.*)<\/span>/gi, '<u>$1</u>')
-    .replace(/<img .*\/?>|<span[^>]*>|<\/span>|<a[^>]*class="pronIPASymbol"[^>]*>/gi, '')
-    .replace(/<a class="hwd_sound[^>]*data-src-mp3="(.*)"[^>]*>/gi, '<a data-src-mp3="$1"> 🔈')
-}
-
-function prasePronounciations(root: Element) {
-  const prons = root.querySelector('.mini_h2')
-    ? root.querySelectorAll('.mini_h2 .pron')
-    : root.querySelectorAll('.pron')
-  const pronounciations = Array.from(prons).map(pron => {
-    const audio = pron.querySelector<HTMLElement>('[data-src-mp3]')?.dataset.srcMp3
-    const text = pron.innerHTML.replace(/(<span class="ptr(.|\s)*<\/span>)|(<a(.|\s)*<\/a>)/i, '')
-    return { text, audio }
+  toRemoveSelectors.forEach(selector => {
+    root.querySelectorAll(selector).forEach(el => el.remove())
   })
-  return pronounciations
-}
 
-function praseDefinitions(root: Element) {
-  const defNodes = root.querySelectorAll('.definitions .hom')
-
-  const definitions = Array.from(defNodes).map(defNode => {
-    const defText =
-      defNode
-        .querySelector('.def')
-        ?.innerHTML?.replaceAll('href="', 'data-href="')
-        .replace(/<span class="hi rend-sup".*<\/span>/gi, '') ?? ''
-
-    if (!defText) return parseSense(defNode)
-
-    const type = defNode.querySelector('.pos')?.textContent ?? ''
-    const cefrLevel = defNode.querySelector<HTMLElement>('.Symbollbcefrb')?.dataset.type
-    const examples = Array.from(defNode.querySelectorAll('.cit.type-example')).map(ex => {
-      const text = ex.querySelector('.quote')?.textContent ?? ex.textContent ?? ''
-      const type = ex.querySelector('.type-syntax')?.textContent ?? ''
-      const audio = ex.querySelector<HTMLElement>('[data-src-mp3]')?.dataset.srcMp3
-      return { text, type, audio }
-    })
-    const synonyms = Array.from(defNode.querySelector('.thes')?.querySelectorAll('a.form') ?? []).map(a => {
-      const text = a.textContent ?? ''
-      const url = a.getAttribute('href') ?? ''
-      return { text, url }
-    })
-    return { type, cefrLevel, defText, examples, synonyms, isSense: false }
+  root.querySelectorAll('img.lazy').forEach(el => {
+    const src = el.getAttribute('data-src')
+    if (src) {
+      el.setAttribute('src', src)
+      el.setAttribute('loading', 'lazy')
+    }
   })
-  return definitions.filter(d => d !== null)
+
+  root.querySelectorAll('.youtube-video').forEach(el => {
+    const vid = el.getAttribute('data-embed')
+    if (vid) {
+      el.innerHTML = `<iframe
+        width="100%"
+        style="aspect-ratio: 16/9;"
+        src="https://www.youtube.com/embed/${vid}"
+        loading="lazy"
+        title="YouTube video player"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+      </iframe>`
+    }
+  })
+
+  const html = root.innerHTML
+
+  return html
+    .replace(/<(script|style|noscript)[^>]*>.*?<\/\1>/g, '')
+    .replaceAll(`href="${apiBase}`, `data-href="${apiBase}`)
+    .replaceAll('<a href="', '<a target="_blank" href="')
+    .replaceAll('/external/images', 'https://www.collinsdictionary.com/external/images')
 }
 
-function parseSense(defNode: Element) {
-  const sense = defNode.querySelector('.sense') ?? defNode.querySelector('.xr')
-  return {
-    defText: (sense?.innerHTML ?? '')
-      .replace('href="', 'data-href="')
-      .replace(/<span class="hi rend-sup".*<\/span>/gi, ''),
-    isSense: true,
-    examples: [],
-    synonyms: [],
-    cefrLevel: undefined,
-    type: undefined
-  }
+export function getWordByHref(href: string) {
+  const url = new URL(href)
+  const path = url.pathname
+  const word = path.replace('/dictionary/english/', '').replace(/-/g, ' ')
+  return word.toLowerCase()
 }

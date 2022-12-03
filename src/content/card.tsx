@@ -1,5 +1,6 @@
 import './index.less'
-import styles from './card.less'
+import cardStyles from './card.less'
+import dictStyles from './dict.less'
 
 import { createSignal, Show, For, batch, onMount } from 'solid-js'
 import { customElement } from 'solid-element'
@@ -13,7 +14,7 @@ import {
   zenExcludeWords,
   setZenExcludeWords
 } from './highlight'
-import { Dict } from './dict'
+import { Dict, getWordByHref } from './dict'
 
 let timerShowRef: number
 let timerHideRef: number
@@ -51,7 +52,7 @@ customElement('wh-card', () => {
     if (node.tagName === 'A' && node.dataset.href) {
       e.stopImmediatePropagation()
       inDirecting = true
-      const word = getNodeWord(node)
+      const word = getWordByHref(node.dataset.href)
       setCurWord(word)
       setDictHistory([...dictHistory(), word])
       return false
@@ -101,7 +102,8 @@ customElement('wh-card', () => {
       <Show when={curWord()}>
         <Dict word={curWord()} onSettle={onDictSettle} />
       </Show>
-      <style>{styles}</style>
+      <style>{cardStyles}</style>
+      <style>{dictStyles}</style>
     </div>
   )
 })

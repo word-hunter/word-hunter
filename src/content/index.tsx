@@ -31,4 +31,4 @@ const App = () => {
 
 const root = document.createElement('wh-root')
 document.body.appendChild(root)
-render(App, root)
+render(() => <App />, root)
