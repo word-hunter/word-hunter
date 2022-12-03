@@ -97,7 +97,7 @@ function parseDocument(doc: Document, word: string) {
   return html
     .replace(/<(script|style|noscript)[^>]*>.*?<\/\1>/g, '')
     .replaceAll(`href="${apiBase}`, `data-href="${apiBase}`)
-    .replaceAll('<a href="', '<a target="_blank" href="')
+    .replaceAll('<a ', '<a target="_blank"')
     .replaceAll('/external/images', 'https://www.collinsdictionary.com/external/images')
 }
 

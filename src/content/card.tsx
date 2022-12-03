@@ -62,7 +62,7 @@ export const WhCard = customElement('wh-card', () => {
       return false
     }
 
-    if (node.classList.contains('__btn-back') || node.parentElement?.classList.contains('__btn-back')) {
+    if (node.classList.contains('history_back') || node.parentElement?.classList.contains('history_back')) {
       e.stopImmediatePropagation()
       inDirecting = true
       const newHistory = dictHistory().slice(0, -1)
@@ -89,8 +89,8 @@ export const WhCard = customElement('wh-card', () => {
   }
 
   return (
-    <div class="__word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
-      <div class="__buttons_container">
+    <div class="word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
+      <div class="toolbar">
         <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown}>
           😀 known
         </button>
@@ -99,7 +99,7 @@ export const WhCard = customElement('wh-card', () => {
             {curWord()}
           </a>
         </span>
-        <a classList={{ '__btn-back': true, disabled: dictHistory().length < 2 }} title="back">
+        <a classList={{ history_back: true, disabled: dictHistory().length < 2 }} title="back">
           <i class="i-history-back"></i>
         </a>
       </div>
@@ -168,8 +168,8 @@ function hidePopupDelay(ms: number) {
   clearTimerHideRef()
   const cardNode = getCardNode()
   timerHideRef = window.setTimeout(() => {
-    cardNode.classList.remove('__card_visible')
-    cardNode.classList.add('__card_hidden')
+    cardNode.classList.remove('card_visible')
+    cardNode.classList.add('card_hidden')
     setDictHistory([])
   }, ms)
 }
@@ -206,8 +206,8 @@ function hidePopup(e: Event) {
 
 function showPopup() {
   const cardNode = getCardNode()
-  cardNode.classList.remove('__card_hidden')
-  cardNode.classList.add('__card_visible')
+  cardNode.classList.remove('card_hidden')
+  cardNode.classList.add('card_visible')
 }
 
 function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {

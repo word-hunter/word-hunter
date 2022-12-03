@@ -15,7 +15,7 @@ export const classes = {
   mark_parent: '__mark_parent',
   known: '__word_known',
   unknown: '__word_unknown',
-  card: '__word_card',
+  card: 'word_card',
   zen_mode: '__zen_mode',
   excluded: '__excluded'
 }

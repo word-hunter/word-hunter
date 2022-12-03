@@ -1,6 +1,6 @@
 @import url('../assets/icon.less');
 
-.__word_card {
+.word_card {
   all: initial;
   position: fixed;
   z-index: 2000000000;
@@ -18,31 +18,42 @@
   -webkit-font-smoothing: antialiased;
   box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
 
-  &.__card_hidden {
+  &.card_hidden {
     visibility: hidden;
     opacity: 0;
     transition: visibility 0s 0.2s, opacity 0.2s linear;
   }
 
-  &.__card_visible {
+  &.card_visible {
     visibility: visible;
     opacity: 1;
     transition: opacity 0.2s, height 0.2s, width 0.2s;
   }
 
-  #__word_def {
+  #word_dict {
     padding: 10px 15px;
     max-height: min(600px, 80vh);
+    min-height: 200px;
     overflow-y: auto;
     overscroll-behavior: contain;
     font-size: 14px;
+    width: 460px;
 
     &:empty {
       padding: 0;
       border: none;
     }
-    &:not(:empty) {
-      width: 460px;
+
+    .no_result {
+      display: grid;
+      place-content: center;
+      height: 200px;
+    }
+
+    .loading {
+      display: grid;
+      place-content: center;
+      height: 300px;
     }
 
     &::-webkit-scrollbar {
@@ -69,7 +80,7 @@
     }
   }
 
-  .__buttons_container {
+  .toolbar {
     display: flex;
     padding: 10px 15px;
     justify-content: space-between;
@@ -110,7 +121,7 @@
       text-decoration: none;
       color: #0069c2;
     }
-    a.__btn-back {
+    a.history_back {
       cursor: pointer;
       padding: 20px 15px;
       margin: -20px -15px -20px 55px;
@@ -119,9 +130,4 @@
       }
     }
   }
-}
-
-.__dict_loading {
-  display: flex;
-  justify-content: center;
 }
