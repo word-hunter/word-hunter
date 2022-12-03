@@ -195,6 +195,9 @@
     display: block;
     padding-left: 1.5em;
     padding-bottom: 1em;
+    &:last-child {
+      padding-bottom: 0;
+    }
   }
 
   .lbl.type-syntax {
@@ -259,6 +262,12 @@
   .cit.type-example,
   .translation .example {
     font-style: italic;
+  }
+  .cB-ts,
+  .cB-n-w {
+    br {
+      display: none;
+    }
   }
   .cB-h {
     padding-bottom: 5px;
@@ -365,6 +374,9 @@
     padding: 10px 20px;
   }
 
+  #videos {
+    padding-top: 0;
+  }
   #videos:has(.video + .video) {
     h2.entry_title {
       display: none;

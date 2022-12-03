@@ -186,8 +186,8 @@ function getPageStatistics() {
 // this function expose to be called in popup page
 window.__getPageStatistics = getPageStatistics
 
-export function getKnwonWords() {
-  return wordsKnown
+export function isWordKnownAble(word: string) {
+  return word in dict && !(word in wordsKnown)
 }
 
 export function isInDict(word: string) {

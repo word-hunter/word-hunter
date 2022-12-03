@@ -1,5 +1,5 @@
 import { loadingImgDataUri } from '../assets/img'
-import { createResource, createEffect, Switch, Match } from 'solid-js'
+import { createResource, createEffect, Switch, Match, onCleanup } from 'solid-js'
 import { lookup } from './collins'
 export { getWordByHref } from './collins'
 
@@ -13,6 +13,17 @@ export function Dict(props: { word: string; onSettle: () => void }) {
       root?.scrollTo(0, 0)
     }
   })
+
+  const removeVideo = (e: SecurityPolicyViolationEvent) => {
+    if (e.violatedDirective === 'frame-src') {
+      if (e.blockedURI.startsWith('https://www.youtube.com')) {
+        root.querySelector('#videos')?.remove()
+      }
+    }
+  }
+
+  document.addEventListener('securitypolicyviolation', removeVideo)
+  onCleanup(() => document.removeEventListener('securitypolicyviolation', removeVideo))
 
   return (
     <div id="__word_def" ref={root!}>

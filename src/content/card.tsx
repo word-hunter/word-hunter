@@ -10,7 +10,7 @@ import {
   markAsKnown,
   isInDict,
   getMessagePort,
-  getKnwonWords,
+  isWordKnownAble,
   zenExcludeWords,
   setZenExcludeWords
 } from './highlight'
@@ -51,8 +51,10 @@ customElement('wh-card', () => {
 
     if (node.tagName === 'A' && node.dataset.href) {
       e.stopImmediatePropagation()
-      inDirecting = true
       const word = getWordByHref(node.dataset.href)
+      if (word === curWord()) return false
+
+      inDirecting = true
       setCurWord(word)
       setDictHistory([...dictHistory(), word])
       return false
@@ -87,7 +89,7 @@ customElement('wh-card', () => {
   return (
     <div class="__word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
       <div class="__buttons_container">
-        <button data-class={classes.known} disabled={curWord() in getKnwonWords()} onclick={onKnown}>
+        <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown}>
           😀 known
         </button>
         <span>
