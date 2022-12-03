@@ -1,6 +1,6 @@
 import './index.less'
-import cardStyles from './card.less'
-import dictStyles from './dict.less'
+import cardStyles from './card.less?inline'
+import dictStyles from './dict.less?inline'
 
 import { createSignal, Show, For, batch, onMount } from 'solid-js'
 import { customElement } from 'solid-element'
