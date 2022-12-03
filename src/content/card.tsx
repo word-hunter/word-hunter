@@ -1,7 +1,9 @@
+import { reloadElement, ICustomElement } from 'component-register'
+import { walk } from '../utils/_hot'
+
 import './index.less'
 import cardStyles from './card.less?inline'
 import dictStyles from './dict.less?inline'
-
 import { createSignal, Show, For, batch, onMount } from 'solid-js'
 import { customElement } from 'solid-element'
 import { classes, Messages } from '../constant'
@@ -26,7 +28,7 @@ const [dictHistory, setDictHistory] = createSignal<string[]>([])
 const [zenMode, setZenMode] = createSignal(false)
 const [zenModeWords, setZenModeWords] = createSignal<string[]>([])
 
-customElement('wh-card', () => {
+export const WhCard = customElement('wh-card', () => {
   onMount(() => {
     highlightInit()
     bindEvents()
@@ -270,6 +272,20 @@ function bindEvents() {
 
     if (node.shadowRoot === document.querySelector('wh-card')?.shadowRoot) {
       clearTimerHideRef()
+    }
+  })
+}
+
+// https://github.com/solidjs/solid/tree/main/packages/solid-element#hot-module-replacement-new
+if (import.meta.hot) {
+  import.meta.hot.accept(newModule => {
+    if (newModule) {
+      // newModule is undefined when SyntaxError happened
+      walk(document.body, (node: Node) => {
+        if ((node as HTMLElement).localName === 'wh-card') {
+          setTimeout(() => reloadElement(node as unknown as ICustomElement), 0)
+        }
+      })
     }
   })
 }

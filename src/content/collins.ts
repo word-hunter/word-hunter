@@ -104,6 +104,6 @@ function parseDocument(doc: Document, word: string) {
 export function getWordByHref(href: string) {
   const url = new URL(href)
   const path = url.pathname
-  const word = path.replace('/dictionary/english/', '').replace(/-/g, ' ')
+  const word = path.replace('/dictionary/english/', '')
   return word.toLowerCase()
 }
