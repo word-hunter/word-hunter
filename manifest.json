@@ -25,5 +25,11 @@
       "all_frames": true
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["*.svg", "*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "permissions": ["storage", "activeTab", "scripting"]
 }

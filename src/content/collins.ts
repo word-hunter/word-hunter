@@ -1,7 +1,5 @@
-const apiBase = 'https://www.collinsdictionary.com/dictionary/english/'
-
-const getPageUrl = (word: string) => `${apiBase}${encodeURIComponent(word.replace(/\s+/g, '-'))}`
-
+const host = 'https://www.collinsdictionary.com'
+const apiBase = `${host}/dictionary/english/`
 const cache: Record<string, string> = {}
 
 export async function lookup(word: string) {
@@ -98,12 +96,29 @@ function parseDocument(doc: Document, word: string) {
     .replace(/<(script|style|noscript)[^>]*>.*?<\/\1>/g, '')
     .replaceAll(`href="${apiBase}`, `data-href="${apiBase}`)
     .replaceAll('<a ', '<a target="_blank"')
-    .replaceAll('/external/images', 'https://www.collinsdictionary.com/external/images')
+    .replaceAll('src="/', `src="${host}/`)
+    .replaceAll('href="/', `href="${host}/`)
 }
+
+const getPageUrl = (word: string) => `${apiBase}${encodeURIComponent(word.replace(/\s+/g, '-'))}`
 
 export function getWordByHref(href: string) {
   const url = new URL(href)
   const path = url.pathname
   const word = path.replace('/dictionary/english/', '')
   return word.toLowerCase()
+}
+
+export function cspViolationhandler(e: SecurityPolicyViolationEvent, root: HTMLElement) {
+  const sectionSelector = '[data-type-block]'
+  if (e.violatedDirective === 'frame-src') {
+    if (e.blockedURI.startsWith('https://www.youtube.com')) {
+      root.querySelector(`iframe[src^="${e.blockedURI}"]`)?.closest(sectionSelector)?.remove()
+    }
+  }
+  if (e.violatedDirective === 'img-src') {
+    if (e.blockedURI.startsWith(host)) {
+      root.querySelector(`img[src^="${e.blockedURI}"]`)?.closest(sectionSelector)?.remove()
+    }
+  }
 }

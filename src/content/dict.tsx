@@ -1,6 +1,5 @@
-import { loadingImgDataUri } from '../assets/img'
 import { createResource, createEffect, Switch, Match, onCleanup } from 'solid-js'
-import { lookup } from './collins'
+import { lookup, cspViolationhandler } from './collins'
 export { getWordByHref } from './collins'
 
 export function Dict(props: { word: string; onSettle: () => void }) {
@@ -14,16 +13,12 @@ export function Dict(props: { word: string; onSettle: () => void }) {
     }
   })
 
-  const removeVideo = (e: SecurityPolicyViolationEvent) => {
-    if (e.violatedDirective === 'frame-src') {
-      if (e.blockedURI.startsWith('https://www.youtube.com')) {
-        root.querySelector('#videos')?.remove()
-      }
-    }
+  const cspHandler = (e: SecurityPolicyViolationEvent) => {
+    cspViolationhandler(e, root)
   }
 
-  document.addEventListener('securitypolicyviolation', removeVideo)
-  onCleanup(() => document.removeEventListener('securitypolicyviolation', removeVideo))
+  document.addEventListener('securitypolicyviolation', cspHandler)
+  onCleanup(() => document.removeEventListener('securitypolicyviolation', cspHandler))
 
   return (
     <div id="word_dict" ref={root!}>
@@ -39,10 +34,13 @@ export function Dict(props: { word: string; onSettle: () => void }) {
   )
 }
 
+const loadingImg = chrome.runtime.getURL('/book.svg')
+console.log(loadingImg)
+
 function Loading() {
   return (
     <div class="loading">
-      <img src={loadingImgDataUri} alt="loading" />
+      <img src={loadingImg} alt="loading" />
     </div>
   )
 }

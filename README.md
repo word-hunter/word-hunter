@@ -11,7 +11,7 @@ At first, all the words on the web page are "unknown" by default. You can hover 
 
 After you mark as many words as possible for "known", the words highlighted are those you really don't know, you can find them at a glance.
 
-<img style="max-width: 100%;" src="./src/assets/screenshot-1.png" />
+<img style="max-width: 100%;" src="./screenshot-1.png" />
 
 ## How to mark faster
 
