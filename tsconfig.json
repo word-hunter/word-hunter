@@ -13,5 +13,5 @@
     "noEmit": true,
     "isolatedModules": true
   },
-  "exclude": ["node_modules", "build", "audio.js", "public/build", "pdf-reader"]
+  "exclude": ["node_modules", "build", "audio.js"]
 }

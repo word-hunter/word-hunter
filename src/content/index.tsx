@@ -3,7 +3,6 @@ import { render } from 'solid-js/web'
 import { ZenMode } from './card'
 import { invertHexColor } from '../utils'
 import { colors } from '../utils/color'
-import styles from './index.less?inline'
 
 declare module 'solid-js' {
   namespace JSX {
@@ -16,7 +15,6 @@ declare module 'solid-js' {
 const App = () => {
   return (
     <>
-      <style>{styles}</style>
       <wh-card />
       <ZenMode />
       <style>

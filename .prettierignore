@@ -1,7 +1,5 @@
 # Ignore artifacts:
 build
-pdf-reader
-public/build
 coverage
 node_modules
 pnpm-lock.yaml
