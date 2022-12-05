@@ -26,12 +26,20 @@ export const App = () => {
     executeScript(() => window.__toggleZenMode())
   }
 
+  const onPdfViewer = () => {
+    chrome.tabs.create({
+      url: `https://mozilla.github.io/pdf.js/web/viewer.html?file=${chrome.runtime.getURL('elephant.pdf')}`
+    })
+    return false
+  }
+
   return (
     <div class={styles.page}>
       <Statistics />
       <div class={styles.buttons}>
         <button onclick={onFastModeToggle}>⚡️ Toggle zen mode</button>
         <button onclick={onSetAllKnown}>👻 Set all words as known</button>
+        <button onclick={onPdfViewer}>👁️ Open PDF reader</button>
       </div>
       <div>
         <details>
