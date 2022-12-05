@@ -7,7 +7,13 @@ export default defineConfig({
   build: {
     outDir: 'build',
     target: 'esnext',
-    sourcemap: false
+    emptyOutDir: true,
+    sourcemap: false,
+    rollupOptions: {
+      input: {
+        viewer: 'pdf-reader/viewer.html'
+      }
+    }
   },
   plugins: [solidPlugin(), crx({ manifest: manifest as ManifestV3Export })]
 })

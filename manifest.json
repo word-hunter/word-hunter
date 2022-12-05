@@ -31,5 +31,6 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": ["storage", "activeTab", "scripting"]
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"]
 }
