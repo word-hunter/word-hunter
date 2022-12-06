@@ -77,7 +77,7 @@ export const WhCard = customElement('wh-card', () => {
   const onCardDoubleClick = (e: MouseEvent) => {
     const selection = document.getSelection()
     const word = selection?.toString().trim().toLowerCase()
-    if (word && isInDict(word)) {
+    if (word && isInDict(word) && word !== curWord()) {
       setCurWord(word)
       setDictHistory([...dictHistory(), word])
     }
