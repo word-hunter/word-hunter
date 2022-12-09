@@ -1,6 +1,36 @@
-export const emphasizeWordInText = (text: string, word: string, tag: string = 'b') => {
+export const safeEmphasizeWordInText = (text: string, word: string, tag: string = 'b') => {
   const regex = new RegExp('(<.*>)?' + word + '(</.*>)?', 'gi')
-  return text.replace(regex, `$1<${tag}>${word}</${tag}>$2`)
+  return text.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(regex, `$1<${tag}>${word}</${tag}>$2`)
+}
+
+export const getFaviconUrl = () => {
+  const favicon = document.querySelector('link[rel*="icon"]') as HTMLLinkElement
+  return favicon?.href ?? ''
+}
+
+export const getFaviconByDomain = (url: string) => {
+  const host = new URL(url).host
+  return `https://s2.googleusercontent.com/s2/favicons?domain=${host}`
+}
+
+export const getDocumentTitle = () => {
+  return document.title.substring(0, 40)
+}
+
+export const getWordContext = (node: HTMLElement) => {
+  const word = node.textContent!
+  const contextNode = node.parentNode?.parentNode?.nodeName === 'P' ? node.parentNode?.parentNode : node.parentNode
+  const context = contextNode?.textContent || ''
+  if (context.length > 300) {
+    const fragment = context.split(word)
+    const preSentences = fragment[0].split('.')
+    const postSentences = fragment[1].split('.')
+    const preContent = preSentences.length > 1 ? preSentences[preSentences.length - 1] : preSentences[0]
+    const postContent = postSentences.length > 1 ? postSentences[0] + '.' : postSentences[0]
+    const result = preContent + word + postContent
+    return result.length > 300 ? word : result
+  }
+  return context
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {

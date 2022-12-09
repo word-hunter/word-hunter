@@ -15,8 +15,11 @@
 .__word_unknown {
   pointer-events: auto;
   color: var(--wh-mark-color);
-  background-color: var(--wh-mark-bg-color, rgba(70, 104, 227, 0.5));
+  background-color: var(--wh-mark-bg-color, #9fb0ef);
   -webkit-text-fill-color: currentColor !important;
+  &[have_context='true'] {
+    background-color: var(--wh-mark-with-content-bg-color, #c175d8);
+  }
 }
 
 .pdfViewer .__word_unknown {

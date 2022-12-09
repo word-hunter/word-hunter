@@ -1,4 +1,4 @@
-import { Messages, WordMap, WordType } from '../constant'
+import { Messages, WordMap, WordContext, StorageKey } from '../constant'
 
 async function readDict(): Promise<WordMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -54,21 +54,43 @@ async function setup() {
       autoDisconnectDelay(port, tabId)
 
       port.onMessage.addListener(async msg => {
-        const { action, word, words } = msg
+        const { action, word, words, context } = msg
         switch (action) {
           case Messages.set_known:
-            storage.get([WordType.known], result => {
-              const knownWords = { ...(result[WordType.known] ?? {}), [word]: 0 }
-              storage.set({ [WordType.known]: knownWords })
+            storage.get([StorageKey.known], result => {
+              const knownWords = { ...(result[StorageKey.known] ?? {}), [word]: 0 }
+              storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
             })
             break
           case Messages.set_all_known:
-            storage.get([WordType.known], result => {
+            storage.get([StorageKey.known], result => {
               const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 0 }), {})
-              const knownWords = { ...(result[WordType.known] ?? {}), ...addedWords }
-              storage.set({ [WordType.known]: knownWords })
+              const knownWords = { ...(result[StorageKey.known] ?? {}), ...addedWords }
+              storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
+            })
+            break
+          case Messages.add_context:
+            storage.get([StorageKey.context], result => {
+              const contexts = result[StorageKey.context] ?? {}
+              const wordContexts = (contexts[word] ?? []) as WordContext[]
+              if (!wordContexts.find(c => c.text === context.text)) {
+                const newContexts = { ...contexts, [word]: [...wordContexts, context] }
+                storage.set({ [StorageKey.context]: newContexts })
+              }
+            })
+            break
+          case Messages.delete_context:
+            storage.get([StorageKey.context], result => {
+              const contexts = result[StorageKey.context] ?? {}
+              const wordContexts = (contexts[word] ?? []) as WordContext[]
+              const index = wordContexts.findIndex(c => c.text === context.text)
+              if (index > -1) {
+                wordContexts.splice(index, 1)
+                const newContexts = { ...contexts, [word]: wordContexts }
+                storage.set({ [StorageKey.context]: newContexts })
+              }
             })
             break
           case Messages.play_audio:
@@ -85,8 +107,8 @@ async function setup() {
     console.log('[storage] dict set up')
   })
 
-  storage.get([WordType.known], result => {
-    updateBadge(result[WordType.known] || {})
+  storage.get([StorageKey.known], result => {
+    updateBadge(result[StorageKey.known] || {})
   })
 }
 

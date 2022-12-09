@@ -6,17 +6,23 @@ import cardStyles from './card.less?inline'
 import dictStyles from './dict.less?inline'
 import { createSignal, Show, For, batch, onMount } from 'solid-js'
 import { customElement } from 'solid-element'
-import { classes, Messages } from '../constant'
+import { classes, Messages, WordContext } from '../constant'
 import {
   init as highlightInit,
   markAsKnown,
+  addContext,
+  deleteContext,
   isInDict,
+  getWordContexts,
+  wordContexts,
+  setWordContexts,
   getMessagePort,
   isWordKnownAble,
   zenExcludeWords,
   setZenExcludeWords
 } from './highlight'
 import { Dict, getWordByHref } from './dict'
+import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain } from '../utils'
 
 let timerShowRef: number
 let timerHideRef: number
@@ -27,6 +33,7 @@ const [curWord, setCurWord] = createSignal('')
 const [dictHistory, setDictHistory] = createSignal<string[]>([])
 const [zenMode, setZenMode] = createSignal(false)
 const [zenModeWords, setZenModeWords] = createSignal<string[]>([])
+const [curContextText, setCurContextText] = createSignal('')
 
 export const WhCard = customElement('wh-card', () => {
   onMount(() => {
@@ -40,6 +47,12 @@ export const WhCard = customElement('wh-card', () => {
     markAsKnown(word)
     setCurWord('')
     hidePopupDelay(0)
+  }
+
+  const onAddContext = (e: MouseEvent) => {
+    e.preventDefault()
+    const word = curWord()
+    addContext(word, curContextText())
   }
 
   const onCardClick = (e: MouseEvent) => {
@@ -88,23 +101,39 @@ export const WhCard = customElement('wh-card', () => {
     inDirecting = false
   }
 
+  const inWordContexts = () => {
+    return !!wordContexts().find(c => c.text === curContextText())
+  }
+
   return (
     <div class="word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
       <div class="toolbar">
-        <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown}>
-          😀 known
-        </button>
-        <span>
+        <div>
+          <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
+            <img src={chrome.runtime.getURL('icons/checkmark.png')} alt="ok" />
+          </button>
+          <Show when={dictHistory().length <= 1}>
+            <button onclick={onAddContext} disabled={inWordContexts()} title="save context">
+              <img src={chrome.runtime.getURL(!inWordContexts() ? 'icons/save.png' : 'icons/saved.png')} alt="save" />
+            </button>
+          </Show>
+        </div>
+        <div>
           <a target="_blank" href={`https://www.collinsdictionary.com/dictionary/english/${curWord()}`}>
             {curWord()}
           </a>
-        </span>
-        <a classList={{ history_back: true, disabled: dictHistory().length < 2 }} title="back">
-          <i class="i-history-back"></i>
-        </a>
+        </div>
+        <div>
+          <a classList={{ history_back: true, disabled: dictHistory().length < 2 }} title="back">
+            <img src={chrome.runtime.getURL('icons/undo.png')} alt="back" />
+          </a>
+        </div>
       </div>
       <Show when={curWord()}>
-        <Dict word={curWord()} onSettle={onDictSettle} />
+        <div class="dict_container">
+          <ContextList contexts={wordContexts()}></ContextList>
+          <Dict word={curWord()} onSettle={onDictSettle} />
+        </div>
       </Show>
       <style>{cardStyles}</style>
       <style>{dictStyles}</style>
@@ -151,6 +180,32 @@ export function ZenMode() {
         </div>
       </div>
     </Show>
+  )
+}
+
+function ContextList(props: { contexts: WordContext[] }) {
+  return (
+    <div class="contexts">
+      <For each={props.contexts.reverse()}>
+        {(context: WordContext) => {
+          console.log(context)
+          return (
+            <div>
+              <div innerHTML={safeEmphasizeWordInText(context.text, curWord())}></div>
+              <p>
+                <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
+                <a href={context.url} target="_blank">
+                  {context.title}
+                </a>
+              </p>
+              <button title="delete context" onclick={() => deleteContext(context)}>
+                <img src={chrome.runtime.getURL('icons/delete.png')} alt="delete" />
+              </button>
+            </div>
+          )
+        }}
+      </For>
+    </div>
   )
 }
 
@@ -249,17 +304,22 @@ function bindEvents() {
     const node = e.target as HTMLElement
 
     if (node.classList.contains('__mark')) {
-      // skip when redirecting in card dictnary
+      // skip when redirecting in card dictionary
       if (inDirecting) {
         inDirecting = true
         return false
       }
 
-      rect = node.getBoundingClientRect()
       const word = getNodeWord(node)
-      setCurWord(word)
+
+      rect = node.getBoundingClientRect()
       adjustCardPosition(rect)
-      setDictHistory([word])
+      batch(() => {
+        setCurWord(word)
+        setCurContextText(getWordContext(node))
+        setWordContexts(getWordContexts(word))
+        setDictHistory([word])
+      })
 
       timerShowRef && clearTimeout(timerShowRef)
       timerShowRef = window.setTimeout(() => {

@@ -27,7 +27,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["*.svg", "*.png", "elephant.pdf"],
+      "resources": ["*.svg", "icons/*.png", "elephant.pdf"],
       "matches": ["<all_urls>"]
     }
   ],

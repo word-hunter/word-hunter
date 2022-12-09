@@ -3,19 +3,24 @@ import {
   invalidTags,
   keepTextNodeHosts,
   Messages,
+  WordContext,
+  ContextMap,
   WordMap,
   wordRegex,
   wordReplaceRegex,
-  WordType
+  StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
+import { getDocumentTitle, getFaviconUrl } from '../utils'
 
 let wordsKnown: WordMap = {}
 let dict: WordMap = {}
+let contexts: ContextMap = {}
 let messagePort: chrome.runtime.Port
 const shouldKeepOriginNode = keepTextNodeHosts.includes(location.hostname)
 
 export const [zenExcludeWords, setZenExcludeWords] = createSignal<string[]>([])
+export const [wordContexts, setWordContexts] = createSignal<WordContext[]>([])
 
 function getNodeWord(node: HTMLElement | Node | undefined) {
   if (!node) return ''
@@ -39,6 +44,49 @@ export function markAsKnown(word: string) {
       node.className = classes.known
     }
   })
+}
+
+export function addContext(word: string, text: string) {
+  if (!wordRegex.test(word)) return
+
+  const context: WordContext = {
+    url: location.href,
+    title: getDocumentTitle(),
+    text: text,
+    word: word,
+    timestamp: Date.now(),
+    favicon: getFaviconUrl()
+  }
+
+  if (!(contexts[word] ?? []).find(c => c.text === context.text)) {
+    contexts[word] = [...(contexts[word] ?? []), context]
+  }
+
+  messagePort.postMessage({ action: Messages.add_context, word: word, context })
+  setWordContexts(contexts[word])
+  document.querySelectorAll('.' + classes.mark).forEach(node => {
+    if (getNodeWord(node) === word) {
+      node.setAttribute('have_context', 'true')
+    }
+  })
+}
+
+export function deleteContext(context: WordContext) {
+  messagePort.postMessage({ action: Messages.delete_context, word: context.word, context })
+
+  const index = (contexts[context.word] ?? []).findIndex(c => c.text === context.text)
+  if (index > -1) {
+    contexts[context.word].splice(index, 1)
+
+    setWordContexts([...contexts[context.word]])
+    if (contexts[context.word]?.length === 0) {
+      document.querySelectorAll('.' + classes.mark).forEach(node => {
+        if (getNodeWord(node) === context.word) {
+          if (context) node.removeAttribute('have_context')
+        }
+      })
+    }
+  }
 }
 
 function markAsAllKnown() {
@@ -76,7 +124,7 @@ function getTextNodes(node: Node): CharacterData[] {
   return textNodes
 }
 
-function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMap) {
+function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMap, contexts: ContextMap) {
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
@@ -88,7 +136,8 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
         if (w in wordsKnown) {
           return origin
         } else {
-          return `${prefix}<w-mark class="${classes.mark} ${classes.unknown}">${word}</w-mark>${postfix}`
+          const contextAttr = contexts[w]?.length > 0 ? 'have_context="true"' : ''
+          return `${prefix}<w-mark class="${classes.mark} ${classes.unknown}" ${contextAttr}>${word}</w-mark>${postfix}`
         }
       } else {
         return origin
@@ -101,7 +150,7 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
           `<w-mark-parent class="${classes.mark_parent}">${html}</w-mark-parent>`
         )
         // move the origin text node into a isolate node, but don't delete it
-        // this is for campatible with some website which use the origin text node always
+        // this is for compatible with some website which use the origin text node always
         const newNode = document.createElement('div')
         newNode.appendChild(node)
       } else {
@@ -115,12 +164,13 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
 }
 
 function readStorageAndHighlight() {
-  chrome.storage.local.get(['dict', WordType.known], result => {
+  chrome.storage.local.get(['dict', StorageKey.known, StorageKey.context], result => {
     dict = result.dict || {}
-    wordsKnown = result[WordType.known] || {}
+    wordsKnown = result[StorageKey.known] || {}
+    contexts = result[StorageKey.context] || {}
 
     const textNodes = getTextNodes(document.body)
-    highlight(textNodes, dict, wordsKnown)
+    highlight(textNodes, dict, wordsKnown, contexts)
   })
 }
 
@@ -138,13 +188,13 @@ function observeDomChange() {
             return false
           }
           if (node.nodeType === Node.TEXT_NODE) {
-            highlight([node as CharacterData], dict, wordsKnown)
+            highlight([node as CharacterData], dict, wordsKnown, contexts)
           } else {
             if ((node as HTMLElement).isContentEditable || node.parentElement?.isContentEditable) {
               return false
             }
             const textNodes = getTextNodes(node)
-            highlight(textNodes, dict, wordsKnown)
+            highlight(textNodes, dict, wordsKnown, contexts)
           }
         })
       }
@@ -196,6 +246,10 @@ export function isInDict(word: string) {
 
 export function getMessagePort() {
   return messagePort
+}
+
+export function getWordContexts(word: string) {
+  return contexts[word] ?? []
 }
 
 export function init() {

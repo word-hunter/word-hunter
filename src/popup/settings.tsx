@@ -3,7 +3,9 @@ import { colors, updateColors } from '../utils/color'
 
 export const Settings = () => {
   const onColorChange = (e: Event) => {
-    const newColors = [(e.target as HTMLInputElement)?.value]
+    const target = e.target as HTMLInputElement
+    const newColors = [...colors()]
+    newColors[Number(target.dataset.index)] = target?.value
     updateColors(newColors)
   }
 
@@ -13,15 +15,12 @@ export const Settings = () => {
         <h4>Color Setting:</h4>
         <div class={styles.colorInputs}>
           <div>
-            <label for="color_unknown">Unknown:</label>
-            <input
-              type="color"
-              id="color_unknown"
-              name="color_unknown"
-              data-index="0"
-              value={colors()[0]}
-              oninput={onColorChange}
-            />
+            <label>Unknown:</label>
+            <input type="color" data-index="0" value={colors()[0]} oninput={onColorChange} />
+          </div>
+          <div>
+            <label>Have context:</label>
+            <input type="color" data-index="1" value={colors()[1]} oninput={onColorChange} />
           </div>
         </div>
       </div>

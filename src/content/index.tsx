@@ -22,6 +22,7 @@ const App = () => {
           :root {
             --wh-mark-color: ${invertHexColor(colors()[0])};
             --wh-mark-bg-color: ${colors()[0]};
+            --wh-mark-with-content-bg-color: ${colors()[1]};
           }
         `}
       </style>

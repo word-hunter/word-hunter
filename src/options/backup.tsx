@@ -1,8 +1,8 @@
 import styles from './backup.module.less'
-import { WordType } from '../constant'
+import { StorageKey } from '../constant'
 import { downloadAsJsonFile } from '../utils'
 
-const timeformatter = new Intl.DateTimeFormat('en-US')
+const timeFormatter = new Intl.DateTimeFormat('en-US')
 
 export const Backup = () => {
   let dialogRef: HTMLDialogElement
@@ -22,20 +22,22 @@ export const Backup = () => {
       try {
         const json = JSON.parse(data)
 
-        if (!json[WordType.known]) {
+        if (!json[StorageKey.known]) {
           alert('invalid file ❗️')
           return
         }
 
-        chrome.storage.local.get([WordType.known], resule => {
-          const known = resule[WordType.known] || {}
+        chrome.storage.local.get([StorageKey.known, StorageKey.context], result => {
+          const known = result[StorageKey.known] || {}
+          const contexts = result.context || {}
 
-          const newKnown = { ...known, ...json[WordType.known] }
+          const newKnown = { ...known, ...json[StorageKey.known] }
+          const newContext = { ...contexts, ...(json[StorageKey.context] ?? {}) }
 
           chrome.storage.local.set(
             {
-              ['half']: {},
-              [WordType.known]: newKnown
+              [StorageKey.context]: newContext,
+              [StorageKey.known]: newKnown
             },
             () => {
               alert('restore success ✅')
@@ -54,12 +56,13 @@ export const Backup = () => {
   }
 
   const onBackup = () => {
-    chrome.storage.local.get([WordType.known], result => {
+    chrome.storage.local.get([StorageKey.known, StorageKey.context], result => {
       const now = Date.now()
-      const fileName = `word_hunter_backup_${timeformatter.format(now)}_${now}.json`
+      const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
       downloadAsJsonFile(
         JSON.stringify({
-          [WordType.known]: result[WordType.known]
+          [StorageKey.known]: result[StorageKey.known],
+          [StorageKey.context]: result[StorageKey.context] ?? {}
         }),
         fileName
       )
@@ -76,8 +79,14 @@ export const Backup = () => {
           <button onclick={onRestore}>confirm</button>
         </form>
       </dialog>
-      <button onclick={showModal}>restore</button>
-      <button onclick={onBackup}>backup</button>
+      <button onclick={showModal}>
+        ️<img src={chrome.runtime.getURL('icons/upload.png')} width="40" height="40" alt="upload" />
+        restore
+      </button>
+      <button onclick={onBackup}>
+        ️<img src={chrome.runtime.getURL('icons/download.png')} width="40" height="40" alt="backup" />
+        backup
+      </button>
     </div>
   )
 }

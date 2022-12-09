@@ -37,9 +37,15 @@ export const App = () => {
     <div class={styles.page}>
       <Statistics />
       <div class={styles.buttons}>
-        <button onclick={onFastModeToggle}>⚡️ Toggle zen mode</button>
-        <button onclick={onSetAllKnown}>👻 Set all words as known</button>
-        <button onclick={onPdfViewer}>👁️ Open PDF reader</button>
+        <button onclick={onFastModeToggle}>
+          ️<img src={chrome.runtime.getURL('icons/quick-mode-on.png')} width="20" height="20" /> Toggle zen mode
+        </button>
+        <button onclick={onSetAllKnown}>
+          <img src={chrome.runtime.getURL('icons/check-all.png')} width="20" height="20" /> Set all words as known
+        </button>
+        <button onclick={onPdfViewer}>
+          ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader
+        </button>
       </div>
       <div>
         <details>
