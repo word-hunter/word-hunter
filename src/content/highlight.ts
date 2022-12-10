@@ -1,6 +1,7 @@
 import {
   classes,
   invalidTags,
+  invalidSelectors,
   keepTextNodeHosts,
   Messages,
   WordContext,
@@ -115,6 +116,13 @@ function getTextNodes(node: Node): CharacterData[] {
     return [node as CharacterData]
   } else if (invalidTags.includes(node.nodeName)) {
     return []
+  }
+
+  for (const selector of invalidSelectors) {
+    if (node.nodeType === Node.ELEMENT_NODE && (node as Element).closest(selector)) {
+      console.log(node)
+      return []
+    }
   }
 
   const textNodes: CharacterData[] = []
