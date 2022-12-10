@@ -59,10 +59,20 @@ export const Backup = () => {
     chrome.storage.local.get([StorageKey.known, StorageKey.context], result => {
       const now = Date.now()
       const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
+
+      // clean up unused context words
+      const known = result[StorageKey.known] || {}
+      const contexts = result[StorageKey.context] || {}
+      const cleanContexts = Object.fromEntries(
+        Object.entries(contexts).filter(([word]) => {
+          return !(word in known)
+        })
+      )
+
       downloadAsJsonFile(
         JSON.stringify({
-          [StorageKey.known]: result[StorageKey.known],
-          [StorageKey.context]: result[StorageKey.context] ?? {}
+          [StorageKey.known]: known,
+          [StorageKey.context]: cleanContexts
         }),
         fileName
       )

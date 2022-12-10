@@ -35,7 +35,6 @@ export function Dict(props: { word: string; onSettle: () => void }) {
 }
 
 const loadingImg = chrome.runtime.getURL('/book.svg')
-console.log(loadingImg)
 
 function Loading() {
   return (

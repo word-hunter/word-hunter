@@ -188,7 +188,6 @@ function ContextList(props: { contexts: WordContext[] }) {
     <div class="contexts">
       <For each={props.contexts.reverse()}>
         {(context: WordContext) => {
-          console.log(context)
           return (
             <div>
               <div innerHTML={safeEmphasizeWordInText(context.text, curWord())}></div>
