@@ -120,7 +120,6 @@ function getTextNodes(node: Node): CharacterData[] {
 
   for (const selector of invalidSelectors) {
     if (node.nodeType === Node.ELEMENT_NODE && (node as Element).closest(selector)) {
-      console.log(node)
       return []
     }
   }
