@@ -1,4 +1,4 @@
-export const safeEmphasizeWordInText = (text: string, word: string, tag: string = 'b') => {
+export const safeEmphasizeWordInText = (text: string = '', word: string, tag: string = 'b') => {
   const regex = new RegExp('(<.*>)?' + word + '(</.*>)?', 'gi')
   return text.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(regex, `$1<${tag}>${word}</${tag}>$2`)
 }
@@ -17,10 +17,14 @@ export const getDocumentTitle = () => {
   return document.title.substring(0, 40)
 }
 
-export const getWordContext = (node: HTMLElement) => {
-  const word = node.textContent!
-  const contextNode = node.parentNode?.parentNode?.nodeName === 'P' ? node.parentNode?.parentNode : node.parentNode
-  const context = contextNode?.textContent || ''
+export const getWordContext = (node: HTMLElement): string => {
+  const pNode = node.parentElement!
+  const context = pNode.textContent ?? ''
+  const word = node.textContent ?? ''
+
+  if (pNode && context.trim() === word.trim()) {
+    return getWordContext(pNode!)
+  }
   if (context.length > 300) {
     const fragment = context.split(word)
     const preSentences = fragment[0].split('.')

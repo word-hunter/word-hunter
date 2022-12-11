@@ -129,12 +129,12 @@ export const WhCard = customElement('wh-card', () => {
           </a>
         </div>
       </div>
-      <Show when={curWord()}>
-        <div class="dict_container">
+      <div class="dict_container">
+        <Show when={curWord()}>
           <ContextList contexts={wordContexts()}></ContextList>
           <Dict word={curWord()} onSettle={onDictSettle} />
-        </div>
-      </Show>
+        </Show>
+      </div>
       <style>{cardStyles}</style>
       <style>{dictStyles}</style>
     </div>
@@ -305,7 +305,7 @@ function bindEvents() {
     if (node.classList.contains('__mark')) {
       // skip when redirecting in card dictionary
       if (inDirecting) {
-        inDirecting = true
+        inDirecting = false
         return false
       }
 
