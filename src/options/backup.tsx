@@ -27,17 +27,20 @@ export const Backup = () => {
           return
         }
 
-        chrome.storage.local.get([StorageKey.known, StorageKey.context], result => {
+        chrome.storage.local.get([StorageKey.known, StorageKey.context, StorageKey.blacklist], result => {
           const known = result[StorageKey.known] || {}
           const contexts = result.context || {}
+          const blacklist = result.blacklist || []
 
           const newKnown = { ...known, ...json[StorageKey.known] }
           const newContext = { ...contexts, ...(json[StorageKey.context] ?? {}) }
+          const newBlacklist = [...new Set([...blacklist, ...(json[StorageKey.blacklist] ?? [])])]
 
           chrome.storage.local.set(
             {
               [StorageKey.context]: newContext,
-              [StorageKey.known]: newKnown
+              [StorageKey.known]: newKnown,
+              [StorageKey.blacklist]: newBlacklist
             },
             () => {
               alert('restore success ✅')
@@ -56,7 +59,7 @@ export const Backup = () => {
   }
 
   const onBackup = () => {
-    chrome.storage.local.get([StorageKey.known, StorageKey.context], result => {
+    chrome.storage.local.get([StorageKey.known, StorageKey.context, StorageKey.blacklist], result => {
       const now = Date.now()
       const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
 
@@ -72,7 +75,8 @@ export const Backup = () => {
       downloadAsJsonFile(
         JSON.stringify({
           [StorageKey.known]: known,
-          [StorageKey.context]: cleanContexts
+          [StorageKey.context]: cleanContexts,
+          [StorageKey.blacklist]: result[StorageKey.blacklist] || []
         }),
         fileName
       )

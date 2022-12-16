@@ -23,6 +23,7 @@ import {
 } from './highlight'
 import { Dict, getWordByHref } from './dict'
 import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain } from '../utils'
+import { readBlacklist } from '../utils/blacklist'
 
 let timerShowRef: number
 let timerHideRef: number
@@ -37,8 +38,11 @@ const [curContextText, setCurContextText] = createSignal('')
 
 export const WhCard = customElement('wh-card', () => {
   onMount(() => {
-    highlightInit()
-    bindEvents()
+    readBlacklist().then(blacklist => {
+      if (blacklist.includes(location.host)) return
+      highlightInit()
+      bindEvents()
+    })
   })
 
   const onKnown = (e: MouseEvent) => {

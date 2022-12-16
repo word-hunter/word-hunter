@@ -23,7 +23,8 @@ export const classes = {
 
 export enum StorageKey {
   'known' = 'known',
-  'context' = 'context'
+  'context' = 'context',
+  'blacklist' = 'blacklist'
 }
 
 export enum Messages {
@@ -31,6 +32,7 @@ export enum Messages {
   'set_all_known' = 'set_all_known',
   'add_context' = 'add_context',
   'delete_context' = 'delete_context',
+  'app_available' = 'app_available',
   'play_audio' = 'play_audio'
 }
 

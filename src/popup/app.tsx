@@ -1,6 +1,8 @@
 import styles from './app.module.less'
 import { Settings } from './settings'
 import { Statistics } from './statistics'
+import { createSignal } from 'solid-js'
+import { StorageKey } from '../constant'
 
 export const executeScript = (func: () => void) => {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
@@ -33,6 +35,21 @@ export const App = () => {
     return false
   }
 
+  const [isBanned, setIsBanned] = createSignal(false)
+
+  const onToggleBlacklist = () => {
+    executeScript(() => window.__toggleBlackList())
+    setIsBanned(!isBanned())
+  }
+
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    const host = new URL(tabs[0].url!).host
+    chrome.storage.local.get(StorageKey.blacklist, result => {
+      const blacklist = result[StorageKey.blacklist] ?? []
+      setIsBanned(blacklist.includes(host))
+    })
+  })
+
   return (
     <div class={styles.page}>
       <Statistics />
@@ -45,6 +62,15 @@ export const App = () => {
         </button>
         <button onclick={onPdfViewer}>
           ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader
+        </button>
+        <button onclick={onToggleBlacklist}>
+          ️
+          <img
+            src={chrome.runtime.getURL(isBanned() ? 'icons/toggle-off.png' : 'icons/toggle-on.png')}
+            width="20"
+            height="20"
+          />
+          {isBanned() ? 'Enable on this site' : 'Disable on this site'}
         </button>
       </div>
       <div>

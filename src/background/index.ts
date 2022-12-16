@@ -101,6 +101,16 @@ async function setup() {
     }
   })
 
+  chrome.runtime.onMessage.addListener(msg => {
+    if (Messages.app_available in msg) {
+      chrome.action.setIcon({
+        path: {
+          128: msg.app_available ? chrome.runtime.getURL('icon.png') : chrome.runtime.getURL('icons/disabled.png')
+        }
+      })
+    }
+  })
+
   const dict = await readDict()
 
   storage.set({ dict: dict }, () => {
