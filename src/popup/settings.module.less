@@ -1,26 +1,36 @@
 .container {
   margin: 20px 0;
 
-  h4 {
-    margin: 0;
-  }
-
-  .colorSetting {
-    width: 200px;
+  section {
     box-sizing: border-box;
-    margin: 0 auto;
+    margin: 20px;
     padding: 20px;
     border-radius: 4px;
     border: 1px solid #999;
+
+    h4 {
+      margin: 0 0 10px 0;
+    }
 
     .colorInputs > div {
       padding: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      input {
+      input[type='color'] {
         width: 40px;
       }
+    }
+
+    input[type='number'] {
+      width: 90px;
+    }
+  }
+
+  .backup {
+    text-align: right;
+    a {
+      color: #0078d4;
     }
   }
 }

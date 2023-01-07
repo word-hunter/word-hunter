@@ -1,16 +1,18 @@
 .page {
+  width: 300px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI Adjusted', 'Segoe UI', 'Liberation Sans', sans-serif;
   color: #555;
+  padding: 20px 0;
+  --section-height: 400px;
   .buttons {
-    width: 200px;
-    align-items: center;
-    padding: 10px 20px 20px 20px;
-    gap: 20px;
+    display: grid;
+    justify-content: center;
+    padding: 10px 20px 30px 20px;
+    gap: 10px;
     button {
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      margin-top: 10px;
       width: 200px;
       padding: 5px 10px;
       gap: 5px;
@@ -18,22 +20,43 @@
     }
   }
 
-  details {
-    margin: 10px 20px 30px 20px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-    summary {
+  > section {
+    margin: 2px 20px;
+
+    h2 {
+      position: relative;
+      background-color: #e8f0f5;
       padding: 5px 0;
+      margin: 0;
       font-size: 14px;
       text-align: center;
       border-radius: 4px;
+      cursor: pointer;
+      span {
+        position: absolute;
+        right: 10px;
+        transform: rotate(0deg);
+        color: #999;
+        transition: all 0.3s;
+      }
     }
-  }
 
-  .link {
-    text-align: right;
-    a {
-      color: #0078d4;
+    > div {
+      height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    &[data-active='true'] > div {
+      opacity: 1;
+      height: var(--section-height);
+    }
+
+    &[data-active='true'] > h2 {
+      span {
+        transform: rotate(90deg);
+      }
     }
   }
 }

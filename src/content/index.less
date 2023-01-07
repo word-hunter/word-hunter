@@ -12,7 +12,8 @@
   background-color: unset;
 }
 
-.__word_unknown {
+.__word_unknown.__word_in_viewport,
+.__zen_mode .__word_unknown {
   pointer-events: auto;
   color: var(--wh-mark-color);
   background-color: var(--wh-mark-bg-color, #9fb0ef);
@@ -41,12 +42,24 @@ body:has(.__zen_mode) {
 
   font-family: BlinkMacSystemFont, sans-serif;
 
-  > div {
+  pre {
+    background-color: unset;
+    border: none;
+  }
+
+  .zen_buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 40px;
+  }
+
+  .zen_words {
     columns: 10rem;
     column-gap: 7rem;
     column-rule: 4px dotted turquoise;
     word-break: break-all;
   }
+
   w-mark {
     display: inline-block;
     break-inside: avoid;
@@ -66,7 +79,7 @@ body:has(.__zen_mode) {
 
   p {
     width: max-content;
-    margin: 0 auto 50px auto;
+    margin: 0 auto 20px auto;
     padding: 10px;
     outline: 5px dashed rgba(0, 0, 0, 0.1);
     font-size: 10px;

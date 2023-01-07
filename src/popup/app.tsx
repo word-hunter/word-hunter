@@ -13,29 +13,22 @@ export const executeScript = (func: () => void) => {
   })
 }
 
+
+
+const onFastModeToggle = () => {
+  executeScript(() => window.__toggleZenMode())
+}
+
+const onPdfViewer = () => {
+  chrome.tabs.create({
+    url: `https://mozilla.github.io/pdf.js/web/viewer.html?file=${chrome.runtime.getURL('elephant.pdf')}`
+  })
+  return false
+}
+
 export const App = () => {
-  const onSetAllKnown = () => {
-    confirm('Are you sure you want to mark all unknown words on this page as known?') &&
-      executeScript(() => window.__markAsAllKnown())
-  }
-
-  const onDirectToOption = () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })
-    return false
-  }
-
-  const onFastModeToggle = () => {
-    executeScript(() => window.__toggleZenMode())
-  }
-
-  const onPdfViewer = () => {
-    chrome.tabs.create({
-      url: `https://mozilla.github.io/pdf.js/web/viewer.html?file=${chrome.runtime.getURL('elephant.pdf')}`
-    })
-    return false
-  }
-
   const [isBanned, setIsBanned] = createSignal(false)
+  const [index, setIndex] = createSignal(0)
 
   const onToggleBlacklist = () => {
     executeScript(() => window.__toggleBlackList())
@@ -52,38 +45,47 @@ export const App = () => {
 
   return (
     <div class={styles.page}>
-      <Statistics />
-      <div class={styles.buttons}>
-        <button onclick={onFastModeToggle}>
-          ️<img src={chrome.runtime.getURL('icons/quick-mode-on.png')} width="20" height="20" /> Toggle zen mode
-        </button>
-        <button onclick={onSetAllKnown}>
-          <img src={chrome.runtime.getURL('icons/check-all.png')} width="20" height="20" /> Set all words as known
-        </button>
-        <button onclick={onPdfViewer}>
-          ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader
-        </button>
-        <button onclick={onToggleBlacklist}>
-          ️
-          <img
-            src={chrome.runtime.getURL(isBanned() ? 'icons/toggle-off.png' : 'icons/toggle-on.png')}
-            width="20"
-            height="20"
-          />
-          {isBanned() ? 'Enable on this site' : 'Disable on this site'}
-        </button>
-      </div>
-      <div>
-        <details>
-          <summary>Settings</summary>
-          <Settings />
-          <div class={styles.link}>
-            <a onclick={onDirectToOption} href="#">
-              Options
-            </a>
+      <section data-active={index() == 0 ? 'true' : 'false'}>
+        <h2
+          onclick={() => {
+            setIndex(0)
+          }}
+        >
+          Page Stats<span>➳</span>
+        </h2>
+        <div>
+          <Statistics />
+          <div class={styles.buttons}>
+            <button onclick={onFastModeToggle}>
+              ️<img src={chrome.runtime.getURL('icons/quick-mode-on.png')} width="20" height="20" /> Toggle zen mode
+            </button>
+            <button onclick={onPdfViewer}>
+              ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader
+            </button>
+            <button onclick={onToggleBlacklist}>
+              ️
+              <img
+                src={chrome.runtime.getURL(isBanned() ? 'icons/toggle-off.png' : 'icons/toggle-on.png')}
+                width="20"
+                height="20"
+              />
+              {isBanned() ? 'Enable on this site' : 'Disable on this site'}
+            </button>
           </div>
-        </details>
-      </div>
+        </div>
+      </section>
+      <section data-active={index() == 1 ? 'true' : 'false'}>
+        <h2
+          onclick={() => {
+            setIndex(1)
+          }}
+        >
+          Settings<span>➳</span>
+        </h2>
+        <div>
+          <Settings />
+        </div>
+      </section>
     </div>
   )
 }

@@ -16,6 +16,7 @@ export const classes = {
   mark_parent: '__mark_parent',
   known: '__word_known',
   unknown: '__word_unknown',
+  in_viewport: '__word_in_viewport',
   card: 'word_card',
   zen_mode: '__zen_mode',
   excluded: '__excluded'
@@ -24,7 +25,8 @@ export const classes = {
 export enum StorageKey {
   'known' = 'known',
   'context' = 'context',
-  'blacklist' = 'blacklist'
+  'blacklist' = 'blacklist',
+  'maxHighlight' = 'maxHighlight'
 }
 
 export enum Messages {
@@ -66,5 +68,6 @@ export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
 
 export const defaultColors = ['#9FB0EF', '#C175D8']
+export const defaultMaxHighlight = 1000_000_000
 
 export const keepTextNodeHosts = ['reader.ttsu.app']

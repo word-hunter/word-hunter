@@ -1,5 +1,5 @@
 import { createResource, createEffect, Switch, Match, onCleanup } from 'solid-js'
-import { lookup, cspViolationhandler } from './collins'
+import { lookup, cspViolationHandler } from './collins'
 export { getWordByHref } from './collins'
 
 export function Dict(props: { word: string; onSettle: () => void }) {
@@ -14,7 +14,7 @@ export function Dict(props: { word: string; onSettle: () => void }) {
   })
 
   const cspHandler = (e: SecurityPolicyViolationEvent) => {
-    cspViolationhandler(e, root)
+    cspViolationHandler(e, root)
   }
 
   document.addEventListener('securitypolicyviolation', cspHandler)

@@ -13,6 +13,11 @@ After you mark as many words as possible for "known", the words highlighted are 
 
 <img style="max-width: 100%;" src="./screenshot-1.png" />
 
+## How to custom max highlight count
+
+You can open the extension popup panel and set the max highlight count.
+It will only highlight new word in viewport only if the total highlighted count is less than the max highlight count.
+
 ## How to mark faster
 
 1. Click the icon of extension on the toolbar, then click "toggle zen mode" button in the pop-up panel.

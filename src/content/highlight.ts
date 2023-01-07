@@ -13,6 +13,7 @@ import {
 } from '../constant'
 import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl } from '../utils'
+import { maxHighlight } from '../utils/maxHighlight'
 
 let wordsKnown: WordMap = {}
 let dict: WordMap = {}
@@ -90,7 +91,7 @@ export function deleteContext(context: WordContext) {
   }
 }
 
-function markAsAllKnown() {
+export function markAsAllKnown() {
   const nodes = document.querySelectorAll('.' + classes.unknown)
   const words: string[] = []
   const toMarkedNotes: Element[] = []
@@ -107,9 +108,6 @@ function markAsAllKnown() {
     node.className = classes.known
   })
 }
-
-// this function expose to be called in popup page
-window.__markAsAllKnown = markAsAllKnown
 
 function getTextNodes(node: Node): CharacterData[] {
   if (node.nodeType === Node.TEXT_NODE) {
@@ -131,42 +129,67 @@ function getTextNodes(node: Node): CharacterData[] {
   return textNodes
 }
 
+const intersectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    const el = entry.target as HTMLElement
+    if (entry.isIntersecting) {
+      if (getHighlightCount(true) > maxHighlight()) {
+        console.warn('highlight count exceed max limit, stop highlight')
+        return
+      }
+      el.classList.add(classes.in_viewport)
+    } else {
+      el.classList.remove(classes.in_viewport)
+    }
+  })
+})
+
+function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordMap, contexts: ContextMap) {
+  const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;')
+  const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
+    const w = word.toLowerCase()
+    if (w in dict) {
+      if (w in wordsKnown) {
+        return origin
+      } else {
+        const contextAttr = contexts[w]?.length > 0 ? 'have_context="true"' : ''
+        return `${prefix}<w-mark class="${classes.mark} ${classes.unknown}" ${contextAttr}>${word}</w-mark>${postfix}`
+      }
+    } else {
+      return origin
+    }
+  })
+  if (text !== html) {
+    if (shouldKeepOriginNode) {
+      node.parentElement?.insertAdjacentHTML(
+        'afterend',
+        `<w-mark-parent class="${classes.mark_parent}">${html}</w-mark-parent>`
+      )
+      // move the origin text node into a isolate node, but don't delete it
+      // this is for compatible with some website which use the origin text node always
+      const newNode = document.createElement('div')
+      newNode.appendChild(node)
+    } else {
+      const newNode = document.createElement('w-mark-parent')
+      newNode.className = classes.mark_parent
+      newNode.innerHTML = html
+      node.replaceWith(newNode)
+
+      // check if element is in viewport
+      const marks = newNode.querySelectorAll('.' + classes.mark)
+      marks.forEach(mark => {
+        intersectionObserver.observe(mark)
+      })
+    }
+  }
+}
+
 function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMap, contexts: ContextMap) {
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
 
-    const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;')
-    const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
-      const w = word.toLowerCase()
-      if (w in dict) {
-        if (w in wordsKnown) {
-          return origin
-        } else {
-          const contextAttr = contexts[w]?.length > 0 ? 'have_context="true"' : ''
-          return `${prefix}<w-mark class="${classes.mark} ${classes.unknown}" ${contextAttr}>${word}</w-mark>${postfix}`
-        }
-      } else {
-        return origin
-      }
-    })
-    if (text !== html) {
-      if (shouldKeepOriginNode) {
-        node.parentElement?.insertAdjacentHTML(
-          'afterend',
-          `<w-mark-parent class="${classes.mark_parent}">${html}</w-mark-parent>`
-        )
-        // move the origin text node into a isolate node, but don't delete it
-        // this is for compatible with some website which use the origin text node always
-        const newNode = document.createElement('div')
-        newNode.appendChild(node)
-      } else {
-        const newNode = document.createElement('w-mark-parent')
-        newNode.className = classes.mark_parent
-        newNode.innerHTML = html
-        node.replaceWith(newNode)
-      }
-    }
+    highlightTextNode(node, dict, wordsKnown, contexts)
   }
 }
 
@@ -215,6 +238,14 @@ function observeDomChange() {
   })
 }
 
+function getHighlightCount(isVisible?: boolean) {
+  const selector = isVisible ? `.${classes.unknown}.${classes.in_viewport}` : `.${classes.unknown}`
+  const unknownWords = Array.from(document.querySelectorAll(selector)).map(w =>
+    (w as HTMLElement).innerText.toLowerCase()
+  )
+  return new Set(unknownWords).size
+}
+
 function getPageStatistics() {
   console.time('getPageStatistics')
   const textNodes = Array.from(getTextNodes(document.body))
@@ -231,11 +262,7 @@ function getPageStatistics() {
     })
   })
   const wordCount = new Set(words).size
-
-  const unknownWords = Array.from(document.querySelectorAll('.' + classes.unknown)).map(w =>
-    (w as HTMLElement).innerText.toLowerCase()
-  )
-  const unknownCount = new Set(unknownWords).size
+  const unknownCount = getHighlightCount()
   console.timeEnd('getPageStatistics')
   return [unknownCount, wordCount] as const
 }

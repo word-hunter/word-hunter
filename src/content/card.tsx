@@ -10,6 +10,7 @@ import { classes, Messages, WordContext } from '../constant'
 import {
   init as highlightInit,
   markAsKnown,
+  markAsAllKnown,
   addContext,
   deleteContext,
   isInDict,
@@ -54,6 +55,7 @@ export const WhCard = customElement('wh-card', () => {
   }
 
   const onAddContext = (e: MouseEvent) => {
+    if (zenMode()) return false
     e.preventDefault()
     const word = curWord()
     addContext(word, curContextText())
@@ -163,6 +165,10 @@ export function ZenMode() {
     }
   }
 
+  const onSetAllKnown = () => {
+    confirm('Are you sure you want to mark all unknown words on this page as known?') && markAsAllKnown()
+  }
+
   return (
     <Show when={zenMode()}>
       <div class={classes.zen_mode}>
@@ -171,7 +177,10 @@ export function ZenMode() {
             Note: use <kbd>⌘</kbd> + <kbd>Click</kbd> to unselect word
           </p>
         </pre>
-        <div>
+        <div class="zen_buttons">
+          <button onclick={onSetAllKnown}>Set all words as known</button>
+        </div>
+        <div class="zen_words">
           <For each={zenModeWords()}>
             {(word: string) => {
               return (
@@ -306,7 +315,10 @@ function bindEvents() {
   document.addEventListener('mouseover', async (e: MouseEvent) => {
     const node = e.target as HTMLElement
 
-    if (node.classList.contains('__mark')) {
+    if (node.classList.contains(classes.mark)) {
+      if (!zenMode() && !node.classList.contains(classes.in_viewport)) {
+        return false
+      }
       // skip when redirecting in card dictionary
       if (inDirecting) {
         inDirecting = false

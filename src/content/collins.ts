@@ -109,7 +109,7 @@ export function getWordByHref(href: string) {
   return word.toLowerCase()
 }
 
-export function cspViolationhandler(e: SecurityPolicyViolationEvent, root: HTMLElement) {
+export function cspViolationHandler(e: SecurityPolicyViolationEvent, root: HTMLElement) {
   const sectionSelector = '[data-type-block]'
   if (e.violatedDirective === 'frame-src') {
     if (e.blockedURI.startsWith('https://www.youtube.com')) {
