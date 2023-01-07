@@ -134,7 +134,6 @@ const intersectionObserver = new IntersectionObserver(entries => {
     const el = entry.target as HTMLElement
     if (entry.isIntersecting) {
       if (getHighlightCount(true) > maxHighlight()) {
-        console.warn('highlight count exceed max limit, stop highlight')
         return
       }
       el.classList.add(classes.in_viewport)
