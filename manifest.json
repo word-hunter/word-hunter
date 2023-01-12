@@ -31,5 +31,6 @@
       "matches": ["<all_urls>"]
     }
   ],
-  "permissions": ["storage", "activeTab", "scripting", "tabs"]
+  "host_permissions": ["*://*.youglish.com/"],
+  "permissions": ["storage", "activeTab", "scripting", "tabs", "cookies"]
 }

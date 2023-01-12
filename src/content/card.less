@@ -182,13 +182,13 @@
       color: #0069c2;
     }
     div:nth-child(3) {
-      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
       a {
         cursor: pointer;
-        padding: 20px 15px;
-        margin: -20px -15px -20px 55px;
         &.disabled {
-          visibility: hidden;
+          display: none;
         }
         img {
           width: 25px;

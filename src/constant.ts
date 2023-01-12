@@ -35,7 +35,8 @@ export enum Messages {
   'add_context' = 'add_context',
   'delete_context' = 'delete_context',
   'app_available' = 'app_available',
-  'play_audio' = 'play_audio'
+  'play_audio' = 'play_audio',
+  'open_youglish' = 'open_youglish'
 }
 
 export const invalidTags = [

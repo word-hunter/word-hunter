@@ -96,6 +96,11 @@ async function setup() {
           case Messages.play_audio:
             createAudioWindow(msg.audio)
             break
+          case Messages.open_youglish:
+            chrome.tabs.create({
+              url: chrome.runtime.getURL('youglish.html') + `?word=${encodeURIComponent(word)}`
+            })
+            break
         }
       })
     }
