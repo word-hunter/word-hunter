@@ -3,7 +3,6 @@ import { walk } from '../utils/_hot'
 
 import './index.less'
 import cardStyles from './card.less?inline'
-import dictStyles from './dict.less?inline'
 import { createSignal, Show, For, batch, onMount } from 'solid-js'
 import { customElement } from 'solid-element'
 import { classes, Messages, WordContext } from '../constant'
@@ -22,7 +21,8 @@ import {
   zenExcludeWords,
   setZenExcludeWords
 } from './highlight'
-import { Dict, getWordByHref } from './dict'
+import { Dict } from './dict'
+import { adapters } from './adapters'
 import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain } from '../utils'
 import { readBlacklist } from '../utils/blacklist'
 
@@ -38,6 +38,8 @@ const [zenModeWords, setZenModeWords] = createSignal<string[]>([])
 const [curContextText, setCurContextText] = createSignal('')
 
 export const WhCard = customElement('wh-card', () => {
+  const dictAdapter = adapters['collins']
+
   onMount(() => {
     readBlacklist().then(blacklist => {
       if (blacklist.includes(location.host)) return
@@ -72,7 +74,7 @@ export const WhCard = customElement('wh-card', () => {
 
     if (node.tagName === 'A' && node.dataset.href) {
       e.stopImmediatePropagation()
-      const word = getWordByHref(node.dataset.href)
+      const word = dictAdapter.getWordByHref(node.dataset.href)
       if (word === curWord()) return false
 
       inDirecting = true
@@ -111,6 +113,13 @@ export const WhCard = customElement('wh-card', () => {
     return !!wordContexts().find(c => c.text === curContextText())
   }
 
+  const goYouGlish = () => {
+    const word = curWord()
+    if (word) {
+      getMessagePort().postMessage({ action: Messages.open_youglish, word })
+    }
+  }
+
   return (
     <div class="word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
       <div class="toolbar">
@@ -130,6 +139,9 @@ export const WhCard = customElement('wh-card', () => {
           </a>
         </div>
         <div>
+          <a onClick={goYouGlish}>
+            <img src={chrome.runtime.getURL('icons/youtube-play.png')} alt="youglish" />
+          </a>
           <a classList={{ history_back: true, disabled: dictHistory().length < 2 }} title="back">
             <img src={chrome.runtime.getURL('icons/undo.png')} alt="back" />
           </a>
@@ -138,11 +150,11 @@ export const WhCard = customElement('wh-card', () => {
       <div class="dict_container">
         <Show when={curWord()}>
           <ContextList contexts={wordContexts()}></ContextList>
-          <Dict word={curWord()} onSettle={onDictSettle} />
+          <Dict word={curWord()} dictAdapter={dictAdapter} onSettle={onDictSettle} />
         </Show>
       </div>
       <style>{cardStyles}</style>
-      <style>{dictStyles}</style>
+      <style>{dictAdapter.style}</style>
     </div>
   )
 })

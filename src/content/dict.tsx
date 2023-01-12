@@ -1,9 +1,9 @@
 import { createResource, createEffect, Switch, Match, onCleanup } from 'solid-js'
-import { lookup, cspViolationHandler } from './collins'
-export { getWordByHref } from './collins'
+import { Adapter } from './adapters'
 
-export function Dict(props: { word: string; onSettle: () => void }) {
-  const [def] = createResource(() => props.word, lookup)
+export function Dict(props: { word: string; dictAdapter: Adapter; onSettle: () => void }) {
+  const { dictAdapter } = props
+  const [def] = createResource(() => props.word, dictAdapter.lookup.bind(dictAdapter))
   let root: HTMLDivElement
 
   createEffect(() => {
@@ -14,7 +14,7 @@ export function Dict(props: { word: string; onSettle: () => void }) {
   })
 
   const cspHandler = (e: SecurityPolicyViolationEvent) => {
-    cspViolationHandler(e, root)
+    dictAdapter.cspViolationHandler?.(e, root)
   }
 
   document.addEventListener('securitypolicyviolation', cspHandler)
@@ -27,7 +27,7 @@ export function Dict(props: { word: string; onSettle: () => void }) {
           <div class="no_result">😭 not found definition</div>
         </Match>
         <Match when={!def.loading && def()}>
-          <div class="__dict_collins" innerHTML={def()}></div>
+          <div class="__dict_container" innerHTML={def()}></div>
         </Match>
       </Switch>
     </div>
