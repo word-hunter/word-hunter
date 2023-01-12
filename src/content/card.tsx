@@ -139,7 +139,7 @@ export const WhCard = customElement('wh-card', () => {
           </a>
         </div>
         <div>
-          <a onClick={goYouGlish}>
+          <a onClick={goYouGlish} title="youglish">
             <img src={chrome.runtime.getURL('icons/youtube-play.png')} alt="youglish" />
           </a>
           <a classList={{ history_back: true, disabled: dictHistory().length < 2 }} title="back">
