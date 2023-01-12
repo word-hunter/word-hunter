@@ -10,6 +10,7 @@
 /build
 .vscode
 dist.zip
+build.zip
 
 # misc
 .DS_Store

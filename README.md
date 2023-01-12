@@ -5,6 +5,10 @@
    <p align="center">Discover new english <mark>words</mark> you don't know on any web page</p>
 </p>
 
+## Installation
+
+[Chrome Web Store](https://chrome.google.com/webstore/detail/word-hunter/nigkedajkofkhoedhgiipmigiebldaem)
+
 ## How it works
 
 At first, all the words on the web page are "unknown" by default. You can hover over the words and mark them as "known", and the words will no longer be highlighted.
