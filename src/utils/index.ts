@@ -18,13 +18,17 @@ export const getDocumentTitle = () => {
 }
 
 export const getWordContext = (node: HTMLElement): string => {
-  const pNode = node.parentElement!
-  const context = pNode.textContent ?? ''
+  const pNode = node.parentElement
+  const context = pNode?.textContent ?? ''
   const word = node.textContent ?? ''
 
-  if (pNode && context.trim() === word.trim()) {
-    return getWordContext(pNode!)
+  const shouldContinue =
+    pNode && (context.trim() === word.trim() || getComputedStyle(pNode).display.startsWith('inline'))
+
+  if (shouldContinue) {
+    return getWordContext(pNode)
   }
+
   if (context.length > 300) {
     const fragment = context.split(word)
     const preSentences = fragment[0].split('.')
