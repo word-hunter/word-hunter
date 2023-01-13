@@ -69,6 +69,6 @@ export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
 
 export const defaultColors = ['#9FB0EF', '#C175D8']
-export const defaultMaxHighlight = 1000_000_000
+export const defaultMaxHighlight = 1000
 
 export const keepTextNodeHosts = ['reader.ttsu.app']

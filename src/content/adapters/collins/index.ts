@@ -94,7 +94,8 @@ export class CollinsDict implements Adapter {
     return html
       .replace(/<(script|style|noscript)[^>]*>.*?<\/\1>/g, '')
       .replaceAll(`href="${this.apiBase}`, `data-href="${this.apiBase}`)
-      .replaceAll('<a ', '<a target="_blank"')
+      .replaceAll('<a href="">', '<a href="#">')
+      .replaceAll('<a ', '<a target="_blank" ')
       .replaceAll('src="/', `src="${this.host}/`)
       .replaceAll('href="/', `href="${this.host}/`)
   }

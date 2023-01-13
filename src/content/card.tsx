@@ -83,6 +83,13 @@ export const WhCard = customElement('wh-card', () => {
       return false
     }
 
+    if (node.tagName === 'A' && node.getAttribute('href') === '#') {
+      e.stopImmediatePropagation()
+      e.preventDefault()
+      getCardNode().querySelector('.dict_container')!.scrollTop = 0
+      return false
+    }
+
     if (node.classList.contains('history_back') || node.parentElement?.classList.contains('history_back')) {
       e.stopImmediatePropagation()
       inDirecting = true

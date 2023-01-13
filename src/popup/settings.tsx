@@ -25,7 +25,7 @@ export const Settings = () => {
     <div class={styles.container}>
       <section>
         <h4>Color Setting:</h4>
-        <div class={styles.colorInputs}>
+        <div class={styles.section_item}>
           <div>
             <label>Unknown:</label>
             <input type="color" data-index="0" value={colors()[0]} oninput={onColorChange} />
@@ -38,19 +38,20 @@ export const Settings = () => {
       </section>
       <section>
         <h4>Max highlight count:</h4>
-        <div class={styles.colorInputs}>
+        <div class={styles.section_item}>
           <div>
-            <label>max:</label>
             <input type="number" min={1} value={maxHighlight()} oninput={onMaxChange} />
           </div>
         </div>
       </section>
       <section>
         <h4>Backup:</h4>
-        <div class={styles.backup}>
-          <a onclick={onDirectToOption} href="#">
-            Go to backup ↗
-          </a>
+        <div class={styles.section_item}>
+          <div>
+            <a onclick={onDirectToOption} href="#">
+              Go to backup ↗
+            </a>
+          </div>
         </div>
       </section>
     </div>
