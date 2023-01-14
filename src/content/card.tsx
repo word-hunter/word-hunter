@@ -127,6 +127,29 @@ export const WhCard = customElement('wh-card', () => {
     }
   }
 
+  document.addEventListener('keydown', (e: KeyboardEvent) => {
+    const cardNode = getCardNode()
+    const container = cardNode.querySelector('.dict_container')!
+    if (cardNode.classList.contains('card_visible') && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      const sections = container.querySelectorAll(dictAdapter.sectionSelector) as NodeListOf<HTMLElement>
+      const rootMargin = 30
+      const firstInViewportIndex = Array.from(sections).findIndex(s => {
+        return s.offsetTop > container.scrollTop
+      })
+      if (e.key === 'ArrowUp') {
+        if (firstInViewportIndex > 0) {
+          container.scrollTop = sections[firstInViewportIndex - 1].offsetTop - rootMargin
+        }
+      }
+      if (e.key === 'ArrowDown') {
+        if (firstInViewportIndex < sections.length - 1) {
+          container.scrollTop = sections[firstInViewportIndex + 1].offsetTop - rootMargin
+        }
+      }
+      e.preventDefault()
+    }
+  })
+
   return (
     <div class="word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
       <div class="toolbar">
@@ -134,11 +157,9 @@ export const WhCard = customElement('wh-card', () => {
           <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
             <img src={chrome.runtime.getURL('icons/checkmark.png')} alt="ok" />
           </button>
-          <Show when={dictHistory().length <= 1}>
-            <button onclick={onAddContext} disabled={inWordContexts()} title="save context">
-              <img src={chrome.runtime.getURL(!inWordContexts() ? 'icons/save.png' : 'icons/saved.png')} alt="save" />
-            </button>
-          </Show>
+          <button onclick={onAddContext} disabled={inWordContexts() || dictHistory().length > 1} title="save context">
+            <img src={chrome.runtime.getURL(!inWordContexts() ? 'icons/save.png' : 'icons/saved.png')} alt="save" />
+          </button>
         </div>
         <div>
           <a target="_blank" href={`https://www.collinsdictionary.com/dictionary/english/${curWord()}`}>
@@ -146,12 +167,12 @@ export const WhCard = customElement('wh-card', () => {
           </a>
         </div>
         <div>
-          <a onClick={goYouGlish} title="youglish">
+          <button onClick={goYouGlish} title="youglish">
             <img src={chrome.runtime.getURL('icons/youtube-play.png')} alt="youglish" />
-          </a>
-          <a classList={{ history_back: true, disabled: dictHistory().length < 2 }} title="back">
+          </button>
+          <button class="history_back" disabled={dictHistory().length < 2} title="back">
             <img src={chrome.runtime.getURL('icons/undo.png')} alt="back" />
-          </a>
+          </button>
         </div>
       </div>
       <div class="dict_container">
@@ -222,7 +243,7 @@ function ContextList(props: { contexts: WordContext[] }) {
         {(context: WordContext) => {
           return (
             <div>
-              <div innerHTML={safeEmphasizeWordInText(context.text, curWord())}></div>
+              <pre innerHTML={safeEmphasizeWordInText(context.text, curWord())}></pre>
               <p>
                 <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
                 <a href={context.url} target="_blank">

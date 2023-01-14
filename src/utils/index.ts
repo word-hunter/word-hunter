@@ -17,28 +17,35 @@ export const getDocumentTitle = () => {
   return document.title.substring(0, 40)
 }
 
-export const getWordContext = (node: HTMLElement): string => {
+export const getWordContext = (node: HTMLElement, originWord?: string): string => {
+  const word = originWord ?? node.textContent ?? ''
   const pNode = node.parentElement
-  const context = pNode?.textContent ?? ''
-  const word = node.textContent ?? ''
 
   const shouldContinue =
-    pNode && (context.trim() === word.trim() || getComputedStyle(pNode).display.startsWith('inline'))
+    pNode &&
+    (getComputedStyle(pNode).display.startsWith('inline') ||
+      // skip class for youtube video captions in one-line, let it expand to multiple lines
+      pNode.classList.contains('caption-visual-line'))
 
   if (shouldContinue) {
-    return getWordContext(pNode)
+    return getWordContext(pNode, word)
   }
 
+  const context = getNodeTextRecursive(pNode as HTMLElement)
+
   if (context.length > 300) {
-    const fragment = context.split(word)
-    const preSentences = fragment[0].split('.')
-    const postSentences = fragment[1].split('.')
-    const preContent = preSentences.length > 1 ? preSentences[preSentences.length - 1] : preSentences[0]
-    const postContent = postSentences.length > 1 ? postSentences[0] + '.' : postSentences[0]
-    const result = preContent + word + postContent
-    return result.length > 300 ? word : result
+    const matched = context.match(new RegExp(`[^.]{0,150}(${word})[^.]{0,150}`))
+    return matched ? matched[0] : context.substring(0, 300)
   }
   return context
+}
+
+function getNodeTextRecursive(node: HTMLElement | CharacterData): string {
+  if (!node) return ''
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    return ([...node.childNodes] as HTMLElement[]).map(getNodeTextRecursive).join(' ').replaceAll('  ', ' ')
+  }
+  return node.textContent ?? ''
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {

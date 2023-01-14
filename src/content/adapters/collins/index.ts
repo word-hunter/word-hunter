@@ -7,6 +7,7 @@ export class CollinsDict implements Adapter {
   readonly name = 'collins'
   readonly host = 'https://www.collinsdictionary.com'
   readonly apiBase = `${this.host}/dictionary/english/`
+  readonly sectionSelector = '.cB'
 
   get style() {
     return dictStyles

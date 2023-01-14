@@ -29,6 +29,7 @@
   }
 
   .dict_container {
+    position: relative;
     padding: 10px 15px;
     max-height: min(600px, 80vh);
     min-height: 200px;
@@ -90,6 +91,18 @@
       background-color: rgba(255, 255, 255, 0.2);
       padding: 15px;
       margin-bottom: 20px;
+
+      pre {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1.6em;
+        font-family: inherit;
+        font-weight: 400;
+        white-space: pre-wrap;
+        word-break: break-word;
+        word-wrap: break-word;
+      }
 
       b {
         color: var(--color-main);
@@ -154,7 +167,8 @@
       background: none;
       cursor: pointer;
       &:disabled {
-        opacity: 0.9;
+        opacity: 0.5;
+        filter: grayscale(80%);
         cursor: not-allowed;
         img:hover {
           transform: scale(1);
@@ -170,26 +184,24 @@
         }
       }
     }
-
     div:nth-child(2) {
       text-align: center;
       color: #333;
       font-weight: bold;
       font-size: 16px;
+      a {
+        text-decoration: none;
+        color: #333;
+        font-family: 'Zilla Slab';
+        font-weight: 600;
+      }
     }
-    a {
-      text-decoration: none;
-      color: #0069c2;
-    }
+
     div:nth-child(3) {
       display: flex;
       justify-content: flex-end;
-      gap: 15px;
       a {
         cursor: pointer;
-        &.disabled {
-          display: none;
-        }
         img {
           width: 25px;
           height: 25px;

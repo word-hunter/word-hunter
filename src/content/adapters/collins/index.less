@@ -275,8 +275,14 @@
     padding-bottom: 5px;
   }
   .quote {
-    color: #000;
+    color: #999;
     font-style: italic;
+    &:has(+ .credits) {
+      color: #333;
+    }
+    & + .credits {
+      color: #999;
+    }
   }
 
   span.sensenum {
