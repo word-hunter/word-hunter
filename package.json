@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@webcomponents/custom-elements": "^1.5.1",
+    "component-register": "0.8.2",
     "solid-element": "^1.6.2",
     "solid-js": "^1.6.2"
   }
