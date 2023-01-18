@@ -9,7 +9,7 @@ async function readDict(): Promise<WordMap> {
 
 function updateBadge(wordsKnown: WordMap) {
   const knownWordsCount = Object.keys(wordsKnown).length
-  chrome.action.setBadgeText({ text: String(knownWordsCount) }, () => {})
+  chrome.action.setBadgeText({ text: knownWordsCount > 0 ? String(knownWordsCount) : '' }, () => {})
   chrome.action.setBadgeBackgroundColor({ color: '#bbb' }, () => {})
 }
 
@@ -108,10 +108,15 @@ async function setup() {
 
   chrome.runtime.onMessage.addListener(msg => {
     if (Messages.app_available in msg) {
+      console.log(msg.app_available)
       chrome.action.setIcon({
         path: {
-          128: msg.app_available ? chrome.runtime.getURL('icon.png') : chrome.runtime.getURL('icons/disabled.png')
+          128: msg.app_available ? chrome.runtime.getURL('icon.png') : chrome.runtime.getURL('icons/blind.png')
         }
+      })
+
+      storage.get([StorageKey.known], result => {
+        updateBadge(msg.app_available ? result[StorageKey.known] || {} : {})
       })
     }
   })
@@ -120,10 +125,6 @@ async function setup() {
 
   storage.set({ dict: dict }, () => {
     console.log('[storage] dict set up')
-  })
-
-  storage.get([StorageKey.known], result => {
-    updateBadge(result[StorageKey.known] || {})
   })
 }
 

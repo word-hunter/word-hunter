@@ -69,6 +69,10 @@ export const WhCard = customElement('wh-card', () => {
     if (audioSrc) {
       e.stopImmediatePropagation()
       getMessagePort().postMessage({ action: Messages.play_audio, audio: audioSrc })
+      node.classList.add('active')
+      setTimeout(() => {
+        node?.classList.remove('active')
+      }, 1000)
       return false
     }
 
@@ -155,10 +159,13 @@ export const WhCard = customElement('wh-card', () => {
       <div class="toolbar">
         <div>
           <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
-            <img src={chrome.runtime.getURL('icons/checkmark.png')} alt="ok" />
+            <img src={chrome.runtime.getURL('icons/checked.png')} alt="ok" />
           </button>
           <button onclick={onAddContext} disabled={inWordContexts() || dictHistory().length > 1} title="save context">
-            <img src={chrome.runtime.getURL(!inWordContexts() ? 'icons/save.png' : 'icons/saved.png')} alt="save" />
+            <img
+              src={chrome.runtime.getURL(!inWordContexts() ? 'icons/filled-star.png' : 'icons/filled-star.png')}
+              alt="save"
+            />
           </button>
         </div>
         <div>
@@ -168,7 +175,7 @@ export const WhCard = customElement('wh-card', () => {
         </div>
         <div>
           <button onClick={goYouGlish} title="youglish">
-            <img src={chrome.runtime.getURL('icons/youtube-play.png')} alt="youglish" />
+            <img src={chrome.runtime.getURL('icons/cinema.png')} alt="youglish" />
           </button>
           <button class="history_back" disabled={dictHistory().length < 2} title="back">
             <img src={chrome.runtime.getURL('icons/undo.png')} alt="back" />
@@ -251,7 +258,7 @@ function ContextList(props: { contexts: WordContext[] }) {
                 </a>
               </p>
               <button title="delete context" onclick={() => deleteContext(context)}>
-                <img src={chrome.runtime.getURL('icons/delete.png')} alt="delete" />
+                <img src={chrome.runtime.getURL('icons/cancel.png')} alt="delete" />
               </button>
             </div>
           )

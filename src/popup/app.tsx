@@ -13,8 +13,6 @@ export const executeScript = (func: () => void) => {
   })
 }
 
-
-
 const onFastModeToggle = () => {
   executeScript(() => window.__toggleZenMode())
 }
@@ -57,7 +55,7 @@ export const App = () => {
           <Statistics />
           <div class={styles.buttons}>
             <button onclick={onFastModeToggle}>
-              ️<img src={chrome.runtime.getURL('icons/quick-mode-on.png')} width="20" height="20" /> Toggle zen mode
+              ️<img src={chrome.runtime.getURL('icons/zen.png')} width="20" height="20" /> Toggle zen mode
             </button>
             <button onclick={onPdfViewer}>
               ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader

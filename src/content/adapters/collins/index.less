@@ -2,7 +2,8 @@
   line-height: 1.6em;
   color: #000;
   --font-bold: 600;
-  --color-main: #c12d30;
+  --color-main: #759fc9;
+  --border-color: rgba(0, 0, 0, 0.3);
   * {
     word-wrap: break-word;
     margin: 0;
@@ -18,12 +19,6 @@
     border-bottom: dashed 1px rgba(0, 0, 0, 0.6);
     &:hover {
       opacity: 0.8;
-    }
-    &.audio_play_button {
-      border-bottom: none;
-      &::before {
-        content: '🔉';
-      }
     }
     &.pronIPASymbol {
       &::before {
@@ -69,7 +64,8 @@
   }
 
   .cB {
-    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
     padding: 15px;
     margin-bottom: 20px;
     -webkit-column-break-inside: avoid;
@@ -136,10 +132,10 @@
       display: none;
     }
     .level {
-      border: 1px solid rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 0, 0, 0.3);
       border-radius: 50%;
       display: inline-block;
-      background-color: #f2928e;
+      background-color: #cfe8fd;
       &.roundRed {
         background-color: var(--color-main);
       }
@@ -275,7 +271,7 @@
     padding-bottom: 5px;
   }
   .quote {
-    color: #999;
+    color: #666;
     font-style: italic;
     &:has(+ .credits) {
       color: #333;
