@@ -86,20 +86,25 @@ body:has(.__zen_mode) {
     font-weight: bold;
     color: rgba(0, 0, 0, 0.4);
     text-align: center;
-    kbd {
-      display: inline-block;
-      margin: 0px 0.1em;
-      padding: 0.1em 0.6em;
-      border-radius: 3px;
-      border: 1px solid rgb(204, 204, 204);
-      color: rgba(0, 0, 0, 0.4);
-      line-height: 1.4;
-      font-family: Arial, Helvetica, sans-serif;
-      -webkit-font-smoothing: unset;
-      background-color: rgb(247, 247, 247);
-      box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #ffffff inset;
-      border-radius: 3px;
-      text-shadow: 0 1px 0 #fff;
+  }
+
+  kbd,
+  button {
+    display: inline-block;
+    margin: 0px 0.1em;
+    padding: 0.1em 0.6em;
+    border-radius: 3px;
+    border: 1px solid rgb(204, 204, 204);
+    color: rgba(0, 0, 0, 0.5);
+    line-height: 1.4;
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: unset;
+    background-color: rgb(247, 247, 247);
+    box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #ffffff inset;
+    border-radius: 3px;
+    text-shadow: 0 1px 0 #fff;
+    &:hover {
+      background-color: rgb(238, 238, 238);
     }
   }
 }
