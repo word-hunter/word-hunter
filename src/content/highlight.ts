@@ -14,11 +14,11 @@ import {
 import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl } from '../utils'
 import { maxHighlight } from '../utils/maxHighlight'
+import { getMessagePort } from './port'
 
 let wordsKnown: WordMap = {}
 let dict: WordMap = {}
 let contexts: ContextMap = {}
-let messagePort: chrome.runtime.Port
 const shouldKeepOriginNode = keepTextNodeHosts.includes(location.hostname)
 
 export const [zenExcludeWords, setZenExcludeWords] = createSignal<string[]>([])
@@ -29,18 +29,11 @@ function getNodeWord(node: HTMLElement | Node | undefined) {
   return (node.textContent ?? '').toLowerCase()
 }
 
-function connectPort() {
-  messagePort = chrome.runtime.connect({ name: 'word-hunter' })
-  messagePort.onDisconnect.addListener(() => {
-    connectPort()
-  })
-}
-
 export function markAsKnown(word: string) {
   if (!wordRegex.test(word)) return
 
   wordsKnown[word] = 0
-  messagePort.postMessage({ action: Messages.set_known, word: word })
+  getMessagePort().postMessage({ action: Messages.set_known, word: word })
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (getNodeWord(node) === word) {
       node.className = classes.known
@@ -64,7 +57,7 @@ export function addContext(word: string, text: string) {
     contexts[word] = [...(contexts[word] ?? []), context]
   }
 
-  messagePort.postMessage({ action: Messages.add_context, word: word, context })
+  getMessagePort().postMessage({ action: Messages.add_context, word: word, context })
   setWordContexts(contexts[word])
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (getNodeWord(node) === word) {
@@ -74,7 +67,7 @@ export function addContext(word: string, text: string) {
 }
 
 export function deleteContext(context: WordContext) {
-  messagePort.postMessage({ action: Messages.delete_context, word: context.word, context })
+  getMessagePort().postMessage({ action: Messages.delete_context, word: context.word, context })
 
   const index = (contexts[context.word] ?? []).findIndex(c => c.text === context.text)
   if (index > -1) {
@@ -103,7 +96,7 @@ export function markAsAllKnown() {
     }
   })
 
-  messagePort.postMessage({ action: Messages.set_all_known, words })
+  getMessagePort().postMessage({ action: Messages.set_all_known, words })
   toMarkedNotes.forEach(node => {
     node.className = classes.known
   })
@@ -277,16 +270,11 @@ export function isInDict(word: string) {
   return word?.toLowerCase() in dict
 }
 
-export function getMessagePort() {
-  return messagePort
-}
-
 export function getWordContexts(word: string) {
   return contexts[word] ?? []
 }
 
 export function init() {
-  connectPort()
   readStorageAndHighlight()
   observeDomChange()
 }

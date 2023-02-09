@@ -60,12 +60,6 @@
   }
 
   #word_dict {
-    .no_result {
-      display: grid;
-      place-content: center;
-      height: 200px;
-    }
-
     .loading {
       display: grid;
       place-content: center;
@@ -74,6 +68,23 @@
         stroke: var(--color-main);
         fill: #cfe8fd;
       }
+    }
+  }
+
+  .no_result,
+  .no-contexts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 200px;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    font-size: 14px;
+    > img {
+      width: 64px;
+      height: 64px;
+      opacity: 0.8;
     }
   }
 
@@ -215,6 +226,35 @@
             transform: scale(1.2);
           }
         }
+      }
+    }
+  }
+
+  .tabs {
+    position: relative;
+    z-index: 2;
+    padding-bottom: 10px;
+    margin-bottom: -10px;
+    background-color: #fff;
+    > div {
+      padding: 5px 0px 0 0px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background-color: #ececeb;
+    }
+    button {
+      padding: 5px 0;
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      color: #999;
+      background-color: transparent;
+      clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
+      &.selected {
+        background-color: #fff;
+        color: var(--color-main);
+        font-weight: bold;
       }
     }
   }

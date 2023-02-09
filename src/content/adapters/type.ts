@@ -6,6 +6,9 @@ export interface Adapter {
 
   get style(): string
   lookup(word: string): Promise<string>
+  getPageUrl: (word: string) => string
   getWordByHref(href: string): string
   cspViolationHandler?: (e: SecurityPolicyViolationEvent, root: HTMLElement) => void
+  bindRootClickEvent?: (root: HTMLElement) => void
+  unbindRootClickEvent?: () => void
 }

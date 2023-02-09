@@ -1,4 +1,4 @@
-import { createResource, createEffect, Switch, Match, onCleanup } from 'solid-js'
+import { createResource, createEffect, Switch, Match, onCleanup, onMount } from 'solid-js'
 import { Adapter } from './adapters'
 
 export function Dict(props: { word: string; dictAdapter: Adapter; onSettle: () => void }) {
@@ -20,11 +20,22 @@ export function Dict(props: { word: string; dictAdapter: Adapter; onSettle: () =
   document.addEventListener('securitypolicyviolation', cspHandler)
   onCleanup(() => document.removeEventListener('securitypolicyviolation', cspHandler))
 
+  onMount(() => {
+    dictAdapter.bindRootClickEvent?.(root)
+  })
+
+  onCleanup(() => {
+    dictAdapter.unbindRootClickEvent?.()
+  })
+
   return (
     <div id="word_dict" ref={root!}>
       <Switch fallback={<Loading />}>
         <Match when={!def.loading && (def.error || !def())}>
-          <div class="no_result">😭 not found definition</div>
+          <div class="no_result">
+            <img src={chrome.runtime.getURL('icons/robot.png')} alt="no definition" />
+            not found definition
+          </div>
         </Match>
         <Match when={!def.loading && def()}>
           <div class="__dict_container" innerHTML={def()}></div>

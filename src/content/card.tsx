@@ -3,7 +3,7 @@ import { walk } from '../utils/_hot'
 
 import './index.less'
 import cardStyles from './card.less?inline'
-import { createSignal, Show, For, batch, onMount } from 'solid-js'
+import { createSignal, Show, For, Switch, Match, batch, onMount } from 'solid-js'
 import { customElement } from 'solid-element'
 import { classes, Messages, WordContext } from '../constant'
 import {
@@ -16,11 +16,11 @@ import {
   getWordContexts,
   wordContexts,
   setWordContexts,
-  getMessagePort,
   isWordKnownAble,
   zenExcludeWords,
   setZenExcludeWords
 } from './highlight'
+import { getMessagePort } from './port'
 import { Dict } from './dict'
 import { adapters } from './adapters'
 import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain } from '../utils'
@@ -36,9 +36,11 @@ const [dictHistory, setDictHistory] = createSignal<string[]>([])
 const [zenMode, setZenMode] = createSignal(false)
 const [zenModeWords, setZenModeWords] = createSignal<string[]>([])
 const [curContextText, setCurContextText] = createSignal('')
+const [tabIndex, setTabIndex] = createSignal(0)
 
 export const WhCard = customElement('wh-card', () => {
-  const dictAdapter = adapters['collins']
+  const adapterName = () => (tabIndex() === 1 ? 'google' : 'collins')
+  const getDictAdapter = () => adapters[adapterName()]
 
   onMount(() => {
     readBlacklist().then(blacklist => {
@@ -61,6 +63,7 @@ export const WhCard = customElement('wh-card', () => {
     e.preventDefault()
     const word = curWord()
     addContext(word, curContextText())
+    setTabIndex(2)
   }
 
   const onCardClick = (e: MouseEvent) => {
@@ -78,7 +81,7 @@ export const WhCard = customElement('wh-card', () => {
 
     if (node.tagName === 'A' && node.dataset.href) {
       e.stopImmediatePropagation()
-      const word = dictAdapter.getWordByHref(node.dataset.href)
+      const word = getDictAdapter().getWordByHref(node.dataset.href)
       if (word === curWord()) return false
 
       inDirecting = true
@@ -135,7 +138,7 @@ export const WhCard = customElement('wh-card', () => {
     const cardNode = getCardNode()
     const container = cardNode.querySelector('.dict_container')!
     if (cardNode.classList.contains('card_visible') && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-      const sections = container.querySelectorAll(dictAdapter.sectionSelector) as NodeListOf<HTMLElement>
+      const sections = container.querySelectorAll(getDictAdapter().sectionSelector) as NodeListOf<HTMLElement>
       const rootMargin = 30
       const firstInViewportIndex = Array.from(sections).findIndex(s => {
         return s.offsetTop > container.scrollTop
@@ -169,7 +172,7 @@ export const WhCard = customElement('wh-card', () => {
           </button>
         </div>
         <div>
-          <a target="_blank" href={`https://www.collinsdictionary.com/dictionary/english/${curWord()}`}>
+          <a target="_blank" href={getDictAdapter().getPageUrl(curWord())}>
             {curWord()}
           </a>
         </div>
@@ -182,14 +185,36 @@ export const WhCard = customElement('wh-card', () => {
           </button>
         </div>
       </div>
+      <div class="tabs">
+        <div>
+          <button onclick={() => setTabIndex(0)} classList={{ selected: tabIndex() === 0 }}>
+            Collins
+          </button>
+          <button onclick={() => setTabIndex(1)} classList={{ selected: tabIndex() === 1 }}>
+            Google
+          </button>
+          <button onclick={() => setTabIndex(2)} classList={{ selected: tabIndex() === 2 }}>
+            Contexts
+          </button>
+        </div>
+      </div>
       <div class="dict_container">
         <Show when={curWord()}>
-          <ContextList contexts={wordContexts()}></ContextList>
-          <Dict word={curWord()} dictAdapter={dictAdapter} onSettle={onDictSettle} />
+          <Switch fallback={null}>
+            <Match when={tabIndex() === 2}>
+              <ContextList contexts={wordContexts()}></ContextList>
+            </Match>
+            <Match when={tabIndex() === 0}>
+              <Dict word={curWord()} dictAdapter={getDictAdapter()} onSettle={onDictSettle} />
+            </Match>
+            <Match when={tabIndex() === 1}>
+              <Dict word={curWord()} dictAdapter={getDictAdapter()} onSettle={onDictSettle} />
+            </Match>
+          </Switch>
         </Show>
       </div>
       <style>{cardStyles}</style>
-      <style>{dictAdapter.style}</style>
+      <style>{getDictAdapter().style}</style>
     </div>
   )
 })
@@ -245,26 +270,36 @@ export function ZenMode() {
 
 function ContextList(props: { contexts: WordContext[] }) {
   return (
-    <div class="contexts">
-      <For each={props.contexts.reverse()}>
-        {(context: WordContext) => {
-          return (
-            <div>
-              <pre innerHTML={safeEmphasizeWordInText(context.text, curWord())}></pre>
-              <p>
-                <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
-                <a href={context.url} target="_blank">
-                  {context.title}
-                </a>
-              </p>
-              <button title="delete context" onclick={() => deleteContext(context)}>
-                <img src={chrome.runtime.getURL('icons/cancel.png')} alt="delete" />
-              </button>
-            </div>
-          )
-        }}
-      </For>
-    </div>
+    <Show
+      when={props.contexts.length > 0}
+      fallback={
+        <div class="no-contexts">
+          <img src={chrome.runtime.getURL('icons/robot.png')} alt="no contexts" />
+          no contexts
+        </div>
+      }
+    >
+      <div class="contexts">
+        <For each={props.contexts.reverse()}>
+          {(context: WordContext) => {
+            return (
+              <div>
+                <pre innerHTML={safeEmphasizeWordInText(context.text, curWord())}></pre>
+                <p>
+                  <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
+                  <a href={context.url} target="_blank">
+                    {context.title}
+                  </a>
+                </p>
+                <button title="delete context" onclick={() => deleteContext(context)}>
+                  <img src={chrome.runtime.getURL('icons/cancel.png')} alt="delete" />
+                </button>
+              </div>
+            )
+          }}
+        </For>
+      </div>
+    </Show>
   )
 }
 

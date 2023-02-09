@@ -101,6 +101,14 @@ async function setup() {
               url: chrome.runtime.getURL('youglish.html') + `?word=${encodeURIComponent(word)}`
             })
             break
+          case Messages.fetch_html:
+            const url = msg.url
+            const htmlRes = await fetch(url, {
+              mode: 'no-cors',
+              credentials: 'include'
+            })
+            const text = await htmlRes.text()
+            port.postMessage({ [Messages.fetch_html]: text, url })
         }
       })
     }
@@ -108,7 +116,6 @@ async function setup() {
 
   chrome.runtime.onMessage.addListener(msg => {
     if (Messages.app_available in msg) {
-      console.log(msg.app_available)
       chrome.action.setIcon({
         path: {
           128: msg.app_available ? chrome.runtime.getURL('icon.png') : chrome.runtime.getURL('icons/blind.png')
