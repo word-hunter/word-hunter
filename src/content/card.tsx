@@ -355,6 +355,9 @@ function hidePopup(e: Event) {
 
 function showPopup() {
   const cardNode = getCardNode()
+  if (tabIndex() === 2) {
+    setTabIndex(0)
+  }
   cardNode.classList.remove('card_hidden')
   cardNode.classList.add('card_visible')
 }
