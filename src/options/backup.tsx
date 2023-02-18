@@ -27,26 +27,16 @@ export const Backup = () => {
           return
         }
 
-        chrome.storage.local.get([StorageKey.known, StorageKey.context, StorageKey.blacklist], result => {
-          const known = result[StorageKey.known] || {}
-          const contexts = result.context || {}
-          const blacklist = result.blacklist || []
-
-          const newKnown = { ...known, ...json[StorageKey.known] }
-          const newContext = { ...contexts, ...(json[StorageKey.context] ?? {}) }
-          const newBlacklist = [...new Set([...blacklist, ...(json[StorageKey.blacklist] ?? [])])]
-
-          chrome.storage.local.set(
-            {
-              [StorageKey.context]: newContext,
-              [StorageKey.known]: newKnown,
-              [StorageKey.blacklist]: newBlacklist
-            },
-            () => {
-              alert('restore success ✅')
-            }
-          )
-        })
+        chrome.storage.local.set(
+          {
+            [StorageKey.context]: json[StorageKey.context] ?? {},
+            [StorageKey.known]: json[StorageKey.known] ?? {},
+            [StorageKey.blacklist]: json[StorageKey.blacklist] ?? []
+          },
+          () => {
+            alert('restore success ✅')
+          }
+        )
       } catch (e) {
         alert('invalid file ❗️')
       }
