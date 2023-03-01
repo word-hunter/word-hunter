@@ -109,12 +109,6 @@ function getTextNodes(node: Node): CharacterData[] {
     return []
   }
 
-  for (const selector of invalidSelectors) {
-    if (node.nodeType === Node.ELEMENT_NODE && (node as Element).closest(selector)) {
-      return []
-    }
-  }
-
   const textNodes: CharacterData[] = []
   for (const childNode of node.childNodes) {
     textNodes.push(...getTextNodes(childNode))
@@ -180,6 +174,12 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
+
+    for (const selector of invalidSelectors) {
+      if (node.parentElement?.closest(selector)) {
+        return
+      }
+    }
 
     highlightTextNode(node, dict, wordsKnown, contexts)
   }

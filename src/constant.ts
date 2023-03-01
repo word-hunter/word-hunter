@@ -64,7 +64,7 @@ export const invalidTags = [
   'OBJECT'
 ]
 
-export const invalidSelectors = ['.monaco-editor', '.CodeMirror-code']
+export const invalidSelectors = ['.monaco-editor', '.CodeMirror-code', '#video-title']
 
 export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
