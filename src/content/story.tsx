@@ -12,18 +12,16 @@ export function Story() {
     <Show when={visible()}>
       <div class="wh-story">
         <div class="toolbar">
-          <Show when={!loading()}>
-            <img
-              src={chrome.runtime.getURL('icons/synchronize.png')}
-              alt="refresh"
-              title="refresh"
-              tabIndex="0"
-              role="button"
-              onclick={() => {
-                createGPTStory(true)
-              }}
-            />
-          </Show>
+          <img
+            src={chrome.runtime.getURL('icons/synchronize.png')}
+            alt="refresh"
+            title="refresh"
+            tabIndex="0"
+            role="button"
+            onclick={() => {
+              createGPTStory(true)
+            }}
+          />
           <img
             src={chrome.runtime.getURL('icons/cancel.png')}
             alt="close"
