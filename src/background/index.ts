@@ -1,4 +1,5 @@
 import { Messages, WordMap, WordContext, StorageKey } from '../constant'
+import { createStory } from '../utils/story'
 
 async function readDict(): Promise<WordMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -109,6 +110,10 @@ async function setup() {
             })
             const text = await htmlRes.text()
             port.postMessage({ [Messages.fetch_html]: text, url })
+            break
+          case Messages.create_story:
+            const story = await createStory()
+            port.postMessage({ [Messages.create_story]: story })
         }
       })
     }

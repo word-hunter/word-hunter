@@ -37,7 +37,8 @@ export enum Messages {
   'app_available' = 'app_available',
   'play_audio' = 'play_audio',
   'open_youglish' = 'open_youglish',
-  'fetch_html' = 'fetch_html'
+  'fetch_html' = 'fetch_html',
+  'create_story' = 'create_story'
 }
 
 export const invalidTags = [

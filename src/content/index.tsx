@@ -1,6 +1,7 @@
 import '@webcomponents/custom-elements'
 import { render } from 'solid-js/web'
 import { ZenMode } from './card'
+import { Story } from './story'
 import { invertHexColor } from '../utils'
 import { colors } from '../utils/color'
 
@@ -17,6 +18,7 @@ const App = () => {
     <>
       <wh-card />
       <ZenMode />
+      <Story />
       <style>
         {`
           :root {

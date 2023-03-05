@@ -20,7 +20,7 @@ import {
   zenExcludeWords,
   setZenExcludeWords
 } from './highlight'
-import { getMessagePort } from './port'
+import { getMessagePort } from '../utils/port'
 import { Dict } from './dict'
 import { adapters } from './adapters'
 import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain } from '../utils'

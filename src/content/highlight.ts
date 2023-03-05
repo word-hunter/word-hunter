@@ -14,7 +14,7 @@ import {
 import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl } from '../utils'
 import { maxHighlight } from '../utils/maxHighlight'
-import { getMessagePort } from './port'
+import { getMessagePort } from '../utils/port'
 
 let wordsKnown: WordMap = {}
 let dict: WordMap = {}
@@ -239,7 +239,6 @@ function getHighlightCount(isVisible?: boolean) {
 }
 
 function getPageStatistics() {
-  console.time('getPageStatistics')
   const textNodes = Array.from(getTextNodes(document.body))
   const splitWordReg = /[\s\.,|?|!\(\)\[\]\{\}\/\\]+/
   const words: string[] = []
@@ -255,7 +254,6 @@ function getPageStatistics() {
   })
   const wordCount = new Set(words).size
   const unknownCount = getHighlightCount()
-  console.timeEnd('getPageStatistics')
   return [unknownCount, wordCount] as const
 }
 

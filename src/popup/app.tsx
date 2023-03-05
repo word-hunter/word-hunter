@@ -41,6 +41,11 @@ export const App = () => {
     })
   })
 
+  const onGPTStory = () => {
+    executeScript(() => window.__createGPTStory())
+    window.close()
+  }
+
   return (
     <div class={styles.page}>
       <section data-active={index() == 0 ? 'true' : 'false'}>
@@ -54,6 +59,9 @@ export const App = () => {
         <div>
           <Statistics />
           <div class={styles.buttons}>
+            <button onclick={onGPTStory}>
+              ️<img src={chrome.runtime.getURL('icons/harry-potter.png')} width="20" height="20" /> GPT Story
+            </button>
             <button onclick={onFastModeToggle}>
               ️<img src={chrome.runtime.getURL('icons/zen.png')} width="20" height="20" /> Toggle zen mode
             </button>

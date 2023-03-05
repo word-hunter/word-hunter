@@ -8,4 +8,5 @@ declare interface Window {
   __toggleBlackList: () => void
   __getPageStatistics: () => readonly [number, number]
   __setMaxHighlight: () => void
+  __createGPTStory: () => void
 }
