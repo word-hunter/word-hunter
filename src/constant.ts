@@ -23,10 +23,12 @@ export const classes = {
 }
 
 export enum StorageKey {
+  'colors' = 'colors',
   'known' = 'known',
   'context' = 'context',
   'blacklist' = 'blacklist',
-  'maxHighlight' = 'maxHighlight'
+  'maxHighlight' = 'maxHighlight',
+  'openaiKey' = 'openaiKey'
 }
 
 export enum Messages {
@@ -38,7 +40,8 @@ export enum Messages {
   'play_audio' = 'play_audio',
   'open_youglish' = 'open_youglish',
   'fetch_html' = 'fetch_html',
-  'create_story' = 'create_story'
+  'create_story' = 'create_story',
+  'ai_explain' = 'ai_explain'
 }
 
 export const invalidTags = [

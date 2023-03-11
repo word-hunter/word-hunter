@@ -1,9 +1,20 @@
 import { createResource, createEffect, Switch, Match, onCleanup, onMount } from 'solid-js'
 import { Adapter } from './adapters'
 
-export function Dict(props: { word: string; dictAdapter: Adapter; onSettle: () => void }) {
+type Props = {
+  word: string
+  contextText?: string
+  dictAdapter: Adapter
+  onSettle: () => void
+}
+
+export function Dict(props: Props) {
   const { dictAdapter } = props
-  const [def] = createResource(() => props.word, dictAdapter.lookup.bind(dictAdapter))
+
+  const [def] = createResource(() => {
+    return { word: props.word, text: props.contextText }
+  }, dictAdapter.lookup.bind(dictAdapter))
+
   let root: HTMLDivElement
 
   createEffect(() => {

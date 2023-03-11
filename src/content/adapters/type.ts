@@ -5,7 +5,7 @@ export interface Adapter {
   readonly sectionSelector: string
 
   get style(): string
-  lookup(word: string): Promise<string>
+  lookup(context: { word: string; text?: string }): Promise<string>
   getPageUrl: (word: string) => string
   getWordByHref(href: string): string
   cspViolationHandler?: (e: SecurityPolicyViolationEvent, root: HTMLElement) => void

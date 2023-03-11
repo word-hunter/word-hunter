@@ -10,13 +10,13 @@ export class GoogleDict implements Adapter {
   readonly name = 'google'
   readonly host = 'https://www.google.com'
   readonly apiBase = `${this.host}/search`
-  readonly sectionSelector = '.cB'
+  readonly sectionSelector = ''
 
   get style() {
     return dictStyles
   }
 
-  async lookup(word: string) {
+  async lookup({ word }: { word: string; text?: string }) {
     if (cache[word]) return Promise.resolve(cache[word])
     try {
       const html = await this.fetch(word)

@@ -39,7 +39,7 @@ const [curContextText, setCurContextText] = createSignal('')
 const [tabIndex, setTabIndex] = createSignal(0)
 
 export const WhCard = customElement('wh-card', () => {
-  const adapterName = () => (tabIndex() === 1 ? 'google' : 'collins')
+  const adapterName = () => (Object.keys(adapters)[tabIndex()] as keyof typeof adapters) ?? 'collins'
   const getDictAdapter = () => adapters[adapterName()]
 
   onMount(() => {
@@ -63,7 +63,7 @@ export const WhCard = customElement('wh-card', () => {
     e.preventDefault()
     const word = curWord()
     addContext(word, curContextText())
-    setTabIndex(2)
+    setTabIndex(3)
   }
 
   const onCardClick = (e: MouseEvent) => {
@@ -138,7 +138,9 @@ export const WhCard = customElement('wh-card', () => {
     const cardNode = getCardNode()
     const container = cardNode.querySelector('.dict_container')!
     if (cardNode.classList.contains('card_visible') && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-      const sections = container.querySelectorAll(getDictAdapter().sectionSelector) as NodeListOf<HTMLElement>
+      const selector = getDictAdapter().sectionSelector
+      if (!selector) return
+      const sections = container.querySelectorAll(selector) as NodeListOf<HTMLElement>
       const rootMargin = 30
       const firstInViewportIndex = Array.from(sections).findIndex(s => {
         return s.offsetTop > container.scrollTop
@@ -194,6 +196,9 @@ export const WhCard = customElement('wh-card', () => {
             Google
           </button>
           <button onclick={() => setTabIndex(2)} classList={{ selected: tabIndex() === 2 }}>
+            ChatGPT
+          </button>
+          <button onclick={() => setTabIndex(3)} classList={{ selected: tabIndex() === 3 }}>
             Contexts
           </button>
         </div>
@@ -201,7 +206,7 @@ export const WhCard = customElement('wh-card', () => {
       <div class="dict_container">
         <Show when={curWord()}>
           <Switch fallback={null}>
-            <Match when={tabIndex() === 2}>
+            <Match when={tabIndex() === 3}>
               <ContextList contexts={wordContexts()}></ContextList>
             </Match>
             <Match when={tabIndex() === 0}>
@@ -209,6 +214,14 @@ export const WhCard = customElement('wh-card', () => {
             </Match>
             <Match when={tabIndex() === 1}>
               <Dict word={curWord()} dictAdapter={getDictAdapter()} onSettle={onDictSettle} />
+            </Match>
+            <Match when={tabIndex() === 2}>
+              <Dict
+                word={curWord()}
+                contextText={curContextText()}
+                dictAdapter={getDictAdapter()}
+                onSettle={onDictSettle}
+              />
             </Match>
           </Switch>
         </Show>
@@ -355,7 +368,7 @@ function hidePopup(e: Event) {
 
 function showPopup() {
   const cardNode = getCardNode()
-  if (tabIndex() === 2) {
+  if (tabIndex() === 3) {
     setTabIndex(0)
   }
   cardNode.classList.remove('card_hidden')

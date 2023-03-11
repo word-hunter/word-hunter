@@ -1,6 +1,7 @@
 import styles from './settings.module.less'
 import { colors, updateColors } from '../utils/color'
 import { maxHighlight, updateMaxHighlight } from '../utils/maxHighlight'
+import { apiKey, setApiKey } from '../utils/openai'
 
 export const Settings = () => {
   const onColorChange = (e: Event) => {
@@ -21,6 +22,11 @@ export const Settings = () => {
     return false
   }
 
+  const onApiKeyChange = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    setApiKey(target.value)
+  }
+
   return (
     <div class={styles.container}>
       <section>
@@ -37,10 +43,10 @@ export const Settings = () => {
         </div>
       </section>
       <section>
-        <h4>Max highlight count:</h4>
+        <h4>OpenAI-APIKey:</h4>
         <div class={styles.section_item}>
           <div>
-            <input type="number" min={1} value={maxHighlight()} oninput={onMaxChange} />
+            <input type="text" value={apiKey()} oninput={onApiKeyChange} />
           </div>
         </div>
       </section>
@@ -49,7 +55,7 @@ export const Settings = () => {
         <div class={styles.section_item}>
           <div>
             <a onclick={onDirectToOption} href="#">
-              Go to backup ↗
+              more settings ↗
             </a>
           </div>
         </div>

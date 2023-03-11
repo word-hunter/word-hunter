@@ -1,5 +1,5 @@
 import { Messages, WordMap, WordContext, StorageKey } from '../constant'
-import { createStory } from '../utils/story'
+import { createStory, explainWord } from '../utils/openai'
 
 async function readDict(): Promise<WordMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -108,12 +108,17 @@ async function setup() {
               mode: 'no-cors',
               credentials: 'include'
             })
-            const text = await htmlRes.text()
-            port.postMessage({ [Messages.fetch_html]: text, url })
+            const htmlText = await htmlRes.text()
+            port.postMessage({ [Messages.fetch_html]: htmlText, url })
             break
           case Messages.create_story:
             const story = await createStory()
             port.postMessage({ [Messages.create_story]: story })
+            break
+          case Messages.ai_explain:
+            const { text } = msg
+            const explain = await explainWord(word, text)
+            port.postMessage({ [Messages.ai_explain]: explain, word, text })
         }
       })
     }

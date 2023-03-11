@@ -14,7 +14,7 @@ export class CollinsDict implements Adapter {
     return dictStyles
   }
 
-  async lookup(word: string) {
+  async lookup({ word }: { word: string; text?: string }) {
     if (cache[word]) return Promise.resolve(cache[word])
     try {
       const doc = await this.fetchDocument(word)
