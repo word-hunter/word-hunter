@@ -32,10 +32,11 @@ export const getWordContext = (node: HTMLElement, originWord?: string): string =
   }
 
   const context = getNodeTextRecursive(pNode as HTMLElement)
+  const maxContextLength = 400
 
-  if (context.length > 300) {
-    const matched = context.match(new RegExp(`[^.]{0,150}(${word})[^.]{0,150}`))
-    return matched ? matched[0] : context.substring(0, 300)
+  if (context.length > maxContextLength) {
+    const matched = context.match(new RegExp(`[^.]{0,${maxContextLength}}(${word})[^.]{0,${maxContextLength}}`))
+    return matched ? matched[0] : context.substring(0, maxContextLength)
   }
   return context
 }

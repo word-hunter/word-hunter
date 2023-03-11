@@ -1,6 +1,5 @@
 import dictStyles from './index.less?inline'
 import type { Adapter } from '../type'
-import { fetchText } from '../fetch'
 
 const cache: Record<string, string> = {}
 
@@ -29,7 +28,8 @@ export class CollinsDict implements Adapter {
 
   private async fetchDocument(word: string) {
     const url = this.getPageUrl(word)
-    const html = await fetchText(url)
+    const res = await fetch(url)
+    const html = await res.text()
     const doc = new DOMParser().parseFromString(html, 'text/html')
     return doc
   }
