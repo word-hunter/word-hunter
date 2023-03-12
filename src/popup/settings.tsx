@@ -1,6 +1,5 @@
 import styles from './settings.module.less'
 import { colors, updateColors } from '../utils/color'
-import { maxHighlight, updateMaxHighlight } from '../utils/maxHighlight'
 import { apiKey, setApiKey } from '../utils/openai'
 
 export const Settings = () => {
@@ -9,12 +8,6 @@ export const Settings = () => {
     const newColors = [...colors()]
     newColors[Number(target.dataset.index)] = target?.value
     updateColors(newColors)
-  }
-
-  const onMaxChange = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const newMax = Number(target.value)
-    updateMaxHighlight(newMax)
   }
 
   const onDirectToOption = () => {
@@ -51,7 +44,7 @@ export const Settings = () => {
         </div>
       </section>
       <section>
-        <h4>Backup:</h4>
+        <h4>Others:</h4>
         <div class={styles.section_item}>
           <div>
             <a onclick={onDirectToOption} href="#">

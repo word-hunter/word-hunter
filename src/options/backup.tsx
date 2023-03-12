@@ -74,7 +74,8 @@ export const Backup = () => {
   }
 
   return (
-    <div class={styles.container}>
+    <section class={styles.container}>
+      <h2>backup</h2>
       <dialog id="restoreDialog" ref={dialogRef!}>
         <form method="dialog">
           <div style={{ 'margin-bottom': '20px' }}>
@@ -91,6 +92,6 @@ export const Backup = () => {
         ️<img src={chrome.runtime.getURL('icons/download.png')} width="40" height="40" alt="backup" />
         backup
       </button>
-    </div>
+    </section>
   )
 }

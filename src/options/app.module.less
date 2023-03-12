@@ -6,6 +6,15 @@
 }
 
 .page {
+  width: clamp(300px, 50%, 600px);
+  margin: 0 auto;
   padding: 0 20px;
   font-family: system-ui;
+  > section {
+    padding: 20px;
+    h2 {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    }
+  }
 }
