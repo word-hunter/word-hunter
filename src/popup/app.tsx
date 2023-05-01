@@ -59,9 +59,9 @@ export const App = () => {
         <div>
           <Statistics />
           <div class={styles.buttons}>
-            <button onclick={onGPTStory}>
+            {/* <button onclick={onGPTStory}>
               ️<img src={chrome.runtime.getURL('icons/harry-potter.png')} width="20" height="20" /> GPT Story
-            </button>
+            </button> */}
             <button onclick={onFastModeToggle}>
               ️<img src={chrome.runtime.getURL('icons/zen.png')} width="20" height="20" /> Toggle zen mode
             </button>

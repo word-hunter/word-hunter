@@ -1,7 +1,7 @@
 {
   "name": "Word Hunter",
   "description": "Discover new words you don't know",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "manifest_version": 3,
   "icons": {
     "16": "icon.png",

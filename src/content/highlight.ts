@@ -174,6 +174,9 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
+    if (invalidTags.includes(node.parentNode?.nodeName ?? '')) {
+      continue
+    }
 
     for (const selector of invalidSelectors) {
       if (node.parentElement?.closest(selector)) {

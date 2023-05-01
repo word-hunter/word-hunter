@@ -28,7 +28,8 @@ export enum StorageKey {
   'context' = 'context',
   'blacklist' = 'blacklist',
   'maxHighlight' = 'maxHighlight',
-  'openaiKey' = 'openaiKey'
+  'openaiKey' = 'openaiKey',
+  'dictTabs' = 'dictTabs'
 }
 
 export enum Messages {

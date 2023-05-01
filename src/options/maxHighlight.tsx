@@ -1,4 +1,3 @@
-import styles from './backup.module.less'
 import { maxHighlight, updateMaxHighlight } from '../utils/maxHighlight'
 
 export const MaxHighlightSetting = () => {
@@ -11,7 +10,7 @@ export const MaxHighlightSetting = () => {
   return (
     <section>
       <h2>Max highlight count:</h2>
-      <div class={styles.section_item}>
+      <div>
         <div>
           <input type="number" min={1} value={maxHighlight()} oninput={onMaxChange} />
         </div>

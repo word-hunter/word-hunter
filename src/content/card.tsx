@@ -22,9 +22,10 @@ import {
 } from './highlight'
 import { getMessagePort } from '../utils/port'
 import { Dict } from './dict'
-import { adapters } from './adapters'
+import { adapters, AdapterKey } from './adapters'
 import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain } from '../utils'
 import { readBlacklist } from '../utils/blacklist'
+import { dictTabs } from '../utils/dictTabs'
 
 let timerShowRef: number
 let timerHideRef: number
@@ -39,8 +40,10 @@ const [curContextText, setCurContextText] = createSignal('')
 const [tabIndex, setTabIndex] = createSignal(0)
 
 export const WhCard = customElement('wh-card', () => {
-  const adapterName = () => (Object.keys(adapters)[tabIndex()] as keyof typeof adapters) ?? 'collins'
+  const availableDicts = () => Object.keys(dictTabs()).filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
+  const adapterName = () => (availableDicts()[tabIndex()] ?? availableDicts()[0]) as AdapterKey
   const getDictAdapter = () => adapters[adapterName()]
+  const tabCount = () => availableDicts().length
 
   onMount(() => {
     readBlacklist().then(blacklist => {
@@ -63,7 +66,7 @@ export const WhCard = customElement('wh-card', () => {
     e.preventDefault()
     const word = curWord()
     addContext(word, curContextText())
-    setTabIndex(3)
+    setTabIndex(tabCount())
   }
 
   const onCardClick = (e: MouseEvent) => {
@@ -189,16 +192,14 @@ export const WhCard = customElement('wh-card', () => {
       </div>
       <div class="tabs">
         <div>
-          <button onclick={() => setTabIndex(0)} classList={{ selected: tabIndex() === 0 }}>
-            Collins
-          </button>
-          <button onclick={() => setTabIndex(1)} classList={{ selected: tabIndex() === 1 }}>
-            Google
-          </button>
-          <button onclick={() => setTabIndex(2)} classList={{ selected: tabIndex() === 2 }}>
-            ChatGPT
-          </button>
-          <button onclick={() => setTabIndex(3)} classList={{ selected: tabIndex() === 3 }}>
+          <For each={availableDicts()}>
+            {(dictName, i) => (
+              <button onclick={() => setTabIndex(i)} classList={{ selected: tabIndex() === i() }}>
+                {dictName}
+              </button>
+            )}
+          </For>
+          <button onclick={() => setTabIndex(tabCount())} classList={{ selected: tabIndex() === tabCount() }}>
             Contexts
           </button>
         </div>
@@ -206,23 +207,21 @@ export const WhCard = customElement('wh-card', () => {
       <div class="dict_container">
         <Show when={curWord()}>
           <Switch fallback={null}>
-            <Match when={tabIndex() === 3}>
+            <Match when={tabIndex() === tabCount()}>
               <ContextList contexts={wordContexts()}></ContextList>
             </Match>
-            <Match when={tabIndex() === 0}>
-              <Dict word={curWord()} dictAdapter={getDictAdapter()} onSettle={onDictSettle} />
-            </Match>
-            <Match when={tabIndex() === 1}>
-              <Dict word={curWord()} dictAdapter={getDictAdapter()} onSettle={onDictSettle} />
-            </Match>
-            <Match when={tabIndex() === 2}>
-              <Dict
-                word={curWord()}
-                contextText={curContextText()}
-                dictAdapter={getDictAdapter()}
-                onSettle={onDictSettle}
-              />
-            </Match>
+            <For each={availableDicts()}>
+              {(dictName, i) => (
+                <Match when={tabIndex() === i()}>
+                  <Dict
+                    word={curWord()}
+                    contextText={curContextText()}
+                    dictAdapter={getDictAdapter()}
+                    onSettle={onDictSettle}
+                  />
+                </Match>
+              )}
+            </For>
           </Switch>
         </Show>
       </div>
@@ -367,8 +366,12 @@ function hidePopup(e: Event) {
 }
 
 function showPopup() {
+  const availableDicts = () => Object.keys(dictTabs()).filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
+  const tabCount = () => availableDicts().length
   const cardNode = getCardNode()
-  if (tabIndex() === 3) {
+  if (wordContexts().length > 0) {
+    setTabIndex(tabCount())
+  } else if (tabIndex() === tabCount()) {
     setTabIndex(0)
   }
   cardNode.classList.remove('card_hidden')
@@ -380,24 +383,26 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
   const { x: x, y: y, width: m_width, height: m_height } = rect
   const { x: c_x, y: c_y, width: c_width, height: c_height } = cardNode.getBoundingClientRect()
 
-  let left = x + m_width + 10
+  const MARGIN_X = 1
+
+  let left = x + m_width + MARGIN_X
   let top = y - 20
   // if overflow right viewport
   if (left + c_width > window.innerWidth) {
     if (x > c_width) {
-      left = x - c_width - 5
+      left = x - c_width - MARGIN_X
     } else {
       left = window.innerWidth - c_width - 30
-      top = y + m_height + 10
+      top = y + m_height + MARGIN_X
     }
   }
   // if overflow top viewport
   if (top < 0) {
-    top = 10
+    top = MARGIN_X
   }
 
   if (top + c_height > window.innerHeight) {
-    top = window.innerHeight - c_height - 10
+    top = window.innerHeight - c_height - MARGIN_X
   }
 
   if (!onlyOutsideViewport || c_y < 0 || c_y + c_height > window.innerHeight) {

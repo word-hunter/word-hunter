@@ -9,3 +9,5 @@ export const adapters = {
   google: new GoogleDict(),
   openai: new OpenAiDict()
 }
+
+export type AdapterKey = keyof typeof adapters

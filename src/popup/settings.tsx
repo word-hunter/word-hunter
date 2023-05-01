@@ -1,6 +1,5 @@
 import styles from './settings.module.less'
 import { colors, updateColors } from '../utils/color'
-import { apiKey, setApiKey } from '../utils/openai'
 
 export const Settings = () => {
   const onColorChange = (e: Event) => {
@@ -13,11 +12,6 @@ export const Settings = () => {
   const onDirectToOption = () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })
     return false
-  }
-
-  const onApiKeyChange = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    setApiKey(target.value)
   }
 
   return (
@@ -35,24 +29,11 @@ export const Settings = () => {
           </div>
         </div>
       </section>
-      <section>
-        <h4>OpenAI-APIKey:</h4>
-        <div class={styles.section_item}>
-          <div>
-            <input type="text" value={apiKey()} oninput={onApiKeyChange} />
-          </div>
-        </div>
-      </section>
-      <section>
-        <h4>Others:</h4>
-        <div class={styles.section_item}>
-          <div>
-            <a onclick={onDirectToOption} href="#">
-              more settings ↗
-            </a>
-          </div>
-        </div>
-      </section>
+      <div>
+        <a onclick={onDirectToOption} href="#">
+          more settings ↗
+        </a>
+      </div>
     </div>
   )
 }
