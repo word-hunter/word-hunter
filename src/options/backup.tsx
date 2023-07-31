@@ -1,6 +1,7 @@
 import styles from './backup.module.less'
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile } from '../utils'
+import { syncKnowns } from '../utils/storage'
 
 const timeFormatter = new Intl.DateTimeFormat('en-US')
 
@@ -34,6 +35,7 @@ export const Backup = () => {
             [StorageKey.blacklist]: json[StorageKey.blacklist] ?? []
           },
           () => {
+            syncKnowns(Object.keys(json[StorageKey.known] ?? {}), json[StorageKey.known])
             alert('restore success ✅')
           }
         )

@@ -190,6 +190,9 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
 
 function readStorageAndHighlight() {
   chrome.storage.local.get(['dict', StorageKey.known, StorageKey.context], result => {
+    if (!result.dict) {
+      return setTimeout(readStorageAndHighlight, 100)
+    }
     dict = result.dict || {}
     wordsKnown = result[StorageKey.known] || {}
     contexts = result[StorageKey.context] || {}

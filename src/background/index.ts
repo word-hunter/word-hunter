@@ -1,5 +1,6 @@
 import { Messages, WordMap, WordContext, StorageKey } from '../constant'
 import { createStory, explainWord } from '../utils/openai'
+import { getAllKnownSync, syncKnowns } from '../utils/storage'
 
 async function readDict(): Promise<WordMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -62,6 +63,7 @@ async function setup() {
               const knownWords = { ...(result[StorageKey.known] ?? {}), [word]: 0 }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
+              syncKnowns([word], knownWords)
             })
             break
           case Messages.set_all_known:
@@ -70,6 +72,7 @@ async function setup() {
               const knownWords = { ...(result[StorageKey.known] ?? {}), ...addedWords }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
+              syncKnowns(words, knownWords)
             })
             break
           case Messages.add_context:
@@ -139,6 +142,11 @@ async function setup() {
   })
 
   const dict = await readDict()
+  const allKnownSynced = await getAllKnownSync()
+  const knownsLocal = await storage.get([StorageKey.known])
+  const knowns = { ...allKnownSynced, ...knownsLocal[StorageKey.known] }
+  await storage.set({ [StorageKey.known]: knowns })
+  syncKnowns(Object.keys(knowns), knowns)
 
   storage.set({ dict: dict }, () => {
     console.log('[storage] dict set up')
