@@ -2,16 +2,7 @@ import styles from './app.module.less'
 import { Settings } from './settings'
 import { Statistics } from './statistics'
 import { createSignal } from 'solid-js'
-import { StorageKey } from '../constant'
-
-export const executeScript = (func: () => void) => {
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    const curId = tabs[0].id
-    if (curId) {
-      chrome.scripting.executeScript({ target: { tabId: curId }, func: func })
-    }
-  })
-}
+import { settings, setSetting, executeScript } from '../lib'
 
 const onFastModeToggle = () => {
   executeScript(() => window.__toggleZenMode())
@@ -28,23 +19,25 @@ export const App = () => {
   const [isBanned, setIsBanned] = createSignal(false)
   const [index, setIndex] = createSignal(0)
 
-  const onToggleBlacklist = () => {
-    executeScript(() => window.__toggleBlackList())
-    setIsBanned(!isBanned())
+  const onToggleBlacklist = async () => {
+    const [inBlocklist, host, blacklist] = await getBannedState()
+    const newBlacklist = inBlocklist ? blacklist.filter(h => h !== host) : [...blacklist, host]
+    setIsBanned(!inBlocklist)
+    await setSetting('blacklist', newBlacklist)
+    executeScript(() => window.__updateAppIcon())
   }
 
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+  const getBannedState = async () => {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
     const host = new URL(tabs[0].url!).host
-    chrome.storage.local.get(StorageKey.blacklist, result => {
-      const blacklist = result[StorageKey.blacklist] ?? []
-      setIsBanned(blacklist.includes(host))
-    })
-  })
-
-  const onGPTStory = () => {
-    executeScript(() => window.__createGPTStory())
-    window.close()
+    const blacklist = settings()['blacklist']
+    const inBlocklist = blacklist.includes(host)
+    return [inBlocklist, host, blacklist] as const
   }
+
+  getBannedState().then(([inBlocklist]) => {
+    setIsBanned(inBlocklist)
+  })
 
   return (
     <div class={styles.page}>
@@ -59,9 +52,6 @@ export const App = () => {
         <div>
           <Statistics />
           <div class={styles.buttons}>
-            {/* <button onclick={onGPTStory}>
-              ️<img src={chrome.runtime.getURL('icons/harry-potter.png')} width="20" height="20" /> GPT Story
-            </button> */}
             <button onclick={onFastModeToggle}>
               ️<img src={chrome.runtime.getURL('icons/zen.png')} width="20" height="20" /> Toggle zen mode
             </button>

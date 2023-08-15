@@ -12,9 +12,8 @@ import {
   StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl } from '../utils'
-import { maxHighlight } from '../utils/maxHighlight'
-import { getMessagePort } from '../utils/port'
+import { getDocumentTitle, getFaviconUrl, settings } from '../lib'
+import { getMessagePort } from '../lib/port'
 
 let wordsKnown: WordMap = {}
 let dict: WordMap = {}
@@ -120,7 +119,7 @@ const intersectionObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     const el = entry.target as HTMLElement
     if (entry.isIntersecting) {
-      if (getHighlightCount(true) > maxHighlight()) {
+      if (getHighlightCount(true) > settings()['maxHighlight']) {
         return
       }
       el.classList.add(classes.in_viewport)

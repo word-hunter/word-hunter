@@ -1,9 +1,7 @@
 import '@webcomponents/custom-elements'
 import { render } from 'solid-js/web'
 import { ZenMode } from './card'
-import { Story } from './story'
-import { invertHexColor } from '../utils'
-import { colors } from '../utils/color'
+import { invertHexColor, settings } from '../lib'
 
 declare module 'solid-js' {
   namespace JSX {
@@ -18,13 +16,12 @@ const App = () => {
     <>
       <wh-card />
       <ZenMode />
-      <Story />
       <style>
         {`
           :root {
-            --wh-mark-color: ${invertHexColor(colors()[0])};
-            --wh-mark-bg-color: ${colors()[0]};
-            --wh-mark-with-content-bg-color: ${colors()[1]};
+            --wh-mark-color: ${invertHexColor(settings()['colors'][0])};
+            --wh-mark-bg-color: ${settings()['colors'][0]};
+            --wh-mark-with-content-bg-color: ${settings()['colors'][1]};
           }
         `}
       </style>

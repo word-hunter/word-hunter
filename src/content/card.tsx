@@ -1,5 +1,4 @@
 import { reloadElement, ICustomElement } from 'component-register'
-import { walk } from '../utils/_hot'
 
 import './index.less'
 import cardStyles from './card.less?inline'
@@ -20,12 +19,11 @@ import {
   zenExcludeWords,
   setZenExcludeWords
 } from './highlight'
-import { getMessagePort } from '../utils/port'
+import { getMessagePort } from '../lib/port'
 import { Dict } from './dict'
 import { adapters, AdapterKey } from './adapters'
-import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain } from '../utils'
-import { readBlacklist } from '../utils/blacklist'
-import { dictTabs } from '../utils/dictTabs'
+import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain, settings } from '../lib'
+import { readBlacklist } from '../lib/blacklist'
 
 let timerShowRef: number
 let timerHideRef: number
@@ -40,6 +38,7 @@ const [curContextText, setCurContextText] = createSignal('')
 const [tabIndex, setTabIndex] = createSignal(0)
 
 export const WhCard = customElement('wh-card', () => {
+  const dictTabs = () => settings()['dictTabs']
   const availableDicts = () => Object.keys(dictTabs()).filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
   const adapterName = () => (availableDicts()[tabIndex()] ?? availableDicts()[0]) as AdapterKey
   const getDictAdapter = () => adapters[adapterName()]
@@ -366,6 +365,7 @@ function hidePopup(e: Event) {
 }
 
 function showPopup() {
+  const dictTabs = () => settings()['dictTabs']
   const availableDicts = () => Object.keys(dictTabs()).filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
   const tabCount = () => availableDicts().length
   const cardNode = getCardNode()
@@ -450,20 +450,6 @@ function bindEvents() {
 
     if (node.shadowRoot === document.querySelector('wh-card')?.shadowRoot) {
       clearTimerHideRef()
-    }
-  })
-}
-
-// https://github.com/solidjs/solid/tree/main/packages/solid-element#hot-module-replacement-new
-if (import.meta.hot) {
-  import.meta.hot.accept(newModule => {
-    if (newModule) {
-      // newModule is undefined when SyntaxError happened
-      walk(document.body, (node: Node) => {
-        if ((node as HTMLElement).localName === 'wh-card') {
-          setTimeout(() => reloadElement(node as unknown as ICustomElement), 0)
-        }
-      })
     }
   })
 }

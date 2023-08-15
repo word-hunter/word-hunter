@@ -1,7 +1,7 @@
 import styles from './backup.module.less'
 import { StorageKey } from '../constant'
-import { downloadAsJsonFile } from '../utils'
-import { syncKnowns } from '../utils/storage'
+import { downloadAsJsonFile, resotreSettings } from '../lib'
+import { syncUpKnowns } from '../lib/storage'
 
 const timeFormatter = new Intl.DateTimeFormat('en-US')
 
@@ -17,28 +17,25 @@ export const Backup = () => {
     }
 
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
       const data = reader.result
       if (typeof data !== 'string') return
       try {
         const json = JSON.parse(data)
-
         if (!json[StorageKey.known]) {
           alert('invalid file ❗️')
           return
         }
 
-        chrome.storage.local.set(
-          {
-            [StorageKey.context]: json[StorageKey.context] ?? {},
-            [StorageKey.known]: json[StorageKey.known] ?? {},
-            [StorageKey.blacklist]: json[StorageKey.blacklist] ?? []
-          },
-          () => {
-            syncKnowns(Object.keys(json[StorageKey.known] ?? {}), json[StorageKey.known])
-            alert('restore success ✅')
-          }
-        )
+        await chrome.storage.local.set({
+          [StorageKey.context]: json[StorageKey.context] ?? {},
+          [StorageKey.known]: json[StorageKey.known] ?? {}
+        })
+        syncUpKnowns(Object.keys(json[StorageKey.known] ?? {}), json[StorageKey.known])
+        // if (json[StorageKey.settings]) {
+        await resotreSettings(json[StorageKey.settings])
+        // }
+        alert('restore success ✅')
       } catch (e) {
         alert('invalid file ❗️')
       }
@@ -51,7 +48,7 @@ export const Backup = () => {
   }
 
   const onBackup = () => {
-    chrome.storage.local.get([StorageKey.known, StorageKey.context, StorageKey.blacklist], result => {
+    chrome.storage.local.get([StorageKey.known, StorageKey.context, StorageKey.settings], result => {
       const now = Date.now()
       const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
 
@@ -68,7 +65,7 @@ export const Backup = () => {
         JSON.stringify({
           [StorageKey.known]: known,
           [StorageKey.context]: cleanContexts,
-          [StorageKey.blacklist]: result[StorageKey.blacklist] || []
+          [StorageKey.settings]: result[StorageKey.settings] || null
         }),
         fileName
       )

@@ -9,7 +9,7 @@ export async function getAllKnownSync() {
   return Object.fromEntries(wordEntries) as WordMap
 }
 
-export async function syncKnowns(words: string[], localKnowns: WordMap) {
+export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
   const toSyncKnowns = {} as Record<string, string[]>
 
   const localKnownsGroupByKeys = {} as Record<string, string[]>
@@ -40,17 +40,12 @@ export async function syncKnowns(words: string[], localKnowns: WordMap) {
   console.log('words synced: ', words.length)
 }
 
-export async function getSyncedOfKeys(keys: StorageKey[]) {
-  const syncedValues = await chrome.storage.sync.get(keys)
-  for (const key of keys) {
-    if (!syncedValues[key]) {
-      syncedValues[key] = await chrome.storage.local.get(key)
-    }
-  }
-  return syncedValues
+export async function getStorageValues(keys: StorageKey[]) {
+  return await chrome.storage.local.get(keys)
 }
 
-export async function syncByKeys(keys: StorageKey[]) {
+export async function uploadStorageValues(keys: StorageKey[]) {
   const localValues = await chrome.storage.local.get(keys)
+  console.log('uploadStorageValues', localValues)
   await chrome.storage.sync.set(localValues)
 }

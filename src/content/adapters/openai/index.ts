@@ -3,14 +3,14 @@
 import dictStyles from './index.less?inline'
 import type { Adapter } from '../type'
 import { Messages } from '../../../constant'
-import { sendMessage } from '../../../utils/port'
+import { sendMessage } from '../../../lib/port'
 
 const cache: Record<string, string> = {}
 
 export class OpenAiDict implements Adapter {
   readonly name = 'openai'
-  readonly host = 'https://word-story.sapjax340.workers.dev/'
-  readonly apiBase = `${this.host}/explain`
+  readonly host = 'https://api.openai.com/v1/completions'
+  readonly apiBase = `${this.host}`
   readonly sectionSelector = ''
 
   get style() {

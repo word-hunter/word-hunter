@@ -23,13 +23,9 @@ export const classes = {
 }
 
 export enum StorageKey {
-  'colors' = 'colors',
   'known' = 'known',
   'context' = 'context',
-  'blacklist' = 'blacklist',
-  'maxHighlight' = 'maxHighlight',
-  'openaiKey' = 'openaiKey',
-  'dictTabs' = 'dictTabs'
+  'settings' = 'settings'
 }
 
 export enum Messages {
@@ -41,7 +37,6 @@ export enum Messages {
   'play_audio' = 'play_audio',
   'open_youglish' = 'open_youglish',
   'fetch_html' = 'fetch_html',
-  'create_story' = 'create_story',
   'ai_explain' = 'ai_explain'
 }
 
@@ -73,9 +68,6 @@ export const invalidSelectors = ['.monaco-editor', '.CodeMirror-code', '#video-t
 
 export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
-
-export const defaultColors = ['#9FB0EF', '#C175D8']
-export const defaultMaxHighlight = 1000
 
 export const keepTextNodeHosts = ['reader.ttsu.app']
 

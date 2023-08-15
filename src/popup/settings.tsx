@@ -1,12 +1,12 @@
 import styles from './settings.module.less'
-import { colors, updateColors } from '../utils/color'
+import { settings, setSetting } from '../lib'
 
 export const Settings = () => {
   const onColorChange = (e: Event) => {
+    const colors = settings()['colors']
     const target = e.target as HTMLInputElement
-    const newColors = [...colors()]
-    newColors[Number(target.dataset.index)] = target?.value
-    updateColors(newColors)
+    colors[Number(target.dataset.index)] = target?.value
+    setSetting('colors', colors)
   }
 
   const onDirectToOption = () => {
@@ -21,11 +21,11 @@ export const Settings = () => {
         <div class={styles.section_item}>
           <div>
             <label>Unknown:</label>
-            <input type="color" data-index="0" value={colors()[0]} oninput={onColorChange} />
+            <input type="color" data-index="0" value={settings()['colors'][0]} oninput={onColorChange} />
           </div>
           <div>
             <label>Have context:</label>
-            <input type="color" data-index="1" value={colors()[1]} oninput={onColorChange} />
+            <input type="color" data-index="1" value={settings()['colors'][1]} oninput={onColorChange} />
           </div>
         </div>
       </section>

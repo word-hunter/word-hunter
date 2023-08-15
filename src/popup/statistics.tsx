@@ -1,6 +1,5 @@
 import { createSignal } from 'solid-js'
-import { executeScript } from '../utils'
-import { colors } from '../utils/color'
+import { executeScript, settings } from '../lib'
 import styles from './statistics.module.less'
 
 export const Statistics = () => {
@@ -19,10 +18,15 @@ export const Statistics = () => {
   return (
     <div class={styles.container}>
       <div>
-        Page Stats: <span style={{ color: colors()[0] }}>{counts()[0]}</span> / {counts()[1]}
+        Page Stats: <span style={{ color: settings()['colors'][0] }}>{counts()[0]}</span> / {counts()[1]}
       </div>
       <svg viewBox="0 0 64 64" class={styles.pie}>
-        <circle r="25%" cx="50%" cy="50%" style={{ 'stroke-dasharray': `${percent()} 100`, stroke: colors()[0] }}>
+        <circle
+          r="25%"
+          cx="50%"
+          cy="50%"
+          style={{ 'stroke-dasharray': `${percent()} 100`, stroke: settings()['colors'][0] }}
+        >
           <title>unknown</title>
         </circle>
       </svg>

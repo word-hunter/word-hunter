@@ -1,6 +1,7 @@
 import { Messages, WordMap, WordContext, StorageKey } from '../constant'
-import { createStory, explainWord } from '../utils/openai'
-import { getAllKnownSync, syncKnowns } from '../utils/storage'
+import { explainWord } from '../lib/openai'
+import { getAllKnownSync, syncUpKnowns } from '../lib/storage'
+import { mergeSettings } from '../lib/settings'
 
 async function readDict(): Promise<WordMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -11,7 +12,14 @@ async function readDict(): Promise<WordMap> {
 
 function updateBadge(wordsKnown: WordMap) {
   const knownWordsCount = Object.keys(wordsKnown).length
-  chrome.action.setBadgeText({ text: knownWordsCount > 0 ? String(knownWordsCount) : '' }, () => {})
+  let badgeText = knownWordsCount > 0 ? String(knownWordsCount) : ''
+  if (knownWordsCount >= 1000 && knownWordsCount < 10000) {
+    badgeText = badgeText.at(0) + '.' + badgeText.at(1) + 'k'
+  }
+  if (knownWordsCount >= 10000) {
+    badgeText = badgeText.at(0)! + badgeText.at(1) + 'k'
+  }
+  chrome.action.setBadgeText({ text: badgeText }, () => {})
   chrome.action.setBadgeBackgroundColor({ color: '#bbb' }, () => {})
 }
 
@@ -63,7 +71,7 @@ async function setup() {
               const knownWords = { ...(result[StorageKey.known] ?? {}), [word]: 0 }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
-              syncKnowns([word], knownWords)
+              syncUpKnowns([word], knownWords)
             })
             break
           case Messages.set_all_known:
@@ -72,7 +80,7 @@ async function setup() {
               const knownWords = { ...(result[StorageKey.known] ?? {}), ...addedWords }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
-              syncKnowns(words, knownWords)
+              syncUpKnowns(words, knownWords)
             })
             break
           case Messages.add_context:
@@ -114,10 +122,6 @@ async function setup() {
             const htmlText = await htmlRes.text()
             port.postMessage({ [Messages.fetch_html]: htmlText, url })
             break
-          case Messages.create_story:
-            const story = await createStory()
-            port.postMessage({ [Messages.create_story]: story })
-            break
           case Messages.ai_explain:
             const { text } = msg
             const explain = await explainWord(word, text)
@@ -146,7 +150,8 @@ async function setup() {
   const knownsLocal = await storage.get([StorageKey.known])
   const knowns = { ...allKnownSynced, ...knownsLocal[StorageKey.known] }
   await storage.set({ [StorageKey.known]: knowns })
-  syncKnowns(Object.keys(knowns), knowns)
+  syncUpKnowns(Object.keys(knowns), knowns)
+  await mergeSettings()
 
   storage.set({ dict: dict }, () => {
     console.log('[storage] dict set up')

@@ -1,5 +1,5 @@
 import { Messages } from '../../constant'
-import { sendMessage } from '../../utils/port'
+import { sendMessage } from '../../lib/port'
 
 export async function fetchText(url: string): Promise<string> {
   const msg = await sendMessage(Messages.fetch_html, { url })
