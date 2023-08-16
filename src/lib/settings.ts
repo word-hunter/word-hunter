@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS = {
     openai: false
   },
   maxHighlight: 1000,
+  atuoPronounce: false,
   openai: {
     apiKey: '',
     model: 'text-davinci-003'

@@ -68,18 +68,22 @@ export const WhCard = customElement('wh-card', () => {
     setTabIndex(tabCount())
   }
 
-  const onCardClick = (e: MouseEvent) => {
-    const node = e.target as HTMLElement
-    const audioSrc = node.getAttribute('data-src-mp3') || node.parentElement?.getAttribute('data-src-mp3')
+  const playAudio = (node: HTMLElement, e?: MouseEvent) => {
+    const audioSrc = node?.getAttribute('data-src-mp3') || node?.parentElement?.getAttribute('data-src-mp3')
     if (audioSrc) {
-      e.stopImmediatePropagation()
       getMessagePort().postMessage({ action: Messages.play_audio, audio: audioSrc })
+      e && e.stopImmediatePropagation()
       node.classList.add('active')
       setTimeout(() => {
         node?.classList.remove('active')
       }, 1000)
       return false
     }
+  }
+
+  const onCardClick = (e: MouseEvent) => {
+    const node = e.target as HTMLElement
+    playAudio(node, e)
 
     if (node.tagName === 'A' && node.dataset.href) {
       e.stopImmediatePropagation()
@@ -123,6 +127,9 @@ export const WhCard = customElement('wh-card', () => {
   const onDictSettle = () => {
     adjustCardPosition(rect, inDirecting)
     inDirecting = false
+    if (settings().atuoPronounce) {
+      playAudio(getCardNode().querySelector('[data-src-mp3]') as HTMLElement)
+    }
   }
 
   const inWordContexts = () => {

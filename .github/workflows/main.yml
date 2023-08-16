@@ -3,7 +3,7 @@ name: Create Release on Tag
 on:
   push:
     tags:
-      - '*.*.*' # Match any tag with the format x.y.z
+      - 'v.*' # Match any tag with the format x.y.z
 
 jobs:
   create_release:
