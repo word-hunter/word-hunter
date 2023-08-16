@@ -1,0 +1,44 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - '*.*.*' # Match any tag with the format x.y.z
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18' # Choose the Node.js version you need
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: build/* # Include files from the build folder
+          release-name: Release ${{ github.ref }} # Set the release name based on the tag
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/release.zip # Path to your release asset
+          asset_name: release.zip
+          asset_content_type: application/zip
