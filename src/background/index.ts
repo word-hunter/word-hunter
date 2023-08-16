@@ -21,6 +21,7 @@ function updateBadge(wordsKnown: WordMap) {
   }
   chrome.action.setBadgeText({ text: badgeText }, () => {})
   chrome.action.setBadgeBackgroundColor({ color: '#bbb' }, () => {})
+  chrome.action.setTitle({ title: '✔ ' + String(knownWordsCount) })
 }
 
 const createAudioWindow = async (audio: string) => {
