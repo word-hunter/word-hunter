@@ -1,6 +1,6 @@
 import { Messages, WordMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
-import { getAllKnownSync, syncUpKnowns } from '../lib/storage'
+import { syncUpKnowns, mergeKnowns } from '../lib/storage'
 import { mergeSettings } from '../lib/settings'
 
 async function readDict(): Promise<WordMap> {
@@ -146,16 +146,13 @@ async function setup() {
     }
   })
 
-  const dict = await readDict()
-  const allKnownSynced = await getAllKnownSync()
-  const knownsLocal = await storage.get([StorageKey.known])
-  const knowns = { ...allKnownSynced, ...knownsLocal[StorageKey.known] }
-  await storage.set({ [StorageKey.known]: knowns })
-  syncUpKnowns(Object.keys(knowns), knowns)
+  await mergeKnowns()
   await mergeSettings()
 
-  storage.set({ dict: dict }, () => {
-    console.log('[storage] dict set up')
+  readDict().then(dict => {
+    storage.set({ dict: dict }, () => {
+      console.log('[storage] dict set up')
+    })
   })
 }
 

@@ -4,6 +4,7 @@ export async function getAllKnownSync() {
   const record = (await chrome.storage.sync.get(STORAGE_KEY_INDICES)) as Record<string, string[]>
   const wordEntries = Object.values(record)
     .flat()
+    .filter(w => !!w)
     .map(word => [word, 0])
 
   return Object.fromEntries(wordEntries) as WordMap
@@ -38,6 +39,16 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
   }
   await chrome.storage.sync.set(toSyncKnowns)
   console.log('words synced: ', words.length)
+}
+
+export async function mergeKnowns() {
+  const allKnownSynced = await getAllKnownSync()
+  const knownsLocal = await chrome.storage.local.get([StorageKey.known])
+  if (Object.keys(knownsLocal).length !== Object.keys(allKnownSynced).length) {
+    const knowns = { ...allKnownSynced, ...knownsLocal[StorageKey.known] }
+    await chrome.storage.local.set({ [StorageKey.known]: knowns })
+    syncUpKnowns(Object.keys(knowns), knowns)
+  }
 }
 
 export async function getStorageValues(keys: StorageKey[]) {

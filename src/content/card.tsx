@@ -45,9 +45,9 @@ export const WhCard = customElement('wh-card', () => {
   const tabCount = () => availableDicts().length
 
   onMount(() => {
-    readBlacklist().then(blacklist => {
+    readBlacklist().then(async blacklist => {
       if (blacklist.includes(location.host)) return
-      highlightInit()
+      await highlightInit()
       bindEvents()
     })
   })

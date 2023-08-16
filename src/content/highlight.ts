@@ -12,7 +12,7 @@ import {
   StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings } from '../lib'
+import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns } from '../lib'
 import { getMessagePort } from '../lib/port'
 
 let wordsKnown: WordMap = {}
@@ -187,18 +187,26 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
   }
 }
 
-function readStorageAndHighlight() {
-  chrome.storage.local.get(['dict', StorageKey.known, StorageKey.context], result => {
-    if (!result.dict) {
-      return setTimeout(readStorageAndHighlight, 100)
+async function waitForDictPrepare(): Promise<WordMap> {
+  return new Promise(resolve => {
+    const listener = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
+      if (namespace === 'local' && changes['dict']) {
+        chrome.storage.onChanged.removeListener(listener)
+        resolve(changes['dict'].newValue)
+      }
     }
-    dict = result.dict || {}
-    wordsKnown = result[StorageKey.known] || {}
-    contexts = result[StorageKey.context] || {}
-
-    const textNodes = getTextNodes(document.body)
-    highlight(textNodes, dict, wordsKnown, contexts)
+    chrome.storage.onChanged.addListener(listener)
   })
+}
+
+async function readStorageAndHighlight() {
+  const result = await chrome.storage.local.get(['dict', StorageKey.known, StorageKey.context])
+  dict = result.dict || (await waitForDictPrepare())
+  wordsKnown = result[StorageKey.known] || {}
+  contexts = result[StorageKey.context] || {}
+
+  const textNodes = getTextNodes(document.body)
+  highlight(textNodes, dict, wordsKnown, contexts)
 }
 
 function observeDomChange() {
@@ -277,7 +285,8 @@ export function getWordContexts(word: string) {
   return contexts[word] ?? []
 }
 
-export function init() {
-  readStorageAndHighlight()
+export async function init() {
+  await mergeKnowns()
+  await readStorageAndHighlight()
   observeDomChange()
 }
