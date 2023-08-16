@@ -10,7 +10,7 @@ export async function explainWord(word: string, context: string) {
   const headers = await getHeaders()
   const prompt = `Can you explain the word ${word} in the sentence "${context}" with grade 2 English words ?`
   const model = settings()['openai'].model
-  const isGPT4 = model === 'gpt4'
+  const isGPT4 = model === 'gpt-4'
   let res: Awaited<ReturnType<typeof fetch>>
   try {
     if (isGPT4) {
@@ -19,19 +19,12 @@ export async function explainWord(word: string, context: string) {
         headers,
         body: JSON.stringify({
           model,
-          choices: [
+          messages: [
             {
-              index: 0,
-              message: {
-                role: 'user',
-                content: prompt
-              },
-              finish_reason: 'stop'
+              role: 'user',
+              content: prompt
             }
-          ],
-          usage: {
-            max_tokens: 200
-          }
+          ]
         })
       })
     } else {

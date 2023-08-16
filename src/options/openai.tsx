@@ -20,7 +20,7 @@ export const OpenAISetting = () => {
         <h3>model</h3>
         <select oninput={onModelChange} value={settings().openai.model}>
           <option value="text-davinci-003">text-davinci-003</option>
-          <option value="gpt4">gpt4</option>
+          <option value="gpt-4">gpt-4</option>
         </select>
         <h3>apikey</h3>
         <div>

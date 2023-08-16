@@ -36,10 +36,17 @@ export async function resotreSettings(values: SettingType) {
 export async function mergeSettings() {
   const localSetting = await chrome.storage.local.get(StorageKey.settings)
   const syncSetting = await chrome.storage.sync.get(StorageKey.settings)
+  console.log(localSetting, syncSetting)
   const mergedSettings = {
     ...DEFAULT_SETTINGS,
-    ...(localSetting[StorageKey.settings] ?? {}),
-    ...(syncSetting[StorageKey.settings] ?? {})
+    ...(localSetting[StorageKey.settings] ?? {})
+  }
+  if (syncSetting[StorageKey.settings]) {
+    for (const key in syncSetting[StorageKey.settings]) {
+      if (syncSetting[StorageKey.settings][key]) {
+        mergedSettings[key] = syncSetting[StorageKey.settings][key]
+      }
+    }
   }
   await chrome.storage.local.set({ settings: mergedSettings })
   await uploadStorageValues([StorageKey.settings])
