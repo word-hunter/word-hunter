@@ -1,5 +1,4 @@
 import { settings, setSetting } from '../lib'
-import styles from './dicts.module.less'
 
 export const PronounceSetting = () => {
   const onInput = (e: Event) => {
@@ -8,21 +7,20 @@ export const PronounceSetting = () => {
   }
 
   return (
-    <section>
-      <h2>Pronounce:</h2>
-      <div class={styles.section_item}>
-        <div class={styles.checkbox_item}>
-          <div>
-            <input
-              type="checkbox"
-              name="pronounce"
-              id="pronounce"
-              checked={settings().atuoPronounce}
-              oninput={onInput}
-            />
-            <label for="pronounce">auto pronounce</label>
-          </div>
-        </div>
+    <section class="section">
+      <h2 class="h2">Pronounce</h2>
+      <div class="flex justify-end">
+        <label for="pronounce" class="label gap-4 cursor-pointer ">
+          <span class="label-text">auto pronounce</span>
+          <input
+            class="toggle toggle-info"
+            type="checkbox"
+            name="pronounce"
+            id="pronounce"
+            checked={settings().atuoPronounce}
+            oninput={onInput}
+          />
+        </label>
       </div>
     </section>
   )

@@ -1,4 +1,3 @@
-import styles from './backup.module.less'
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
 import { syncUpKnowns } from '../lib/storage'
@@ -73,24 +72,41 @@ export const Backup = () => {
   }
 
   return (
-    <section class={styles.container}>
-      <h2>backup</h2>
-      <dialog id="restoreDialog" ref={dialogRef!}>
-        <form method="dialog">
-          <div style={{ 'margin-bottom': '20px' }}>
-            <input type="file" accept=".json" ref={fileRef!} />
+    <section class="section">
+      <h2 class="h2">backup</h2>
+      <dialog id="restoreDialog" ref={dialogRef!} class="modal">
+        <form method="dialog" class="modal-box">
+          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          <div class="pt-10">
+            <input
+              type="file"
+              accept=".json"
+              ref={fileRef!}
+              class="file-input file-input-bordered file-input-lg w-full"
+            />
           </div>
-          <button onclick={onRestore}>confirm</button>
+
+          <div class="modal-action">
+            <button class="btn btn-outline" onclick={onRestore}>
+              confirm
+            </button>
+          </div>
+        </form>
+        <form method="dialog" class="modal-backdrop">
+          <button>close</button>
         </form>
       </dialog>
-      <button onclick={showModal}>
-        ️<img src={chrome.runtime.getURL('icons/upload.png')} width="40" height="40" alt="upload" />
-        restore
-      </button>
-      <button onclick={onBackup}>
-        ️<img src={chrome.runtime.getURL('icons/download.png')} width="40" height="40" alt="backup" />
-        backup
-      </button>
+
+      <div class="grid grid-cols-2 gap-4 pt-4">
+        <button onclick={showModal} class="btn btn-block btn-lg">
+          ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
+          restore
+        </button>
+        <button onclick={onBackup} class="btn btn-block btn-lg">
+          ️<img src={chrome.runtime.getURL('icons/download.png')} class="w-8 h-8" alt="backup" />
+          backup
+        </button>
+      </div>
     </section>
   )
 }

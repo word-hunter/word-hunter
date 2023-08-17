@@ -23,6 +23,7 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.7",
     "@types/chrome": "^0.0.203",
+    "daisyui": "^3.5.1",
     "less": "^4.1.3",
     "prettier": "^2.7.1",
     "typescript": "^4.9.3",

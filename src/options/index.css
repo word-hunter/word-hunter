@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .section {
+    @apply border px-4 pt-4 pb-4 rounded-xl shadow-md relative;
+  }
+  .h2 {
+    @apply absolute -top-3 max-w-fit rounded-xl px-2 py-1  border bg-white dark:bg-info-content text-sm shadow-sm italic font-serif;
+  }
+}

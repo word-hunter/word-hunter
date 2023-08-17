@@ -8,12 +8,16 @@ export const MaxHighlightSetting = () => {
   }
 
   return (
-    <section>
-      <h2>Max highlight count:</h2>
-      <div>
-        <div>
-          <input type="number" min={1} value={settings()['maxHighlight']} oninput={onMaxChange} />
-        </div>
+    <section class="section">
+      <h2 class="h2">Max Highlights</h2>
+      <div class="flex justify-end">
+        <input
+          class="input input-bordered"
+          type="number"
+          min={1}
+          value={settings()['maxHighlight']}
+          oninput={onMaxChange}
+        />
       </div>
     </section>
   )
