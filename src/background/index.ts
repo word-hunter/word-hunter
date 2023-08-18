@@ -114,19 +114,20 @@ async function setup() {
               url: chrome.runtime.getURL('youglish.html') + `?word=${encodeURIComponent(word)}`
             })
             break
-          case Messages.fetch_html:
-            const url = msg.url
+          case Messages.fetch_html: {
+            const { url, uuid } = msg
             const htmlRes = await fetch(url, {
               mode: 'no-cors',
               credentials: 'include'
             })
             const htmlText = await htmlRes.text()
-            port.postMessage({ [Messages.fetch_html]: htmlText, url })
+            port.postMessage({ result: htmlText, uuid })
             break
+          }
           case Messages.ai_explain:
-            const { text } = msg
+            const { text, uuid } = msg
             const explain = await explainWord(word, text)
-            port.postMessage({ [Messages.ai_explain]: explain, word, text })
+            port.postMessage({ result: explain, uuid })
         }
       })
     }

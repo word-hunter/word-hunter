@@ -1,4 +1,5 @@
 import { Messages } from '../constant'
+import { uuidv4 } from './utils'
 let messagePort: chrome.runtime.Port
 
 function connectPort() {
@@ -16,16 +17,17 @@ export function getMessagePort() {
 
 export async function sendMessage(action: Messages, data: object): Promise<any> {
   const port = getMessagePort()
+  const uuid = uuidv4()
 
   return new Promise((resolve, _reject) => {
     const messageHandler = (msg: any) => {
-      if (msg[action]) {
-        resolve(msg)
+      if (msg.uuid === uuid) {
+        resolve(msg.result)
+        port.onMessage.removeListener(messageHandler)
       }
-      port.onMessage.removeListener(messageHandler)
     }
 
-    port.postMessage({ action: action, ...data })
+    port.postMessage({ action: action, ...data, uuid })
     port.onMessage.addListener(messageHandler)
   })
 }
