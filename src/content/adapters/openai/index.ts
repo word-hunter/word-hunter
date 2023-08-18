@@ -40,9 +40,6 @@ export class OpenAiDict implements Adapter {
 }
 
 export async function fetchExplain(word: string, text?: string): Promise<string> {
-  const msg = await sendMessage(Messages.ai_explain, { word, text })
-  if (msg.word === word) {
-    return msg[Messages.ai_explain] as string
-  }
-  return ''
+  const result = await sendMessage(Messages.ai_explain, { word, text })
+  return result ?? ''
 }
