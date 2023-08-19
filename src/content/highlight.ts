@@ -138,7 +138,7 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
         return origin
       } else {
         const contextAttr = contexts[w]?.length > 0 ? 'have_context="true"' : ''
-        return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr}>${word}</w-mark>${postfix}`
+        return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${postfix}`
       }
     } else {
       return origin

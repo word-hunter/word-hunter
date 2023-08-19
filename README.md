@@ -29,3 +29,12 @@ It will only highlight new words when the highlighted words in the viewport don'
 3. Click "set all words as known" button
 
 This will make all "unknown" words as "known", except the words you excluded in step 2.
+
+## Keyboard shortcuts
+
+- <kbd>Tab</kbd> switch dict tab
+- <kbd>→</kbd> switch dict tab right
+- <kbd>←</kbd> switch dict tab left
+- <kbd>↓</kbd> scroll down dict section
+- <kbd>↑</kbd> scroll up dict section
+- <kbd>ESC</kbd> close dict panel / close zen mode

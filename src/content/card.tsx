@@ -166,6 +166,22 @@ export const WhCard = customElement('wh-card', () => {
       }
       e.preventDefault()
     }
+    if (
+      cardNode.classList.contains('card_visible') &&
+      (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab')
+    ) {
+      if (e.key === 'ArrowLeft') {
+        setTabIndex(tabIndex() > 0 ? tabIndex() - 1 : tabCount())
+      }
+      if (e.key === 'ArrowRight' || e.key === 'Tab') {
+        setTabIndex(tabIndex() < tabCount() ? tabIndex() + 1 : 0)
+      }
+      e.preventDefault()
+    }
+    if (cardNode.classList.contains('card_visible') && e.key === 'Escape') {
+      hidePopupDelay(0)
+      e.preventDefault()
+    }
   })
 
   return (
@@ -239,7 +255,7 @@ export const WhCard = customElement('wh-card', () => {
 
 export function ZenMode() {
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && zenMode()) {
+    if (e.key === 'Escape' && zenMode() && !getCardNode().classList.contains('card_visible')) {
       toggleZenMode()
     }
   })
