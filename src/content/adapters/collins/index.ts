@@ -67,7 +67,7 @@ export class CollinsDict implements Adapter {
       '.extra-link',
       '.carousel-title',
       '.btmslot_a-container',
-      '.pronIPASymbol img',
+      '.pronIPASymbol',
       '.ex-info',
       '.pB-quiz',
       '.specialQuiz',
