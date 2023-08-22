@@ -101,8 +101,10 @@ async function setup() {
               const index = wordContexts.findIndex(c => c.text === context.text)
               if (index > -1) {
                 wordContexts.splice(index, 1)
-                const newContexts = { ...contexts, [word]: wordContexts }
-                storage.set({ [StorageKey.context]: newContexts })
+                const { [word]: w, ...rest } = contexts
+                storage.set({
+                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest
+                })
               }
             })
             break

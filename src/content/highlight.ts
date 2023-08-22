@@ -60,7 +60,7 @@ export function addContext(word: string, text: string) {
   setWordContexts(contexts[word])
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (getNodeWord(node) === word) {
-      node.setAttribute('have_context', 'true')
+      node.setAttribute('have_context', contexts[word].length.toString())
     }
   })
 }
@@ -73,13 +73,15 @@ export function deleteContext(context: WordContext) {
     contexts[context.word].splice(index, 1)
 
     setWordContexts([...contexts[context.word]])
-    if (contexts[context.word]?.length === 0) {
-      document.querySelectorAll('.' + classes.mark).forEach(node => {
-        if (getNodeWord(node) === context.word) {
-          if (context) node.removeAttribute('have_context')
+    document.querySelectorAll('.' + classes.mark).forEach(node => {
+      if (getNodeWord(node) === context.word) {
+        if (contexts[context.word]?.length === 0) {
+          node.removeAttribute('have_context')
+        } else {
+          node.setAttribute('have_context', contexts[context.word].length.toString())
         }
-      })
-    }
+      }
+    })
   }
 }
 
@@ -137,7 +139,7 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
       if (w in wordsKnown) {
         return origin
       } else {
-        const contextAttr = contexts[w]?.length > 0 ? 'have_context="true"' : ''
+        const contextAttr = contexts[w]?.length > 0 ? `have_context="${contexts[w]?.length}"` : ''
         return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${postfix}`
       }
     } else {
