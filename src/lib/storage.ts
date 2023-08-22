@@ -38,7 +38,6 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
     }
   }
   await chrome.storage.sync.set(toSyncKnowns)
-  console.log('words synced: ', words.length)
 }
 
 export async function mergeKnowns() {
@@ -57,6 +56,5 @@ export async function getStorageValues(keys: StorageKey[]) {
 
 export async function uploadStorageValues(keys: StorageKey[]) {
   const localValues = await chrome.storage.local.get(keys)
-  console.log('uploadStorageValues', localValues)
   await chrome.storage.sync.set(localValues)
 }

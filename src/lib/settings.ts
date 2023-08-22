@@ -37,7 +37,6 @@ export async function resotreSettings(values: SettingType) {
 export async function mergeSettings() {
   const localSetting = await chrome.storage.local.get(StorageKey.settings)
   const syncSetting = await chrome.storage.sync.get(StorageKey.settings)
-  console.log(localSetting, syncSetting)
 
   if (
     syncSetting[StorageKey.settings] &&

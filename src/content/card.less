@@ -2,8 +2,6 @@
   all: initial;
   position: fixed;
   z-index: 2000000000;
-  opacity: 0;
-  visibility: hidden;
   --border-color: rgba(0, 0, 0, 0.3);
   --color-main: #759fc9;
   --height: 600px;
@@ -20,17 +18,19 @@
   -webkit-font-smoothing: antialiased;
   box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
   user-select: text;
-
-  &.card_hidden {
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s 0.2s, opacity 0.2s linear;
-  }
+  transform: translateY(50px);
+  opacity: 0;
+  transition: left 0.1s, top 0.1s, transform 0.3s, opacity 0.3s, display 0.3s allow-discrete;
+  pointer-events: none;
 
   &.card_visible {
-    visibility: visible;
+    pointer-events: auto;
+    @starting-style {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    transform: translateY(0);
     opacity: 1;
-    transition: opacity 0.2s, height 0.2s, width 0.2s;
   }
 
   .dict_container {
@@ -116,7 +116,7 @@
         line-height: 1.6em;
         font-family: 'Zilla Slab', Times, 'Times New Roman', serif;
         font-weight: 400;
-        white-space: pre-wrap;
+        white-space: pre-line;
         word-break: break-word;
         word-wrap: break-word;
       }

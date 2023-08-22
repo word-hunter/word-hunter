@@ -352,7 +352,6 @@ function hidePopupDelay(ms: number) {
   const cardNode = getCardNode()
   timerHideRef = window.setTimeout(() => {
     cardNode.classList.remove('card_visible')
-    cardNode.classList.add('card_hidden')
     setDictHistory([])
   }, ms)
 }
@@ -397,7 +396,6 @@ function showPopup() {
   } else if (tabIndex() === tabCount()) {
     setTabIndex(0)
   }
-  cardNode.classList.remove('card_hidden')
   cardNode.classList.add('card_visible')
 }
 

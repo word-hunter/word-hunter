@@ -15,11 +15,23 @@
 .__word_unknown.__word_in_viewport,
 .__zen_mode .__word_unknown {
   pointer-events: auto;
-  color: var(--wh-mark-color);
+  color: var(--wh-mark-color-0);
   background-color: var(--wh-mark-bg-color, #9fb0ef);
+  transition: background-color 0.5s ease;
   -webkit-text-fill-color: currentColor !important;
-  &[have_context='true'] {
+  &[have_context] {
+    color: var(--wh-mark-color-1);
     background-color: var(--wh-mark-with-content-bg-color, #c175d8);
+    &::after {
+      font-size: 50%;
+      vertical-align: super;
+      content: ' (' attr(have_context) ')';
+    }
+  }
+  &[have_context='1'] {
+    &::after {
+      display: none;
+    }
   }
 }
 
