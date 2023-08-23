@@ -1,4 +1,4 @@
-import { For } from 'solid-js'
+import { Index } from 'solid-js'
 import { settings, setSetting } from '../lib'
 
 export const DictsSetting = () => {
@@ -12,24 +12,24 @@ export const DictsSetting = () => {
     <section class="section">
       <h2 class="h2">Dicts</h2>
       <div class="flex flex-col items-end">
-        <For each={Object.entries(settings()['dictTabs'])}>
-          {([key, value]) => {
+        <Index each={Object.entries(settings()['dictTabs'])}>
+          {(dict, i) => {
             return (
-              <label for={key} class="label cursor-pointer gap-4">
-                <span class="label-text"> {key}</span>
+              <label for={dict()[0]} class="label cursor-pointer gap-4">
+                <span class="label-text"> {dict()[0]}</span>
                 <input
                   type="checkbox"
                   class="toggle toggle-info"
                   name="dicts"
-                  id={key}
-                  value={key}
-                  checked={value}
+                  id={dict()[0]}
+                  value={dict()[0]}
+                  checked={dict()[1]}
                   oninput={onInput}
                 />
               </label>
             )
           }}
-        </For>
+        </Index>
       </div>
     </section>
   )
