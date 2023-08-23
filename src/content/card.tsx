@@ -128,7 +128,13 @@ export const WhCard = customElement('wh-card', () => {
     adjustCardPosition(rect, inDirecting)
     inDirecting = false
     if (settings().atuoPronounce) {
-      playAudio(getCardNode().querySelector('[data-src-mp3]') as HTMLElement)
+      // play amarican english audio first
+      let ameNode = getCardNode().querySelector('.amefile[data-src-mp3]')
+      if (ameNode) {
+        playAudio(ameNode as HTMLElement)
+      } else {
+        playAudio(getCardNode().querySelector('[data-src-mp3]') as HTMLElement)
+      }
     }
   }
 
