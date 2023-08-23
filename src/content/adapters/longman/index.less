@@ -1,0 +1,677 @@
+.__dict_container {
+  background: #fff;
+  font-family: arial, helvetica, sans-serif;
+  color: #333333;
+  font-size: 14px;
+  * {
+    box-sizing: border-box;
+    border: none;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5em;
+  }
+  --txt-color: #ffffff;
+  --link-txt-color: #ff9800;
+  --section-colloc: #3599d4;
+  --section-colloc2: #0f75bc;
+  --section-phr: #9ccc52;
+  --section-phr2: #7eb341;
+  --section-prep: #c86475;
+  --section-prep2: #9e5252;
+  --section-pv: #c572ae;
+  --section-pv2: #a05193;
+  --section-syn: #8768ad;
+  --section-syn2: #734da0;
+  --longman-blue: #314089;
+}
+
+a {
+  -webkit-transition: color 0.5s, background-color 0.5s;
+  transition: color 0.5s, background-color 0.5s;
+}
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.dictentry {
+  display: block;
+  margin-bottom: 25px;
+  img {
+    max-width: 80%;
+  }
+}
+
+.dictentry:has(.bussdictEntry) {
+  display: none;
+}
+
+.content h1.pagetitle,
+.content h1.topicpagetitle {
+  margin-bottom: 20px;
+}
+.pagetitle {
+  font-size: 1.6em;
+  font-weight: bold;
+}
+
+.assets_intro,
+.asset_intro {
+  border: solid 1px;
+  border-color: #f1d600;
+  background-color: #f1d600;
+  color: #fff;
+  font-weight: normal;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+/*** WORD FAMILY ***/
+.pos {
+  color: green;
+  font-weight: normal;
+}
+.wordfams {
+  font-weight: bold;
+}
+.wordfams .crossRef,
+.wordfams .w {
+  margin: 0 6px;
+}
+.wordfams .crossRef {
+  border-bottom: thin dotted gray;
+}
+
+/***** EXAS ******/
+.exaGroup .exaEntry {
+  margin-bottom: 20px;
+  display: block;
+}
+
+.exaGroup .exaGroup {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.exaGroup .title {
+  font-size: 110%;
+  font-weight: bold;
+  color: black;
+  display: block;
+  margin-left: 5px;
+  margin-top: 15px;
+}
+
+.exaGroup .exa {
+  display: block;
+  color: gray;
+  margin-left: 15px;
+}
+
+.exaGroup .NodeW {
+  font-weight: bold;
+}
+
+.asset {
+  margin-top: 30px;
+}
+
+/***** TOPIC ******/
+.dictionary_intro,
+.topic_intro {
+  display: block;
+  background-color: #35a3ff;
+  color: #fff;
+  padding-left: 10px;
+  margin: 5px 0 10px -7px;
+}
+
+.Entry .topics_container {
+  display: table;
+}
+
+.Entry .related_topics {
+  padding: 0 4px 1px 0;
+  font-size: 16px;
+  font-family: Tahoma, Arial, Helvetica;
+  color: #000;
+}
+
+.Entry .topic,
+.topicCloud .topic_other {
+  color: red;
+  text-decoration: underline;
+}
+
+.Entry .topic:hover,
+.topicCloud .topic_other:hover {
+  color: #4693db;
+}
+
+/*****  LDOCE  ***************************/
+.ldoceEntry .Entry {
+  font-size: 12pt;
+  text-align: justify;
+  display: block;
+  margin-top: 8px;
+}
+
+.ldoceEntry .Thesref {
+  color: #364395;
+}
+
+.ldoceEntry .ABBR {
+  font-weight: bold;
+}
+
+.ldoceEntry .ACTIV {
+  display: none;
+}
+
+.ldoceEntry .AMEQUIV {
+  font-weight: bold;
+}
+
+.ldoceEntry .BOX {
+  display: none;
+}
+
+.ldoceEntry .BREQUIV {
+  font-weight: bold;
+}
+
+.ldoceEntry .COLLO {
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.ldoceEntry .ColloExa {
+  display: block;
+}
+
+.ldoceEntry .COLLOINEXA {
+  font-weight: bold;
+}
+
+.ldoceEntry .COMMENT {
+  display: none;
+}
+
+.ldoceEntry .COMP {
+  font-weight: bold;
+}
+
+.ldoceEntry .Crossrefto {
+  font-weight: bold;
+  font-size: 120%;
+}
+
+.ldoceEntry .DERIV {
+  font-weight: bold;
+  font-size: 120%;
+}
+
+.ldoceEntry .Entry {
+  font-size: 11pt;
+  text-align: justify;
+}
+
+.ldoceEntry .ErrorBox {
+  display: block;
+}
+
+.ldoceEntry .EXAMPLE {
+  display: block;
+  margin-left: 20px;
+  color: gray;
+}
+
+.ldoceEntry .FIELD {
+  display: none;
+}
+
+.ldoceEntry .AC,
+.ldoceEntry .synopp {
+  color: #fff;
+  border-color: #f1d600;
+  background-color: #f1d600;
+}
+
+.ldoceEntry .FREQ {
+  color: red;
+  border-color: red;
+}
+
+.ldoceEntry .LEVEL {
+  color: red;
+  font-size: 120%;
+}
+
+.ldoceEntry .FULLFORM {
+  font-weight: bold;
+}
+
+.ldoceEntry .GEO,
+.ldoceEntry .geo {
+  font-weight: normal;
+  color: #364395;
+}
+
+.ldoceEntry .GLOSS {
+  color: #364395;
+  font-weight: normal;
+  font-style: normal;
+}
+
+.ldoceEntry .GRAM,
+.bussdictEntry .GRAM {
+  color: green;
+  font-weight: bold;
+  margin: 0 5px 10px 3px;
+}
+
+.ldoceEntry .GramExa {
+  display: block;
+}
+
+.ldoceEntry .HINTBOLD {
+  font-weight: bold;
+}
+
+.ldoceEntry .HINTITALIC {
+  font-style: italic;
+}
+
+.ldoceEntry .HINTTITLE {
+  font-weight: bold;
+}
+
+.ldoceEntry .frequent .HOMNUM {
+  vertical-align: super;
+  font-size: 12pt;
+  color: red;
+  font-weight: bold;
+}
+
+.ldoceEntry .frequent .HYPHENATION {
+  color: red;
+  font-size: 160%;
+}
+.ldoceEntry .HOMNUM {
+  vertical-align: super;
+  font-size: 12pt;
+  color: red;
+  font-weight: bold;
+}
+
+.ldoceEntry .HWD {
+  display: none;
+}
+
+.ldoceEntry .HYPHENATION,
+.ldoceEntry .PHRVBHWD {
+  font-weight: bold;
+  font-size: 160%;
+  color: red;
+}
+
+.ldoceEntry .LEXUNIT,
+.ldoceEntry .LEXVAR {
+  font-weight: bold;
+}
+
+.ldoceEntry .LINKWORD {
+  color: #364395;
+}
+
+.ldoceEntry .NOTE,
+.ldoceEntry .Noteprompt {
+  display: none;
+}
+
+.ldoceEntry .OBJECT {
+  font-weight: normal;
+}
+
+.ldoceEntry .OPP,
+.ldoceEntry .ORTHVAR,
+.ldoceEntry .PASTPART,
+.ldoceEntry .PASTTENSE {
+  font-weight: bold;
+}
+
+.ldoceEntry .PhrVbEntry {
+  display: block;
+}
+
+.ldoceEntry .PIC,
+.ldoceEntry .PICCAL {
+  display: none;
+}
+
+.ldoceEntry .PLURALFORM {
+  font-weight: bold;
+}
+
+.ldoceEntry .POS,
+.bussdictEntry .POS {
+  color: green;
+  font-weight: bold;
+  margin: 0 0 0 10px;
+}
+
+.ldoceEntry .PRESPART,
+.ldoceEntry .PRESPARTX {
+  font-weight: bold;
+}
+
+.ldoceEntry .PROPFORM {
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.ldoceEntry .PROPFORMPREP {
+  font-weight: bold;
+  margin-left: 20px;
+}
+
+.ldoceEntry .PTandPP,
+.ldoceEntry .PTandPPX {
+  font-weight: bold;
+}
+
+.ldoceEntry .REFHOMNUM {
+  vertical-align: super;
+  font-size: 60%;
+}
+
+.ldoceEntry .REFHWD {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.ldoceEntry .REFLEX {
+  font-weight: bold;
+}
+
+.ldoceEntry .REGISTERLAB {
+  color: purple;
+  font-style: italic;
+}
+
+.ldoceEntry .RELATEDWD {
+  font-weight: bold;
+  color: blue;
+}
+
+.ldoceEntry .RunOn {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.ldoceEntry .Sense {
+  display: block;
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.ldoceEntry .SIGNPOST {
+  background-color: #f18500;
+  color: white;
+  font-weight: bold;
+  font-size: 79%;
+  text-transform: uppercase;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  /* padding-left: 3px; */
+  /* padding-right: 3px; */
+  padding: 0px 5px;
+  letter-spacing: 1px;
+}
+
+.ldoceEntry .STRONG {
+  font-style: italic;
+}
+
+.ldoceEntry .Subsense {
+  display: block;
+  margin-left: 10px;
+}
+
+.ldoceEntry .SUPERL,
+.ldoceEntry .SYN,
+.ldoceEntry .T3PERSSING,
+.ldoceEntry .T3PERSSINGX {
+  font-weight: bold;
+}
+
+.ldoceEntry .UNCLASSIFIED {
+  font-weight: bold;
+}
+
+.ldoceEntry .USAGE {
+  display: none;
+}
+
+.ldoceEntry .GramBox .CROSS .neutral {
+  color: red;
+  margin-right: 10px;
+}
+
+.ldoceEntry .neutral {
+  color: black;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+}
+
+.ldoceEntry .EXPL .cross,
+.ldoceEntry .GramBox .EXPL .dont_say,
+.ldoceEntry .BADEXA {
+  color: red;
+}
+
+.ldoceEntry .italic {
+  font-style: italic;
+  font-weight: normal;
+}
+
+.ldoceEntry .infllab {
+  font-style: italic;
+  font-weight: normal;
+}
+
+.ldoceEntry .warning {
+  font-style: normal;
+  font-weight: bold;
+  color: red;
+}
+
+.ldoceEntry .sensenum {
+  font-style: normal;
+  font-weight: bold;
+  color: black;
+}
+
+.ldoceEntry .synopp,
+.ldoceEntry .FREQ,
+.ldoceEntry .AC {
+  display: inline-block;
+  font-style: normal;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: solid 1px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.bussdictEntry .Box,
+.ldoceEntry .ColloBox,
+.ldoceEntry .ThesBox,
+.ldoceEntry .F2NBox,
+.ldoceEntry .GramBox {
+  display: block;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: solid #364395 1px;
+  padding: 15px;
+  margin: 8px 0;
+}
+
+.GramBox {
+  background-color: #fff;
+  color: #000;
+}
+
+.GramBox .boxheader {
+  line-height: 2em;
+}
+
+.ColloBox .heading {
+  line-height: 2em;
+  margin: 0 10px 0 0;
+}
+
+.ThesBox .heading {
+  line-height: 2em;
+}
+
+.ldoceEntry .HEADING,
+.ldoceEntry .heading {
+  font-weight: bold;
+  font-size: 120%;
+  color: #364395;
+}
+
+.ldoceEntry .HEADING.newline {
+  display: block;
+}
+
+.ldoceEntry .SECHEADING,
+.ldoceEntry .subheading {
+  display: table;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: solid #6f469d 2px;
+  padding-left: 4px;
+  padding-right: 20px;
+  margin: 25px 0 10px 0;
+  font-weight: bold;
+  color: white;
+  text-transform: uppercase;
+  background-color: #6f469d;
+}
+
+.ldoceEntry .Collocate,
+.ldoceEntry .Exponent {
+  display: block;
+  margin: 15px 0 0 6px;
+}
+
+.ldoceEntry .EXPL {
+  display: block;
+}
+
+.ldoceEntry .COLLOC,
+.ldoceEntry .EXP,
+.ldoceEntry .EXPR {
+  font-weight: bold;
+}
+
+.ldoceEntry .keycollo {
+  font-weight: bold;
+  color: #364395;
+}
+
+.ldoceEntry .THESPROPFORM {
+  font-weight: bold;
+}
+
+.ldoceEntry .COLLEXA,
+.ldoceEntry .THESEXA {
+  color: gray;
+  display: block;
+}
+
+.ldoceEntry .LearnerItem {
+  display: block;
+}
+
+.ldoceEntry .GOODCOLLO {
+  font-style: italic;
+}
+
+.ldoceEntry .BADCOLLO {
+  text-decoration: line-through;
+}
+
+.ldoceEntry .DEFBOLD {
+  font-weight: bold;
+}
+
+.ldoceEntry .exafile {
+  color: gray;
+  font-style: normal;
+  font-size: 120%;
+  padding: 5px;
+}
+
+.ldoceEntry .amefile {
+  color: #4693db;
+  font-size: 130%;
+  padding-left: 5px;
+}
+
+.ldoceEntry .brefile {
+  color: #fa6360;
+  font-size: 130%;
+  padding-left: 5px;
+}
+
+/**  no result */
+h1.search_title {
+  display: block;
+  font-size: 1.6em;
+  margin-bottom: 20px;
+}
+.searches,
+.didyoumean {
+  -webkit-column-count: 1;
+  -moz-column-count: 1;
+  column-count: 1;
+  margin-bottom: 10px;
+  list-style: none;
+}
+
+.searches li,
+.didyoumean li {
+  padding: 0.5em;
+  background: aliceblue;
+  margin-bottom: 5px;
+}
+
+.searches li a,
+.didyoumean li a {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/** audio button icon */
+.brefile {
+  /* color pink */
+  filter: brightness(0.5) sepia(1) hue-rotate(-70deg) saturate(5);
+}
+
+.amefile {
+  /* color navy*/
+  filter: brightness(0.2) sepia(1) hue-rotate(180deg) saturate(5);
+}

@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS = {
   blacklist: [] as string[],
   dictTabs: {
     collins: true,
+    longman: false,
     google: false,
     openai: false
   },
@@ -57,8 +58,21 @@ export async function mergeSettings() {
   }
 }
 
+function mergeObjectDeep(target: Record<string, any>, source: Record<string, any>) {
+  for (const key in source) {
+    if (!target.hasOwnProperty(key)) {
+      target[key] = source[key]
+    } else {
+      if (typeof source[key] === 'object') {
+        mergeObjectDeep(target[key], source[key])
+      }
+    }
+  }
+}
+
 export function initSettings() {
   getStorageValues([StorageKey.settings]).then(result => {
+    mergeObjectDeep(result[StorageKey.settings], DEFAULT_SETTINGS)
     setSettings(result[StorageKey.settings] ?? DEFAULT_SETTINGS)
     mergeSettings()
   })
