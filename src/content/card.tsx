@@ -68,19 +68,6 @@ export const WhCard = customElement('wh-card', () => {
     setTabIndex(tabCount())
   }
 
-  const playAudio = (node: HTMLElement, e?: MouseEvent) => {
-    const audioSrc = node?.getAttribute('data-src-mp3') || node?.parentElement?.getAttribute('data-src-mp3')
-    if (audioSrc) {
-      getMessagePort().postMessage({ action: Messages.play_audio, audio: audioSrc })
-      e && e.stopImmediatePropagation()
-      node.classList.add('active')
-      setTimeout(() => {
-        node?.classList.remove('active')
-      }, 1000)
-      return false
-    }
-  }
-
   const onCardClick = (e: MouseEvent) => {
     const node = e.target as HTMLElement
     playAudio(node, e)
@@ -127,15 +114,7 @@ export const WhCard = customElement('wh-card', () => {
   const onDictSettle = () => {
     adjustCardPosition(rect, inDirecting)
     inDirecting = false
-    if (settings().atuoPronounce) {
-      // play amarican english audio first
-      let ameNode = getCardNode().querySelector('.amefile[data-src-mp3]')
-      if (ameNode) {
-        playAudio(ameNode as HTMLElement)
-      } else {
-        playAudio(getCardNode().querySelector('[data-src-mp3]') as HTMLElement)
-      }
-    }
+    runAtuoPronounce()
   }
 
   const inWordContexts = () => {
@@ -152,40 +131,37 @@ export const WhCard = customElement('wh-card', () => {
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     const cardNode = getCardNode()
     const container = cardNode.querySelector('.dict_container')!
-    if (cardNode.classList.contains('card_visible') && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-      const selector = getDictAdapter().sectionSelector
-      if (!selector) return
-      const sections = container.querySelectorAll(selector) as NodeListOf<HTMLElement>
-      const rootMargin = 30
-      const firstInViewportIndex = Array.from(sections).findIndex(s => {
-        return s.offsetTop > container.scrollTop
-      })
-      if (e.key === 'ArrowUp') {
-        if (firstInViewportIndex > 0) {
-          container.scrollTop = sections[firstInViewportIndex - 1].offsetTop - rootMargin
+    if (isCardVisible()) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        const selector = getDictAdapter().sectionSelector
+        if (!selector) return
+        const sections = container.querySelectorAll(selector) as NodeListOf<HTMLElement>
+        const rootMargin = 30
+        const firstInViewportIndex = Array.from(sections).findIndex(s => {
+          return s.offsetTop > container.scrollTop
+        })
+        if (e.key === 'ArrowUp') {
+          if (firstInViewportIndex > 0) {
+            container.scrollTop = sections[firstInViewportIndex - 1].offsetTop - rootMargin
+          }
+        }
+        if (e.key === 'ArrowDown') {
+          if (firstInViewportIndex < sections.length - 1) {
+            container.scrollTop = sections[firstInViewportIndex + 1].offsetTop - rootMargin
+          }
         }
       }
-      if (e.key === 'ArrowDown') {
-        if (firstInViewportIndex < sections.length - 1) {
-          container.scrollTop = sections[firstInViewportIndex + 1].offsetTop - rootMargin
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
+        if (e.key === 'ArrowLeft') {
+          setTabIndex(tabIndex() > 0 ? tabIndex() - 1 : tabCount())
+        }
+        if (e.key === 'ArrowRight' || e.key === 'Tab') {
+          setTabIndex(tabIndex() < tabCount() ? tabIndex() + 1 : 0)
         }
       }
-      e.preventDefault()
-    }
-    if (
-      cardNode.classList.contains('card_visible') &&
-      (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab')
-    ) {
-      if (e.key === 'ArrowLeft') {
-        setTabIndex(tabIndex() > 0 ? tabIndex() - 1 : tabCount())
+      if (e.key === 'Escape') {
+        hidePopupDelay(0)
       }
-      if (e.key === 'ArrowRight' || e.key === 'Tab') {
-        setTabIndex(tabIndex() < tabCount() ? tabIndex() + 1 : 0)
-      }
-      e.preventDefault()
-    }
-    if (cardNode.classList.contains('card_visible') && e.key === 'Escape') {
-      hidePopupDelay(0)
       e.preventDefault()
     }
   })
@@ -261,7 +237,7 @@ export const WhCard = customElement('wh-card', () => {
 
 export function ZenMode() {
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && zenMode() && !getCardNode().classList.contains('card_visible')) {
+    if (e.key === 'Escape' && zenMode() && !isCardVisible()) {
       toggleZenMode()
     }
   })
@@ -348,9 +324,38 @@ function getCardNode() {
   return root?.querySelector('.' + classes.card) as HTMLElement
 }
 
+const isCardVisible = () => {
+  return getCardNode().classList.contains('card_visible')
+}
+
 function getNodeWord(node: HTMLElement | Node | undefined) {
   if (!node) return ''
   return (node.textContent ?? '').toLowerCase()
+}
+
+const playAudio = (node: HTMLElement, e?: MouseEvent) => {
+  const audioSrc = node?.getAttribute('data-src-mp3') || node?.parentElement?.getAttribute('data-src-mp3')
+  if (audioSrc) {
+    getMessagePort().postMessage({ action: Messages.play_audio, audio: audioSrc })
+    e && e.stopImmediatePropagation()
+    node.classList.add('active')
+    setTimeout(() => {
+      node?.classList.remove('active')
+    }, 1000)
+    return false
+  }
+}
+
+const runAtuoPronounce = () => {
+  if (isCardVisible() && settings().atuoPronounce) {
+    // play amarican english audio first
+    let ameNode = getCardNode().querySelector('.amefile[data-src-mp3]')
+    if (ameNode) {
+      playAudio(ameNode as HTMLElement)
+    } else {
+      playAudio(getCardNode().querySelector('[data-src-mp3]') as HTMLElement)
+    }
+  }
 }
 
 function hidePopupDelay(ms: number) {
@@ -403,6 +408,7 @@ function showPopup() {
     setTabIndex(0)
   }
   cardNode.classList.add('card_visible')
+  runAtuoPronounce()
 }
 
 function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
