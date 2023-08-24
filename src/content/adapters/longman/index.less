@@ -42,10 +42,6 @@ a {
   }
 }
 
-.dictentry:has(.bussdictEntry) {
-  display: none;
-}
-
 .content h1.pagetitle,
 .content h1.topicpagetitle {
   margin-bottom: 20px;
@@ -674,4 +670,400 @@ h1.search_title {
 .amefile {
   /* color navy*/
   filter: brightness(0.2) sepia(1) hue-rotate(180deg) saturate(5);
+}
+
+/*****  BUSSDICT  ***************************/
+
+/** if there is contemporary dict, hidden buss dict */
+.dictentry:nth-of-type(2):has(.bussdictEntry) {
+  display: none;
+}
+
+.bussdictEntry .Entry {
+  font-size: 12pt;
+  text-align: justify;
+  display: block;
+  margin-top: 8px;
+}
+
+.bussdictEntry .supp {
+  background-color: gray;
+}
+
+.bussdictEntry .ABBR,
+.bussdictEntry .AMEQUIV,
+.bussdictEntry .BREQUIV,
+.bussdictEntry .COLLO,
+.bussdictEntry .COMP {
+  font-weight: bold;
+}
+
+.bussdictEntry .ACTIV,
+.bussdictEntry .COMMENT {
+  display: none;
+}
+
+.bussdictEntry .ColloExa {
+  display: block;
+  margin-left: 10px;
+}
+
+.bussdictEntry .COLLOINEXA {
+  font-style: italic;
+  font-weight: bold;
+}
+
+.bussdictEntry .DERIV {
+  font-weight: bold;
+  font-size: 120%;
+}
+
+.bussdictEntry .ErrorBox {
+  display: block;
+}
+
+.bussdictEntry .EXAMPLE {
+  display: block;
+  margin-left: 15px;
+  color: gray;
+}
+
+.bussdictEntry .Box .EXAMPLE {
+  display: inline;
+  margin-left: 0px;
+  color: black;
+  font-style: italic;
+}
+
+.bussdictEntry .FIELD {
+  display: none;
+}
+
+.bussdictEntry .FREQ,
+.bussdictEntry .LEVEL {
+  font-weight: bold;
+  color: red;
+}
+
+.bussdictEntry .FULLFORM {
+  font-weight: bold;
+}
+
+.bussdictEntry .GEO,
+span.geo {
+  font-weight: normal;
+  font-style: italic;
+  color: #364395;
+}
+
+.bussdictEntry .GLOSS {
+  font-weight: normal;
+  font-style: normal;
+  color: #364395;
+}
+
+.bussdictEntry .GramExa {
+  display: block;
+  margin-left: 10px;
+}
+
+.bussdictEntry .HINTBOLD,
+.bussdictEntry .HINTTITLE {
+  font-weight: bold;
+}
+
+.bussdictEntry .HINTITALIC {
+  font-style: italic;
+}
+
+.bussdictEntry .HOMNUM {
+  vertical-align: super;
+  font-size: 12pt;
+  font-weight: bold;
+}
+
+.bussdictEntry .HWD {
+  display: none;
+}
+
+.bussdictEntry .HYPHENATION {
+  font-weight: bold;
+  font-size: 160%;
+}
+
+.bussdictEntry .LEXUNIT,
+.bussdictEntry .LEXVAR {
+  font-weight: bold;
+}
+
+.bussdictEntry .LINKWORD {
+  color: #364395;
+}
+
+.bussdictEntry .NOTE,
+.bussdictEntry .Noteprompt {
+  display: none;
+}
+
+.bussdictEntry .OBJECT {
+  font-weight: normal;
+}
+
+.bussdictEntry .OPP,
+.bussdictEntry .ORTHVAR,
+.bussdictEntry .PASTPART,
+.bussdictEntry .PASTTENSE {
+  font-weight: bold;
+}
+
+.bussdictEntry .PhrVbEntry {
+  display: block;
+}
+
+.bussdictEntry .PHRVBHWD {
+  font-weight: bold;
+  color: #364395;
+  font-size: 120%;
+}
+
+.bussdictEntry .PIC,
+.bussdictEntry .PICCAL {
+  display: none;
+}
+
+.bussdictEntry .PLURALFORM {
+  font-weight: bold;
+}
+
+.bussdictEntry .PRESPART,
+.bussdictEntry .PRESPARTX,
+.bussdictEntry .PROPFORM,
+.bussdictEntry .PROPFORMPREP,
+.bussdictEntry .PTandPP,
+.bussdictEntry .PTandPPX {
+  font-weight: bold;
+}
+
+.bussdictEntry .REFHOMNUM {
+  vertical-align: super;
+  font-size: 60%;
+}
+
+.bussdictEntry .REFHWD {
+  text-transform: lowercase;
+  font-style: normal;
+  font-variant: small-caps;
+}
+
+.bussdictEntry .FIELDXX,
+.bussdictEntry .Crossrefto .REFLEX {
+  display: none;
+}
+
+.bussdictEntry .REFLEX {
+  font-weight: bold;
+}
+
+.bussdictEntry .REGISTERLAB {
+  color: #364395;
+  font-style: italic;
+}
+
+.bussdictEntry .RELATEDWD {
+  font-weight: bold;
+}
+
+.bussdictEntry .Sense {
+  display: block;
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.bussdictEntry .SIGNPOST {
+  background-color: gray;
+  color: white;
+  font-weight: bold;
+}
+
+.bussdictEntry .STRONG {
+  font-style: italic;
+}
+
+.bussdictEntry .Subsense {
+  display: block;
+  margin-left: 10px;
+}
+
+.bussdictEntry .SUPERL,
+.bussdictEntry .SYN,
+.bussdictEntry .T3PERSSING,
+.bussdictEntry .T3PERSSINGX,
+.bussdictEntry .UNCLASSIFIED {
+  font-weight: bold;
+}
+
+.bussdictEntry .USAGE {
+  display: none;
+}
+
+span.neutral {
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+}
+
+span.italic,
+span.infllab {
+  font-style: italic;
+  font-weight: normal;
+  font-family: Times New roman;
+}
+
+span.warning {
+  font-style: normal;
+  font-weight: bold;
+  color: red;
+}
+
+span.sensenum {
+  font-style: normal;
+  font-weight: bold;
+  margin-right: 5px;
+  margin-left: 3px;
+}
+
+span.synopp {
+  font-style: normal;
+  font-weight: bold;
+  color: darkblue;
+}
+
+.bussdictEntry .ColloBox,
+.bussdictEntry .ThesBox,
+.bussdictEntry .F2NBox,
+.bussdictEntry .GramBox,
+.bussdictEntry .UsageBox {
+  display: block;
+  border-style: solid;
+}
+
+.bussdictEntry .GramBox.nobox {
+  display: inline;
+  border-style: none;
+  background-color: none;
+}
+
+.bussdictEntry .GramBox.nobox .EXPL {
+  display: inline;
+}
+
+.bussdictEntry .HEADING,
+span.heading,
+.bussdictEntry .Gramref {
+  font-weight: bold;
+  font-size: 120%;
+  color: #364395;
+}
+
+.bussdictEntry .gramref {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.bussdictEntry .HEADING.newline {
+  display: block;
+}
+
+.bussdictEntry .SECHEADING,
+span.subheading {
+  display: block;
+  font-weight: bold;
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.bussdictEntry .Collocate.newline,
+.bussdictEntry .Exponent,
+.bussdictEntry .GramBox .EXPL,
+.bussdictEntry .EXPL.newline {
+  display: block;
+}
+
+.bussdictEntry .Collocate.inline {
+  display: inline;
+}
+
+.bussdictEntry .COLLOC,
+.bussdictEntry .EXP,
+.bussdictEntry .EXPR {
+  font-weight: bold;
+}
+
+.bussdictEntry .COLLOC.key {
+  color: #364395;
+}
+
+span.keycollo {
+  font-weight: bold;
+  color: #364395;
+}
+
+.bussdictEntry .THESPROPFORM {
+  font-weight: bold;
+}
+
+.bussdictEntry .COLLEXA,
+.bussdictEntry .THESEXA,
+.bussdictEntry .GOODCOLLO {
+  font-style: italic;
+}
+
+.bussdictEntry .LearnerItem {
+  display: block;
+}
+
+.bussdictEntry .BADCOLLO,
+.bussdictEntry .BADEXA {
+  text-decoration: line-through;
+}
+
+.bussdictEntry .DEFBOLD {
+  font-weight: bold;
+}
+
+.bussdictEntry .CompareWord,
+.bussdictEntry .CompareWord,
+.bussdictEntry .EXP {
+  display: block;
+}
+
+.bussdictEntry .UNDERLINE {
+  text-decoration: underline;
+}
+
+.bussdictEntry .boxheader {
+  display: block;
+  background-color: #364395;
+  color: white;
+  font-weight: bold;
+}
+
+.bussdictEntry .SubEntry.embedded {
+  margin-top: -5px;
+  margin-bottom: 0px;
+  margin-left: 30px;
+}
+
+.bussdictEntry .SubEntry {
+  display: block;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  margin-left: 20px;
+}
+
+.bussdictEntry .SubEntry .HWD {
+  display: inline;
+  font-weight: bold;
+  font-size: 120%;
+  color: #364395;
 }
