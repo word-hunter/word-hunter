@@ -158,7 +158,6 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
   })
   if (text !== html) {
     autoPauseForYoutubeSubTitle(node.parentElement)
-    console.log(node.parentElement)
     if (shouldKeepOriginNode) {
       node.parentElement?.insertAdjacentHTML(
         'afterend',
