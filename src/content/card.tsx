@@ -39,7 +39,7 @@ const [tabIndex, setTabIndex] = createSignal(0)
 
 export const WhCard = customElement('wh-card', () => {
   const dictTabs = () => settings()['dictTabs']
-  const availableDicts = () => Object.keys(dictTabs()).filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
+  const availableDicts = () => settings().dictOrder.filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
   const adapterName = () => (availableDicts()[tabIndex()] ?? availableDicts()[0]) as AdapterKey
   const getDictAdapter = () => adapters[adapterName()]
   const tabCount = () => availableDicts().length
@@ -399,7 +399,7 @@ function hidePopup(e: Event) {
 
 function showPopup() {
   const dictTabs = () => settings()['dictTabs']
-  const availableDicts = () => Object.keys(dictTabs()).filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
+  const availableDicts = () => settings().dictOrder.filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
   const tabCount = () => availableDicts().length
   const cardNode = getCardNode()
   if (wordContexts().length > 0) {

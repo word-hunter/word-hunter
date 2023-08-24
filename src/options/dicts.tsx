@@ -1,5 +1,15 @@
-import { Index } from 'solid-js'
-import { settings, setSetting } from '../lib'
+import { For, JSXElement, createSignal } from 'solid-js'
+import { settings, setSetting, DictName } from '../lib'
+import {
+  useDragDropContext,
+  DragDropProvider,
+  DragDropSensors,
+  DragOverlay,
+  SortableProvider,
+  createSortable,
+  closestCenter
+} from '@thisbeyond/solid-dnd'
+import type { DragEventHandler } from '@thisbeyond/solid-dnd'
 
 export const DictsSetting = () => {
   const onInput = (e: Event) => {
@@ -8,29 +18,84 @@ export const DictsSetting = () => {
     setSetting('dictTabs', newDicts)
   }
 
+  const [activeItem, setActiveItem] = createSignal<DictName | null>(null)
+  const ids = () => settings().dictOrder
+  const onDragStart: DragEventHandler = ({ draggable }) => setActiveItem(draggable.id as DictName)
+  const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
+    if (draggable && droppable) {
+      const currentItems = ids()
+      const fromIndex = currentItems.indexOf(draggable.id as DictName)
+      const toIndex = currentItems.indexOf(droppable.id as DictName)
+      if (fromIndex !== toIndex) {
+        const updatedItems = currentItems.slice()
+        updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1))
+        setSetting('dictOrder', updatedItems)
+      }
+    }
+  }
+
   return (
     <section class="section">
-      <h2 class="h2">Dicts</h2>
+      <h2 class="h2 tooltip" data-tip="You can drag and drop to adjust the order">
+        Dicts
+      </h2>
       <div class="flex flex-col items-end">
-        <Index each={Object.entries(settings()['dictTabs'])}>
-          {(dict, i) => {
-            return (
-              <label for={dict()[0]} class="label cursor-pointer gap-4">
-                <span class="label-text"> {dict()[0]}</span>
-                <input
-                  type="checkbox"
-                  class="toggle toggle-info"
-                  name="dicts"
-                  id={dict()[0]}
-                  value={dict()[0]}
-                  checked={dict()[1]}
-                  oninput={onInput}
-                />
-              </label>
-            )
-          }}
-        </Index>
+        <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>
+          <DragDropSensors />
+          <div class="column self-stretch">
+            <SortableProvider ids={ids()}>
+              <For each={settings().dictOrder}>
+                {item => {
+                  return (
+                    <Sortable item={item}>
+                      <label for={item} class="label cursor-pointer gap-4 max-w-fit">
+                        <span class="label-text"> {item}</span>
+                        <input
+                          type="checkbox"
+                          class="toggle toggle-info"
+                          name="dicts"
+                          id={item}
+                          value={item}
+                          checked={settings().dictTabs[item]}
+                          oninput={onInput}
+                        />
+                      </label>
+                    </Sortable>
+                  )
+                }}
+              </For>
+            </SortableProvider>
+          </div>
+          <DragOverlay>
+            <div class="sortable flex justify-end text-cyan-400 pr-16">{activeItem()}</div>
+          </DragOverlay>
+        </DragDropProvider>
       </div>
     </section>
+  )
+}
+
+declare module 'solid-js' {
+  namespace JSX {
+    interface Directives {
+      sortable: boolean
+    }
+  }
+}
+
+const Sortable = (props: { item: DictName; children: JSXElement }) => {
+  const sortable = createSortable(props.item)
+  const [state] = useDragDropContext()!
+  return (
+    <div
+      use:sortable
+      class="sortable flex justify-end"
+      classList={{
+        'opacity-25': sortable.isActiveDraggable,
+        'transition-transform': !!state.active.draggable
+      }}
+    >
+      {props.children}
+    </div>
   )
 }

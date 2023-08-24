@@ -2,15 +2,20 @@ import { createSignal } from 'solid-js'
 import { getStorageValues, uploadStorageValues } from './storage'
 import { StorageKey } from '../constant'
 
+const DEFAULT_DICTS = {
+  longman: false,
+  collins: true,
+  google: false,
+  openai: false
+}
+
+export type DictName = keyof typeof DEFAULT_DICTS
+
 export const DEFAULT_SETTINGS = {
   colors: ['#9FB0EF', '#C175D8'],
   blacklist: [] as string[],
-  dictTabs: {
-    collins: true,
-    longman: false,
-    google: false,
-    openai: false
-  },
+  dictTabs: DEFAULT_DICTS,
+  dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
   maxHighlight: 1000,
   atuoPronounce: false,
   openai: {

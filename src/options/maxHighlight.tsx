@@ -9,7 +9,9 @@ export const MaxHighlightSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Max Highlights</h2>
+      <h2 class="h2 tooltip" data-tip="max count of highlighted words in viewport">
+        Max Highlights
+      </h2>
       <div class="flex justify-end">
         <input
           class="input input-bordered"

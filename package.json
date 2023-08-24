@@ -31,6 +31,7 @@
     "vite-plugin-solid": "^2.4.0"
   },
   "dependencies": {
+    "@thisbeyond/solid-dnd": "^0.7.4",
     "@webcomponents/custom-elements": "^1.5.1",
     "component-register": "0.8.2",
     "solid-element": "^1.6.2",
