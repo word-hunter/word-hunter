@@ -67,7 +67,7 @@ export const DictsSetting = () => {
             </SortableProvider>
           </div>
           <DragOverlay>
-            <div class="sortable flex justify-end text-cyan-400 pr-16">{activeItem()}</div>
+            <div class="sortable flex justify-end text-cyan-400 pr-16 font-serif">{activeItem()}</div>
           </DragOverlay>
         </DragDropProvider>
       </div>
