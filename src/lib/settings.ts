@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS = {
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
   maxHighlight: 1000,
   atuoPronounce: false,
+  autoPauseYoutubeVideo: false,
   openai: {
     apiKey: '',
     model: 'text-davinci-003'

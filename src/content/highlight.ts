@@ -131,6 +131,16 @@ const intersectionObserver = new IntersectionObserver(entries => {
   })
 })
 
+function autoPauseForYoutubeSubTitle(node: HTMLElement | null) {
+  if (!location.host.endsWith('youtube.com') || !settings().autoPauseYoutubeVideo) return
+  if (node?.classList.contains('ytp-caption-segment')) {
+    const video = document.querySelector('video')
+    if (!video?.paused) {
+      video?.pause()
+    }
+  }
+}
+
 function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordMap, contexts: ContextMap) {
   const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;')
   const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
@@ -147,6 +157,8 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
     }
   })
   if (text !== html) {
+    autoPauseForYoutubeSubTitle(node.parentElement)
+    console.log(node.parentElement)
     if (shouldKeepOriginNode) {
       node.parentElement?.insertAdjacentHTML(
         'afterend',

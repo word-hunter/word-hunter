@@ -3,6 +3,7 @@ import { MaxHighlightSetting } from './maxHighlight'
 import { DictsSetting } from './dicts'
 import { OpenAISetting } from './openai'
 import { PronounceSetting } from './pronounce'
+import { YoutubeSetting } from './youtube'
 
 export const App = () => {
   return (
@@ -11,6 +12,7 @@ export const App = () => {
       <Backup />
       <DictsSetting />
       <PronounceSetting />
+      <YoutubeSetting />
       <MaxHighlightSetting />
       <OpenAISetting />
     </div>
