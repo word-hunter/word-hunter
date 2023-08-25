@@ -131,24 +131,36 @@ const intersectionObserver = new IntersectionObserver(entries => {
   })
 })
 
-function autoPauseForYoutubeSubTitle(node: HTMLElement | null) {
+let pausedWords: string[] = []
+function autoPauseForYoutubeSubTitle(node: HTMLElement | null, toHighlightWords: string[]) {
   if (!location.host.endsWith('youtube.com') || !settings().autoPauseYoutubeVideo) return
   if (node?.classList.contains('ytp-caption-segment')) {
     const video = document.querySelector('video')
     if (!video?.paused) {
-      video?.pause()
+      let shouldPause = false
+      for (const word of toHighlightWords) {
+        if (!pausedWords.includes(word)) {
+          pausedWords.push(word)
+          shouldPause = true
+        }
+      }
+      if (shouldPause) {
+        video?.pause()
+      }
     }
   }
 }
 
 function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordMap, contexts: ContextMap) {
   const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;')
+  const toHighlightWords: string[] = []
   const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
     const w = word.toLowerCase()
     if (w in dict) {
       if (w in wordsKnown) {
         return origin
       } else {
+        toHighlightWords.push(w)
         const contextAttr = contexts[w]?.length > 0 ? `have_context="${contexts[w]?.length}"` : ''
         return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${postfix}`
       }
@@ -157,7 +169,7 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
     }
   })
   if (text !== html) {
-    autoPauseForYoutubeSubTitle(node.parentElement)
+    autoPauseForYoutubeSubTitle(node.parentElement, toHighlightWords)
     if (shouldKeepOriginNode) {
       node.parentElement?.insertAdjacentHTML(
         'afterend',
