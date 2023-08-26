@@ -2,6 +2,9 @@ import { Messages, WordMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, mergeKnowns } from '../lib/storage'
 import { mergeSettings } from '../lib/settings'
+import { getAllTenses } from '../lib/tense'
+
+let dict: WordMap = {}
 
 async function readDict(): Promise<WordMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -69,7 +72,12 @@ async function setup() {
         switch (action) {
           case Messages.set_known:
             storage.get([StorageKey.known], result => {
-              const knownWords = { ...(result[StorageKey.known] ?? {}), [word]: 0 }
+              const wordsWithAllTense = getAllTenses(word, dict)
+              const toAddWords: WordMap = {}
+              for (const w of wordsWithAllTense) {
+                toAddWords[w] = 'o'
+              }
+              const knownWords = { ...(result[StorageKey.known] ?? {}), ...toAddWords }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
               syncUpKnowns([word], knownWords)
@@ -77,7 +85,7 @@ async function setup() {
             break
           case Messages.set_all_known:
             storage.get([StorageKey.known], result => {
-              const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 0 }), {})
+              const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
               const knownWords = { ...(result[StorageKey.known] ?? {}), ...addedWords }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
@@ -152,8 +160,9 @@ async function setup() {
   await mergeKnowns()
   await mergeSettings()
 
-  readDict().then(dict => {
-    storage.set({ dict: dict }, () => {
+  readDict().then(localDict => {
+    dict = localDict
+    storage.set({ dict: localDict }, () => {
       console.log('[storage] dict set up')
     })
   })

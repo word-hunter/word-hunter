@@ -6,7 +6,6 @@ export const LevelSetting = () => {
   const onInput = (e: Event) => {
     const target = e.target as HTMLInputElement
     const level = target.value as LevelKey
-    console.log(level, target.checked)
     if (target.checked && !settings().levels.includes(level)) {
       setSetting('levels', [...settings().levels, level])
     } else {
@@ -16,10 +15,6 @@ export const LevelSetting = () => {
       )
     }
   }
-
-  createEffect(() => {
-    console.log(settings().levels)
-  })
 
   return (
     <section class="section">
