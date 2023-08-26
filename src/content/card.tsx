@@ -22,7 +22,7 @@ import {
 import { getMessagePort } from '../lib/port'
 import { Dict } from './dict'
 import { adapters, AdapterKey } from './adapters'
-import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain, settings } from '../lib'
+import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain, settings, explode } from '../lib'
 import { readBlacklist } from '../lib/blacklist'
 
 let timerShowRef: number
@@ -58,6 +58,7 @@ export const WhCard = customElement('wh-card', () => {
     markAsKnown(word)
     setCurWord('')
     hidePopupDelay(0)
+    explode(e.pageX, e.pageY)
   }
 
   const onAddContext = (e: MouseEvent) => {
