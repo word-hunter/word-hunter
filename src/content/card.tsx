@@ -452,9 +452,6 @@ function bindEvents() {
     const node = e.target as HTMLElement
 
     if (node.classList.contains(classes.mark)) {
-      if (!zenMode() && !node.classList.contains(classes.in_viewport)) {
-        return false
-      }
       // skip when redirecting in card dictionary
       if (inDirecting) {
         inDirecting = false

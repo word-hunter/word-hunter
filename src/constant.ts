@@ -28,7 +28,6 @@ export const classes = {
   mark_parent: '__mark_parent',
   known: '__word_known',
   unknown: '__word_unknown',
-  in_viewport: '__word_in_viewport',
   card: 'word_card',
   zen_mode: '__zen_mode',
   excluded: '__excluded'

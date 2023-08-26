@@ -1,5 +1,4 @@
 import { Backup } from './backup'
-import { MaxHighlightSetting } from './maxHighlight'
 import { DictsSetting } from './dicts'
 import { OpenAISetting } from './openai'
 import { PronounceSetting } from './pronounce'
@@ -15,7 +14,6 @@ export const App = () => {
       <LevelSetting />
       <PronounceSetting />
       <YoutubeSetting />
-      <MaxHighlightSetting />
       <OpenAISetting />
     </div>
   )

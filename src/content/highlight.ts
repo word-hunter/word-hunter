@@ -117,20 +117,6 @@ function getTextNodes(node: Node): CharacterData[] {
   return textNodes
 }
 
-const intersectionObserver = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    const el = entry.target as HTMLElement
-    if (entry.isIntersecting) {
-      if (getHighlightCount(true) > settings()['maxHighlight']) {
-        return
-      }
-      el.classList.add(classes.in_viewport)
-    } else {
-      el.classList.remove(classes.in_viewport)
-    }
-  })
-})
-
 let pausedWords: string[] = []
 function autoPauseForYoutubeSubTitle(node: HTMLElement | null, toHighlightWords: string[]) {
   if (!location.host.endsWith('youtube.com') || !settings().autoPauseYoutubeVideo) return
@@ -184,12 +170,6 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
       newNode.className = classes.mark_parent
       newNode.innerHTML = html
       node.replaceWith(newNode)
-
-      // check if element is in viewport
-      const marks = newNode.querySelectorAll('.' + classes.mark)
-      marks.forEach(mark => {
-        intersectionObserver.observe(mark)
-      })
     }
   }
 }
@@ -277,7 +257,7 @@ function observeDomChange() {
 }
 
 function getHighlightCount(isVisible?: boolean) {
-  const selector = isVisible ? `.${classes.unknown}.${classes.in_viewport}` : `.${classes.unknown}`
+  const selector = isVisible ? `.${classes.unknown}` : `.${classes.unknown}`
   const unknownWords = Array.from(document.querySelectorAll(selector)).map(w =>
     (w as HTMLElement).innerText.toLowerCase()
   )

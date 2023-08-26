@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import { getStorageValues, uploadStorageValues } from './storage'
-import { StorageKey, LevelKey, WordMap, Levels } from '../constant'
+import { StorageKey, LevelKey, WordMap } from '../constant'
 
 const DEFAULT_DICTS = {
   longman: true,
@@ -16,7 +16,6 @@ export const DEFAULT_SETTINGS = {
   blacklist: [] as string[],
   dictTabs: DEFAULT_DICTS,
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
-  maxHighlight: 1000,
   atuoPronounce: false,
   autoPauseYoutubeVideo: false,
   levels: ['p', 'm', 'h', '4', '6', 'g', 'o'] as LevelKey[],

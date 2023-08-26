@@ -17,10 +17,13 @@ After you mark as many words as possible for "known", the words highlighted are 
 
 <img style="max-width: 100%;" src="./screenshot-1.png" />
 
-## How to custom max highlight count
+## How to Skip basic words
 
-You can open the extension popup panel and set the max highlight count in settings.
-It will only highlight new words when the highlighted words in the viewport don't exceed max highlight count.
+You can change which levels of words to be highlighted in settings.
+
+let's say you want to skip the level below CET-6.
+
+<img style="max-width: 50%;" src="./screenshot-level.png" />
 
 ## How to mark faster
 
