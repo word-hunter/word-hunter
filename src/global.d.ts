@@ -5,5 +5,6 @@ declare const __APP_VERSION__: string
 declare interface Window {
   __toggleZenMode: () => void
   __updateAppIcon: () => void
+  __updateDicts: () => void
   __getPageStatistics: () => readonly [number, number]
 }

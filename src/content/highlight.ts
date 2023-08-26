@@ -12,7 +12,7 @@ import {
   StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns } from '../lib'
+import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns, getSelectedDicts } from '../lib'
 import { getMessagePort } from '../lib/port'
 
 let wordsKnown: WordMap = {}
@@ -31,7 +31,7 @@ function getNodeWord(node: HTMLElement | Node | undefined) {
 export function markAsKnown(word: string) {
   if (!wordRegex.test(word)) return
 
-  wordsKnown[word] = 0
+  wordsKnown[word] = 'o'
   getMessagePort().postMessage({ action: Messages.set_known, word: word })
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (getNodeWord(node) === word) {
@@ -226,12 +226,20 @@ async function waitForDictPrepare(): Promise<WordMap> {
 
 async function readStorageAndHighlight() {
   const result = await chrome.storage.local.get(['dict', StorageKey.known, StorageKey.context])
-  dict = result.dict || (await waitForDictPrepare())
+  dict = await getSelectedDicts(result.dict || (await waitForDictPrepare()))
   wordsKnown = result[StorageKey.known] || {}
   contexts = result[StorageKey.context] || {}
 
   const textNodes = getTextNodes(document.body)
   highlight(textNodes, dict, wordsKnown, contexts)
+}
+
+function resetHighlight() {
+  dict = {}
+  document.querySelectorAll('.' + classes.mark_parent).forEach(node => {
+    const text = node.textContent ?? ''
+    node.replaceWith(document.createTextNode(text))
+  })
 }
 
 function observeDomChange() {
@@ -297,6 +305,11 @@ function getPageStatistics() {
 
 // this function expose to be called in popup page
 window.__getPageStatistics = getPageStatistics
+
+window.__updateDicts = () => {
+  resetHighlight()
+  readStorageAndHighlight()
+}
 
 export function isWordKnownAble(word: string) {
   return word in dict && !(word in wordsKnown)

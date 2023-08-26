@@ -1,9 +1,9 @@
 import { createSignal } from 'solid-js'
 import { getStorageValues, uploadStorageValues } from './storage'
-import { StorageKey } from '../constant'
+import { StorageKey, LevelKey, WordMap, Levels } from '../constant'
 
 const DEFAULT_DICTS = {
-  longman: false,
+  longman: true,
   collins: true,
   google: false,
   openai: false
@@ -19,6 +19,7 @@ export const DEFAULT_SETTINGS = {
   maxHighlight: 1000,
   atuoPronounce: false,
   autoPauseYoutubeVideo: false,
+  levels: ['p', 'm', 'h', '4', '6', 'g', 'o'] as LevelKey[],
   openai: {
     apiKey: '',
     model: 'text-davinci-003'
@@ -45,23 +46,31 @@ export async function mergeSettings() {
   const localSetting = await chrome.storage.local.get(StorageKey.settings)
   const syncSetting = await chrome.storage.sync.get(StorageKey.settings)
 
+  let mergedSettings: SettingType = { ...DEFAULT_SETTINGS }
+
   if (
-    syncSetting[StorageKey.settings] &&
-    JSON.stringify(syncSetting[StorageKey.settings]) !== JSON.stringify(localSetting[StorageKey.settings])
+    localSetting[StorageKey.settings] &&
+    JSON.stringify(localSetting[StorageKey.settings]) !== JSON.stringify(mergedSettings)
   ) {
-    const mergedSettings = {
-      ...DEFAULT_SETTINGS,
-      ...(localSetting[StorageKey.settings] ?? {})
-    }
-    for (const key in syncSetting[StorageKey.settings]) {
-      if (syncSetting[StorageKey.settings][key]) {
-        mergedSettings[key] = syncSetting[StorageKey.settings][key]
+    for (const key in localSetting[StorageKey.settings]) {
+      if (localSetting[StorageKey.settings][key]) {
+        ;(mergedSettings as any)[key] = localSetting[StorageKey.settings][key]
       }
     }
-    await chrome.storage.local.set({ settings: mergedSettings })
-    await uploadStorageValues([StorageKey.settings])
-    await setSettings(mergedSettings)
   }
+  if (
+    syncSetting[StorageKey.settings] &&
+    JSON.stringify(syncSetting[StorageKey.settings]) !== JSON.stringify(mergedSettings)
+  ) {
+    for (const key in syncSetting[StorageKey.settings]) {
+      if (syncSetting[StorageKey.settings][key]) {
+        ;(mergedSettings as any)[key] = syncSetting[StorageKey.settings][key]
+      }
+    }
+  }
+  await chrome.storage.local.set({ settings: mergedSettings })
+  await uploadStorageValues([StorageKey.settings])
+  await setSettings(mergedSettings)
 }
 
 function mergeObjectDeep(target: Record<string, any>, source: Record<string, any>) {
@@ -76,6 +85,19 @@ function mergeObjectDeep(target: Record<string, any>, source: Record<string, any
   }
 }
 
+export async function getSelectedDicts(dict: WordMap) {
+  await mergeSettings()
+  const levels = settings().levels
+  const newDict: WordMap = {}
+  for (const word in dict) {
+    const level = dict[word] ?? 'o'
+    if (levels.includes(level)) {
+      newDict[word] = level
+    }
+  }
+  return newDict
+}
+
 export function initSettings() {
   getStorageValues([StorageKey.settings]).then(result => {
     mergeObjectDeep(result[StorageKey.settings], DEFAULT_SETTINGS)
@@ -86,7 +108,11 @@ export function initSettings() {
   // update context script after settings changed
   const listener = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
     if (namespace === 'local' && changes[StorageKey.settings]) {
-      setSettings(changes[StorageKey.settings].newValue)
+      const { oldValue, newValue } = changes[StorageKey.settings]
+      setSettings(newValue)
+      if (JSON.stringify(oldValue?.levels) !== JSON.stringify(newValue?.levels)) {
+        window.__updateDicts?.()
+      }
     }
   }
   if (typeof window !== 'undefined') {

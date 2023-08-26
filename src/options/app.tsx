@@ -4,6 +4,7 @@ import { DictsSetting } from './dicts'
 import { OpenAISetting } from './openai'
 import { PronounceSetting } from './pronounce'
 import { YoutubeSetting } from './youtube'
+import { LevelSetting } from './levels'
 
 export const App = () => {
   return (
@@ -11,6 +12,7 @@ export const App = () => {
       <h1 class="font-extrabold text-2xl text-center">Settings</h1>
       <Backup />
       <DictsSetting />
+      <LevelSetting />
       <PronounceSetting />
       <YoutubeSetting />
       <MaxHighlightSetting />

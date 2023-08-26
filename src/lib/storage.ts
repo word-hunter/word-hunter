@@ -31,7 +31,7 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
 
         if (!toSyncKnowns[key].includes(word)) {
           toSyncKnowns[key].push(word)
-          localKnowns[word] = 0
+          localKnowns[word] = 'o'
         }
         break
       }

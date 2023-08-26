@@ -1,4 +1,16 @@
-export type WordMap = Record<string, 0>
+export const Levels = [
+  ['p', 'Primary School'],
+  ['m', 'Middle School'],
+  ['h', 'High School'],
+  ['4', 'CET-4'],
+  ['6', 'CET-6'],
+  ['g', 'GRE 8000'],
+  ['o', '∞']
+] as const
+
+export type LevelKey = typeof Levels[number][0]
+
+export type WordMap = Record<string, LevelKey>
 
 export type WordContext = {
   url: string
