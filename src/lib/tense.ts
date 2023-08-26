@@ -91,6 +91,11 @@ function findNormalTense(word: string, dict: WordMap) {
     if (normal in dict) return findNormalTense(normal, dict)
   }
 
+  if (word.endsWith('ly')) {
+    const normal = word.replace(/ly$/, '')
+    if (normal in dict) return findNormalTense(normal, dict)
+  }
+
   if (word.endsWith('es')) {
     const normal = word.slice(0, -2)
     if (normal in dict) return findNormalTense(normal, dict)
