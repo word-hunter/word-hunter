@@ -258,10 +258,14 @@ function observeDomChange() {
 
 function getHighlightCount(isVisible?: boolean) {
   const selector = isVisible ? `.${classes.unknown}` : `.${classes.unknown}`
-  const unknownWords = Array.from(document.querySelectorAll(selector)).map(w =>
-    (w as HTMLElement).innerText.toLowerCase()
-  )
-  return new Set(unknownWords).size
+  let haveContextCount = 0
+  const unknownWords = Array.from(document.querySelectorAll(selector)).map(w => {
+    if (w.hasAttribute('have_context')) {
+      haveContextCount++
+    }
+    return (w as HTMLElement).innerText.toLowerCase()
+  })
+  return [new Set(unknownWords).size, haveContextCount]
 }
 
 function getPageStatistics() {
@@ -279,8 +283,8 @@ function getPageStatistics() {
     })
   })
   const wordCount = new Set(words).size
-  const unknownCount = getHighlightCount()
-  return [unknownCount, wordCount] as const
+  const [unknownCount, haveContextCount] = getHighlightCount()
+  return [unknownCount - haveContextCount, haveContextCount, wordCount] as const
 }
 
 // this function expose to be called in popup page

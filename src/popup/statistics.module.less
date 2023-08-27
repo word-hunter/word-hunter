@@ -9,6 +9,7 @@
   .pie {
     margin-top: 20px;
     width: 100px;
+    height: 100px;
     background: #ccc;
     border-radius: 50%;
     border: 0.15em solid #fff;
@@ -19,6 +20,9 @@
       fill: none;
       stroke-width: 32;
       transition: stroke-dasharray 0.5s ease-in;
+      &:last-child {
+        animation-delay: 0.5s;
+      }
     }
   }
 }

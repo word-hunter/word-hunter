@@ -6,5 +6,5 @@ declare interface Window {
   __toggleZenMode: () => void
   __updateAppIcon: () => void
   __updateDicts: () => void
-  __getPageStatistics: () => readonly [number, number]
+  __getPageStatistics: () => readonly [number, number, number]
 }
