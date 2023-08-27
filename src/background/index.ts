@@ -22,8 +22,11 @@ function updateBadge(wordsKnown: WordMap) {
   if (knownWordsCount >= 10000) {
     badgeText = badgeText.at(0)! + badgeText.at(1) + 'k'
   }
-  chrome.action.setBadgeText({ text: badgeText }, () => {})
-  chrome.action.setBadgeBackgroundColor({ color: '#bbb' }, () => {})
+  chrome.action.setBadgeText({ text: String(knownWordsCount) })
+  setTimeout(() => {
+    chrome.action.setBadgeText({ text: badgeText })
+  }, 5000)
+  chrome.action.setBadgeBackgroundColor({ color: '#bbb' })
   chrome.action.setTitle({ title: '✔ ' + String(knownWordsCount) })
 }
 
