@@ -44,7 +44,11 @@ export const getWordContext = (node: HTMLElement, originWord?: string): string =
 function getNodeTextRecursive(node: HTMLElement | CharacterData): string {
   if (!node) return ''
   if (node.nodeType === Node.ELEMENT_NODE) {
-    return ([...node.childNodes] as HTMLElement[]).map(getNodeTextRecursive).join(' ').replaceAll('  ', ' ')
+    return ([...node.childNodes] as HTMLElement[])
+      .filter(node => node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE)
+      .map(getNodeTextRecursive)
+      .join(' ')
+      .replaceAll('  ', ' ')
   }
   return node.textContent ?? ''
 }
