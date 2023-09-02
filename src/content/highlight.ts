@@ -312,7 +312,7 @@ function listenBackgroundMessage() {
         _makeAsKnown(word)
         break
       case Messages.set_all_known:
-        _makeAsAllKnown(word)
+        _makeAsAllKnown(msg.words)
         break
       case Messages.add_context:
         _addContext(context)
