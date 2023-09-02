@@ -33,6 +33,9 @@ export function markAsKnown(word: string) {
 
   wordsKnown[word] = 'o'
   getMessagePort().postMessage({ action: Messages.set_known, word: word })
+}
+
+function _makeAsKnown(word: string) {
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (getNodeWord(node) === word) {
       node.className = classes.known
@@ -51,12 +54,15 @@ export function addContext(word: string, text: string) {
     timestamp: Date.now(),
     favicon: getFaviconUrl()
   }
+  getMessagePort().postMessage({ action: Messages.add_context, word: word, context })
+}
 
+function _addContext(context: WordContext) {
+  const word = context.word
   if (!(contexts[word] ?? []).find(c => c.text === context.text)) {
     contexts[word] = [...(contexts[word] ?? []), context]
   }
 
-  getMessagePort().postMessage({ action: Messages.add_context, word: word, context })
   setWordContexts(contexts[word])
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (getNodeWord(node) === word) {
@@ -67,7 +73,9 @@ export function addContext(word: string, text: string) {
 
 export function deleteContext(context: WordContext) {
   getMessagePort().postMessage({ action: Messages.delete_context, word: context.word, context })
+}
 
+function _deleteContext(context: WordContext) {
   const index = (contexts[context.word] ?? []).findIndex(c => c.text === context.text)
   if (index > -1) {
     contexts[context.word].splice(index, 1)
@@ -86,20 +94,21 @@ export function deleteContext(context: WordContext) {
 }
 
 export function markAsAllKnown() {
+  const words = Array.from(document.querySelectorAll('.' + classes.unknown))
+    .map(node => {
+      return getNodeWord(node)
+    })
+    .filter(word => wordRegex.test(word) && !zenExcludeWords().includes(word))
+  getMessagePort().postMessage({ action: Messages.set_all_known, words })
+}
+
+function _makeAsAllKnown(words: string[]) {
   const nodes = document.querySelectorAll('.' + classes.unknown)
-  const words: string[] = []
-  const toMarkedNotes: Element[] = []
   nodes.forEach(node => {
     const word = getNodeWord(node)
-    if (wordRegex.test(word) && !zenExcludeWords().includes(word)) {
-      words.push(word)
-      toMarkedNotes.push(node)
+    if (wordRegex.test(word) && words.includes(word)) {
+      node.className = classes.known
     }
-  })
-
-  getMessagePort().postMessage({ action: Messages.set_all_known, words })
-  toMarkedNotes.forEach(node => {
-    node.className = classes.known
   })
 }
 
@@ -295,6 +304,28 @@ window.__updateDicts = () => {
   readStorageAndHighlight()
 }
 
+function listenBackgroundMessage() {
+  chrome.runtime.onMessage.addListener((msg, sender: chrome.runtime.MessageSender) => {
+    const { action, word, context } = msg
+    switch (action) {
+      case Messages.set_known:
+        _makeAsKnown(word)
+        break
+      case Messages.set_all_known:
+        _makeAsAllKnown(word)
+        break
+      case Messages.add_context:
+        _addContext(context)
+        break
+      case Messages.delete_context:
+        _deleteContext(context)
+        break
+      default:
+        break
+    }
+  })
+}
+
 export function isWordKnownAble(word: string) {
   return word in dict && !(word in wordsKnown)
 }
@@ -311,4 +342,5 @@ export async function init() {
   await mergeKnowns()
   await readStorageAndHighlight()
   observeDomChange()
+  listenBackgroundMessage()
 }

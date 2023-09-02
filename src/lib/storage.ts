@@ -37,7 +37,17 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
       }
     }
   }
-  await chrome.storage.sync.set(toSyncKnowns)
+
+  // do not sync the keys doesn't changed
+  for (const key of STORAGE_KEY_INDICES) {
+    const remoteWordsOfkey = (await chrome.storage.sync.get(key))[key] ?? []
+    if (toSyncKnowns[key] && remoteWordsOfkey.length === toSyncKnowns[key].length) {
+      delete toSyncKnowns[key]
+    }
+  }
+  if (Object.keys(toSyncKnowns).length > 0) {
+    await chrome.storage.sync.set(toSyncKnowns)
+  }
 }
 
 export async function mergeKnowns() {

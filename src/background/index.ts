@@ -44,6 +44,14 @@ const createAudioWindow = async (audio: string) => {
   })
 }
 
+function sendMessageToAllTabs(msg: any) {
+  chrome.tabs.query({}, tabs => {
+    for (const tab of tabs) {
+      chrome.tabs.sendMessage(tab.id!, msg)
+    }
+  })
+}
+
 /**
  * https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension/66618269#66618269
  * chrome connection will be auto disconnected after 5 minutes
@@ -84,6 +92,7 @@ async function setup() {
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
               syncUpKnowns([word], knownWords)
+              sendMessageToAllTabs({ action, word })
             })
             break
           case Messages.set_all_known:
@@ -93,6 +102,7 @@ async function setup() {
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
               syncUpKnowns(words, knownWords)
+              sendMessageToAllTabs({ action, words })
             })
             break
           case Messages.add_context:
@@ -103,6 +113,7 @@ async function setup() {
                 const newContexts = { ...contexts, [word]: [...wordContexts, context] }
                 storage.set({ [StorageKey.context]: newContexts })
               }
+              sendMessageToAllTabs({ action, context })
             })
             break
           case Messages.delete_context:
@@ -116,6 +127,7 @@ async function setup() {
                 storage.set({
                   [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest
                 })
+                sendMessageToAllTabs({ action, context })
               }
             })
             break
