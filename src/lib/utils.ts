@@ -17,40 +17,56 @@ export const getDocumentTitle = () => {
   return document.title.substring(0, 40)
 }
 
-export const getWordContext = (node: HTMLElement, originWord?: string): string => {
-  const word = originWord ?? node.textContent ?? ''
+export const getWordContext = (node: Node, originWord?: string): string => {
+  let text = originWord ?? node.textContent ?? ''
   const pNode = node.parentElement
-
   const shouldContinue =
     pNode &&
+    node.textContent == pNode.textContent &&
     (getComputedStyle(pNode).display.startsWith('inline') ||
       // skip class for youtube video captions in one-line, let it expand to multiple lines
       pNode.classList.contains('caption-visual-line'))
 
   if (shouldContinue) {
-    return getWordContext(pNode, word)
+    return getWordContext(pNode, text)
   }
 
-  const context = getNodeTextRecursive(pNode as HTMLElement)
-  const maxContextLength = 400
+  let left = node.previousSibling
+  let right = node.nextSibling
 
-  if (context.length > maxContextLength) {
-    const matched = context.match(new RegExp(`[^.]{0,${maxContextLength}}(${word})[^.]{0,${maxContextLength}}`))
-    return matched ? matched[0] : context.substring(0, maxContextLength)
+  while (left) {
+    const leftText =
+      left.nodeType === Node.ELEMENT_NODE || left.nodeType === Node.TEXT_NODE ? left.textContent ?? '' : ''
+    if (leftText.includes('.')) {
+      text = leftText.split('.').at(-1) + ' ' + text
+      left = null
+    } else {
+      text = leftText + ' ' + text
+      left = left.previousSibling
+    }
   }
-  return context
-}
 
-function getNodeTextRecursive(node: HTMLElement | CharacterData): string {
-  if (!node) return ''
-  if (node.nodeType === Node.ELEMENT_NODE) {
-    return ([...node.childNodes] as HTMLElement[])
-      .filter(node => node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE)
-      .map(getNodeTextRecursive)
-      .join(' ')
-      .replaceAll('  ', ' ')
+  while (right) {
+    const rightText =
+      right.nodeType === Node.ELEMENT_NODE || right.nodeType === Node.TEXT_NODE ? right.textContent ?? '' : ''
+    if (rightText.includes('.')) {
+      text = text + ' ' + rightText.split('.')[0] + '.'
+      right = null
+    } else {
+      text = text + ' ' + rightText
+      if (right.nextSibling) {
+        right = right.nextSibling
+      } else {
+        if (right.parentElement?.classList.contains('__mark_parent')) {
+          right = right.parentElement?.nextSibling
+        } else {
+          right = null
+        }
+      }
+    }
   }
-  return node.textContent ?? ''
+
+  return text
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {

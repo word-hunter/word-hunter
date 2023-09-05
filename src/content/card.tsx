@@ -403,9 +403,7 @@ function showPopup() {
   const availableDicts = () => settings().dictOrder.filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
   const tabCount = () => availableDicts().length
   const cardNode = getCardNode()
-  if (wordContexts().length > 0) {
-    setTabIndex(tabCount())
-  } else if (tabIndex() === tabCount()) {
+  if (tabIndex() === tabCount()) {
     setTabIndex(0)
   }
   cardNode.classList.add('card_visible')
@@ -436,7 +434,7 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
   }
 
   if (top + c_height > window.innerHeight) {
-    top = window.innerHeight - c_height - MARGIN_X
+    top = window.innerHeight - c_height - MARGIN_X - 10
   }
 
   if (!onlyOutsideViewport || c_y < 0 || c_y + c_height > window.innerHeight) {
