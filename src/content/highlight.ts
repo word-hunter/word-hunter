@@ -115,7 +115,8 @@ function _makeAsAllKnown(words: string[]) {
 function getTextNodes(node: Node): CharacterData[] {
   if (node.nodeType === Node.TEXT_NODE) {
     return [node as CharacterData]
-  } else if (invalidTags.includes(node.nodeName)) {
+    // https://johnresig.com/blog/nodename-case-sensitivity/
+  } else if (invalidTags.includes(node.nodeName?.toUpperCase())) {
     return []
   }
 
@@ -187,7 +188,7 @@ function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMa
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
-    if (invalidTags.includes(node.parentNode?.nodeName ?? '')) {
+    if (invalidTags.includes(node.parentNode?.nodeName?.toUpperCase() ?? '')) {
       continue
     }
 
