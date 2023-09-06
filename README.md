@@ -15,7 +15,11 @@ At first, all the words on the web page are "unknown" by default. You can hover 
 
 After you mark as many words as possible for "known", the words highlighted are those you really don't know, you can find them at a glance.
 
-<img style="max-width: 100%;" src="./screenshot-1.png" />
+<img style="max-width: 100%;" src="./screenshots/screenshot-1.png" />
+
+It also works for youtube video subtitles.
+
+<img style="max-width: 100%;" src="./screenshots/screenshot-youtube.png" />
 
 ## How to Skip basic words
 
@@ -23,7 +27,7 @@ You can change which levels of words to be highlighted in settings.
 
 let's say you want to skip the level below CET-6.
 
-<img style="max-width: 50%;" src="./screenshot-level.png" />
+<img style="max-width: 300" src="./screenshots/screenshot-level.png" />
 
 ## How to mark faster
 
