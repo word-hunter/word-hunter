@@ -3,8 +3,8 @@ import { getStorageValues, uploadStorageValues } from './storage'
 import { StorageKey, LevelKey, WordMap } from '../constant'
 
 const DEFAULT_DICTS = {
-  longman: true,
   collins: true,
+  longman: true,
   google: false,
   openai: false
 }
@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS = {
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
   atuoPronounce: false,
   autoPauseYoutubeVideo: false,
-  levels: ['p', 'm', 'h', '4', '6', 'g', 'o'] as LevelKey[],
+  levels: ['4', '6', 'g', 'o'] as LevelKey[],
   openai: {
     apiKey: '',
     model: 'text-davinci-003'
