@@ -21,11 +21,7 @@ export const getWordContext = (node: Node, originWord?: string): string => {
   let text = originWord ?? node.textContent ?? ''
   const pNode = node.parentElement
   const shouldContinue =
-    pNode &&
-    node.textContent == pNode.textContent &&
-    (getComputedStyle(pNode).display.startsWith('inline') ||
-      // skip class for youtube video captions in one-line, let it expand to multiple lines
-      pNode.classList.contains('caption-visual-line'))
+    pNode && text?.trim() == pNode.textContent?.trim() && getComputedStyle(pNode).display.startsWith('inline')
 
   if (shouldContinue) {
     return getWordContext(pNode, text)
@@ -54,19 +50,29 @@ export const getWordContext = (node: Node, originWord?: string): string => {
       right = null
     } else {
       text = text + ' ' + rightText
-      if (right.nextSibling) {
-        right = right.nextSibling
-      } else {
-        if (right.parentElement?.classList.contains('__mark_parent')) {
-          right = right.parentElement?.nextSibling
-        } else {
-          right = null
-        }
-      }
+      right = findRightSibling(right)
     }
   }
 
   return text
+}
+
+function findRightSibling(el: Node) {
+  if (el.nextSibling) {
+    return el.nextSibling
+  } else {
+    const p = el.parentElement
+    if (
+      p?.classList.contains('__mark_parent') ||
+      // handle class for youtube video captions in one-line, let it expand to multiple lines
+      p?.classList.contains('caption-visual-line') ||
+      p?.classList.contains('ytp-caption-segment')
+    ) {
+      return findRightSibling(p)
+    } else {
+      return null
+    }
+  }
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {
