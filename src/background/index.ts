@@ -30,9 +30,62 @@ function updateBadge(wordsKnown: WordMap) {
   chrome.action.setTitle({ title: '✔ ' + String(knownWordsCount) })
 }
 
-const createAudioWindow = async (audio: string) => {
-  let url = chrome.runtime.getURL('audio.html')
-  url = `${url}?audio=${encodeURIComponent(audio)}`
+const playAudio = async (audio: string) => {
+  const autioPageUrl = chrome.runtime.getURL('audio.html')
+
+  if (!chrome.offscreen) {
+    return createAudioWindow(`${autioPageUrl}?audio=${encodeURIComponent(audio)}`)
+  }
+
+  await setupOffscreenDocument(autioPageUrl)
+  chrome.runtime.sendMessage({
+    type: 'play-audio',
+    target: 'offscreen',
+    data: audio
+  })
+}
+
+let creating: any // A global promise to avoid concurrency issues
+const setupOffscreenDocument = async (path: string) => {
+  // Check all windows controlled by the service worker to see if one
+  // of them is the offscreen document with the given path
+  if (await checkOffscreenDocumentExist(path)) return
+
+  if (creating) {
+    // create offscreen document
+    await creating
+  } else {
+    creating = chrome.offscreen.createDocument({
+      url: path,
+      reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
+      justification: 'play audio for word pronunciation'
+    })
+    await creating
+    creating = null
+  }
+}
+
+const checkOffscreenDocumentExist = async (offscreenUrl: string) => {
+  if (chrome.runtime.getContexts) {
+    const existingContexts = await chrome.runtime.getContexts({
+      contextTypes: ['OFFSCREEN_DOCUMENT'],
+      documentUrls: [offscreenUrl]
+    })
+    return existingContexts.length > 0
+  } else if (globalThis.clients) {
+    const matchedClients = await globalThis.clients.matchAll()
+
+    for (const client of matchedClients) {
+      if (client.url === offscreenUrl) {
+        return true
+      }
+    }
+    return false
+  }
+  return false
+}
+
+const createAudioWindow = async (url: string) => {
   await chrome.windows.create({
     type: 'popup',
     focused: false,
@@ -132,7 +185,7 @@ async function setup() {
             })
             break
           case Messages.play_audio:
-            createAudioWindow(msg.audio)
+            playAudio(msg.audio)
             break
           case Messages.open_youglish:
             chrome.tabs.create({
