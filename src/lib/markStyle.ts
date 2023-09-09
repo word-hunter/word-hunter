@@ -12,7 +12,6 @@ export function genMarkStyle() {
       --wh-mark-text-color-1: ${invertHexColor(settings()['colors'][1])};
       --wh-mark-color-0: ${settings()['colors'][0]};
       --wh-mark-color-1: ${settings()['colors'][1]};
-      --wh-mark-border-width: 2px;
   `
   switch (markStyle) {
     case 'text':
@@ -53,9 +52,59 @@ export function genMarkStyle() {
     case 'dashed':
       style += `
         ${unknownSelector} {
-          border-bottom: var(--wh-mark-border-width) dashed var(--wh-mark-color-0);
+          text-decoration-line: underline;
+          text-decoration-style: dashed;
+          text-decoration-color: var(--wh-mark-color-0);
           ${contextSelector} {
-            border-bottom: var(--wh-mark-border-width) dashed var(--wh-mark-color-1));
+             text-decoration-color: var(--wh-mark-color-1);
+          }
+        }
+      `
+      break
+    case 'dotted':
+      style += `
+         ${unknownSelector} {
+          text-decoration-line: underline;
+          text-decoration-style: dotted;
+          text-decoration-color: var(--wh-mark-color-0);
+          ${contextSelector} {
+             text-decoration-color: var(--wh-mark-color-1);
+          }
+        }
+      `
+      break
+    case 'underline':
+      style += `
+        ${unknownSelector} {
+          text-decoration-line: underline;
+          text-decoration-style: solid;
+          text-decoration-color: var(--wh-mark-color-0);
+          ${contextSelector} {
+             text-decoration-color: var(--wh-mark-color-1);
+          }
+        }
+      `
+      break
+    case 'double-underline':
+      style += `
+        ${unknownSelector} {
+          text-decoration-line: underline;
+          text-decoration-style: double;
+          text-decoration-color: var(--wh-mark-color-0);
+          ${contextSelector} {
+             text-decoration-color: var(--wh-mark-color-1);
+          }
+        }
+      `
+      break
+    case 'wavy':
+      style += `
+        ${unknownSelector} {
+          text-decoration-line: underline;
+          text-decoration-style: wavy;
+          text-decoration-color: var(--wh-mark-color-0);
+          ${contextSelector} {
+             text-decoration-color: var(--wh-mark-color-1);
           }
         }
       `
@@ -108,39 +157,27 @@ export function genMarkStyle() {
         }
       `
       break
-
-    case 'underline':
-      style += `
-        ${unknownSelector} {
-          border-bottom: var(--wh-mark-border-width) solid var(--wh-mark-color-0);
-          ${contextSelector} {
-            border-bottom: var(--wh-mark-border-width) solid var(--wh-mark-color-1));
-          }
-        }
-      `
-      break
     case 'shape':
       style += `
         ${unknownSelector} {
           position:relative;
-          color: var(--wh-mark-text-color-0);
           &::before {
-            position: absolute;
-            z-index: -1;
             content: " ";
             display: block;
-            height: 70%;
-            width: 95%;
-
+            height: 1em;
+            width: 100%;
+            margin-left: -3px;
+            margin-right: -3px;
+            position: absolute;
             background: var(--wh-mark-color-0);
             transform: rotate(2deg);
-            top: -1px;
-            left: -3px;
+            top: 2px;
+            left: -1px;
             border-radius: 20% 25% 20% 24%;
-            padding: 10px 0px 0px 8px;
+            padding: 0.6em 0.18em 0.18em 0.6em;
+            opacity: 0.3;
           }
           ${contextSelector} {
-            color: var(--wh-mark-text-color-1);
             &::before {
               background: var(--wh-mark-color-1);
             }
@@ -161,11 +198,11 @@ export function genMarkStyle() {
             left: -2px;
             bottom: 0;
             transform: rotate(-2deg);
-            background-color: var(--wh-mark-color-0);
+            background: linear-gradient(135deg, var(--wh-mark-color-0) 0%, rgba(0,0,0,0) 100%);
           }
           ${contextSelector} {
             &::before {
-              background-color: var(--wh-mark-color-1);
+              background: linear-gradient(135deg, var(--wh-mark-color-1) 0%, rgba(0,0,0,0) 100%);
             }
           }
         }
