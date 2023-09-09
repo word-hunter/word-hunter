@@ -1,5 +1,7 @@
 import styles from './settings.module.less'
-import { settings, setSetting } from '../lib'
+import { classes } from '../constant'
+import { settings, setSetting, MarkStyles, genMarkStyle } from '../lib'
+import { For } from 'solid-js'
 
 export const Settings = () => {
   const onColorChange = (e: Event) => {
@@ -12,6 +14,11 @@ export const Settings = () => {
   const onDirectToOption = () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })
     return false
+  }
+
+  const onMarkStyleChanged = (e: Event) => {
+    const target = e.target as HTMLSelectElement
+    setSetting('markStyle', target.value as (typeof MarkStyles)[number])
   }
 
   return (
@@ -29,11 +36,36 @@ export const Settings = () => {
           </div>
         </div>
       </section>
+
+      <section>
+        <h4>
+          <span class={classes.unknown}>Mark</span> style:
+        </h4>
+        <div class={styles.section_item}>
+          <select value={settings().markStyle} onChange={onMarkStyleChanged}>
+            <For each={MarkStyles}>
+              {item => (
+                <option id={item} value={item}>
+                  {item}
+                </option>
+              )}
+            </For>
+          </select>
+        </div>
+      </section>
+
       <div>
         <a onclick={onDirectToOption} href="#">
           more settings ↗
         </a>
       </div>
+      <style>
+        {`
+          :root {
+              ${genMarkStyle()}
+          }
+        `}
+      </style>
     </div>
   )
 }

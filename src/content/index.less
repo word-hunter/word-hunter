@@ -4,7 +4,6 @@
   display: inline;
   padding-inline: 0.1em;
   margin-inline: -0.1em;
-  border-radius: 0.3em;
 }
 
 .__word_known {
@@ -15,12 +14,8 @@
 .__word_unknown,
 .__zen_mode .__word_unknown {
   pointer-events: auto;
-  color: var(--wh-mark-color-0);
-  background-color: var(--wh-mark-bg-color, #9fb0ef);
   -webkit-text-fill-color: currentColor !important;
   &[have_context] {
-    color: var(--wh-mark-color-1);
-    background-color: var(--wh-mark-with-content-bg-color, #c175d8);
     &::after {
       font-size: 50%;
       display: inline-block;

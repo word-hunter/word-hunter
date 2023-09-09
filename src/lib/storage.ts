@@ -46,7 +46,11 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
     }
   }
   if (Object.keys(toSyncKnowns).length > 0) {
-    await chrome.storage.sync.set(toSyncKnowns)
+    try {
+      await chrome.storage.sync.set(toSyncKnowns)
+    } catch (e) {
+      console.log(e)
+    }
   }
 }
 
@@ -66,5 +70,9 @@ export async function getStorageValues(keys: StorageKey[]) {
 
 export async function uploadStorageValues(keys: StorageKey[]) {
   const localValues = await chrome.storage.local.get(keys)
-  await chrome.storage.sync.set(localValues)
+  try {
+    await chrome.storage.sync.set(localValues)
+  } catch (e) {
+    console.log(e)
+  }
 }

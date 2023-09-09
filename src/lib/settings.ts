@@ -11,8 +11,24 @@ const DEFAULT_DICTS = {
 
 export type DictName = keyof typeof DEFAULT_DICTS
 
+export const MarkStyles = [
+  'background',
+  'text',
+  'outline',
+  'underline',
+  'dashed',
+  'emphasis-dot',
+  'emphasis-circle',
+  'emphasis-open-circle',
+  'emphasis-triangle',
+  'shape',
+  'slanting',
+  'pen'
+] as const
+
 export const DEFAULT_SETTINGS = {
   colors: ['#9FB0EF', '#C175D8'],
+  markStyle: 'background' as (typeof MarkStyles)[number],
   blacklist: [] as string[],
   dictTabs: DEFAULT_DICTS,
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
