@@ -19,7 +19,7 @@ export function genMarkStyle() {
         ${unknownSelector} {
           color: var(--wh-mark-color-0);
           ${contextSelector} {
-            color: var(--wh-mark-color-1));
+            color: var(--wh-mark-color-1);
           }
         }
       `
@@ -31,7 +31,7 @@ export function genMarkStyle() {
           background-color: var(--wh-mark-color-0);
           border-radius: 0.3em;
           ${contextSelector} {
-            color: var(--wh-mark-text-color-1)));
+            color: var(--wh-mark-text-color-1);
             background-color: var(--wh-mark-color-1);
           }
         }
@@ -116,7 +116,7 @@ export function genMarkStyle() {
          text-emphasis-position: under right;
          text-emphasis-color: var(--wh-mark-color-0);
           ${contextSelector} {
-            text-emphasis-color: var(--wh-mark-color-1));
+            text-emphasis-color: var(--wh-mark-color-1);
           }
         }
       `
@@ -128,7 +128,7 @@ export function genMarkStyle() {
          text-emphasis-position: under right;
          text-emphasis-color: var(--wh-mark-color-0);
           ${contextSelector} {
-            text-emphasis-color: var(--wh-mark-color-1));
+            text-emphasis-color: var(--wh-mark-color-1);
           }
         }
       `
@@ -140,7 +140,7 @@ export function genMarkStyle() {
          text-emphasis-position: under right;
          text-emphasis-color: var(--wh-mark-color-0);
           ${contextSelector} {
-            text-emphasis-color: var(--wh-mark-color-1));
+            text-emphasis-color: var(--wh-mark-color-1);
           }
         }
       `
@@ -152,7 +152,7 @@ export function genMarkStyle() {
          text-emphasis-position: under right;
          text-emphasis-color: var(--wh-mark-color-0);
           ${contextSelector} {
-            text-emphasis-color: var(--wh-mark-color-1));
+            text-emphasis-color: var(--wh-mark-color-1);
           }
         }
       `
