@@ -23,6 +23,8 @@ export function getAllTenses(word: string, dict: WordMap, isNormal = false) {
 
   if (w + 'est' in dict) all.push(w + 'est')
 
+  if (w + 'ly' in dict) all.push(w + 'ly')
+
   if (w.endsWith('se')) {
     if (w + 'n' in dict) all.push(w + 'n')
   }
@@ -101,7 +103,7 @@ export function findNormalTense(word: string, dict: WordMap) {
     if (normal in dict) return findNormalTense(normal, dict)
   }
 
-  if (word.endsWith('s')) {
+  if (word.endsWith('s') && !word.endsWith('ss')) {
     const normal = word.slice(0, -1)
     if (normal in dict) return findNormalTense(normal, dict)
   }
