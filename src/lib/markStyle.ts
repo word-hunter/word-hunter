@@ -171,10 +171,10 @@ export function genMarkStyle() {
             position: absolute;
             background: var(--wh-mark-color-0);
             transform: rotate(2deg);
-            top: 2px;
+            top: -1px;
             left: -1px;
             border-radius: 20% 25% 20% 24%;
-            padding: 0.6em 0.18em 0.18em 0.6em;
+            padding: 0 3px 3px 3px;
             opacity: 0.3;
           }
           ${contextSelector} {
@@ -232,7 +232,6 @@ export function genMarkStyle() {
           }
           &:after{
             content:"";
-            z-index:-1;
             left:-0.5em;
             top:0.1em;
             padding:0.1em 0.25em;
