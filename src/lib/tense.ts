@@ -77,7 +77,7 @@ export function findNormalTense(word: string, dict: WordMap) {
   }
 
   if (word.endsWith('ily')) {
-    const normal = word.replace(/iest$/, 'y')
+    const normal = word.replace(/ily$/, 'y')
     if (normal in dict) return findNormalTense(normal, dict)
   }
 
