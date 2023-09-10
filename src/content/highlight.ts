@@ -12,10 +12,19 @@ import {
   StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns, getSelectedDicts } from '../lib'
+import {
+  getDocumentTitle,
+  getFaviconUrl,
+  settings,
+  mergeKnowns,
+  getSelectedDicts,
+  findNormalTense,
+  getAllTenses
+} from '../lib'
 import { getMessagePort } from '../lib/port'
 
 let wordsKnown: WordMap = {}
+let fullDict: WordMap = {}
 let dict: WordMap = {}
 let contexts: ContextMap = {}
 const shouldKeepOriginNode = keepTextNodeHosts.includes(location.hostname)
@@ -57,15 +66,16 @@ export function addContext(word: string, text: string) {
   getMessagePort().postMessage({ action: Messages.add_context, word: word, context })
 }
 
-function _addContext(context: WordContext) {
-  const word = context.word
+function _addContext(context: WordContext, normalTenseWord: string) {
+  const word = normalTenseWord
   if (!(contexts[word] ?? []).find(c => c.text === context.text)) {
     contexts[word] = [...(contexts[word] ?? []), context]
   }
 
   setWordContexts(contexts[word])
+  const allTenseWords = getAllTenses(normalTenseWord, fullDict)
   document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (getNodeWord(node) === word) {
+    if (allTenseWords.includes(getNodeWord(node))) {
       node.setAttribute('have_context', contexts[word].length.toString())
     }
   })
@@ -75,18 +85,20 @@ export function deleteContext(context: WordContext) {
   getMessagePort().postMessage({ action: Messages.delete_context, word: context.word, context })
 }
 
-function _deleteContext(context: WordContext) {
-  const index = (contexts[context.word] ?? []).findIndex(c => c.text === context.text)
+function _deleteContext(context: WordContext, normalTenseWord: string) {
+  const word = normalTenseWord
+  const index = (contexts[word] ?? []).findIndex(c => c.text === context.text)
   if (index > -1) {
-    contexts[context.word].splice(index, 1)
+    contexts[word].splice(index, 1)
 
-    setWordContexts([...contexts[context.word]])
+    setWordContexts([...contexts[word]])
+    const allTenseWords = getAllTenses(normalTenseWord, fullDict)
     document.querySelectorAll('.' + classes.mark).forEach(node => {
-      if (getNodeWord(node) === context.word) {
-        if (contexts[context.word]?.length === 0) {
+      if (allTenseWords.includes(getNodeWord(node))) {
+        if (contexts[word]?.length === 0) {
           node.removeAttribute('have_context')
         } else {
-          node.setAttribute('have_context', contexts[context.word].length.toString())
+          node.setAttribute('have_context', contexts[word].length.toString())
         }
       }
     })
@@ -157,7 +169,8 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
         return origin
       } else {
         toHighlightWords.push(w)
-        const contextAttr = contexts[w]?.length > 0 ? `have_context="${contexts[w]?.length}"` : ''
+        const contextLength = getWordContexts(w)?.length ?? 0
+        const contextAttr = contextLength > 0 ? `have_context="${contextLength}"` : ''
         return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${postfix}`
       }
     } else {
@@ -216,7 +229,8 @@ async function waitForDictPrepare(): Promise<WordMap> {
 
 async function readStorageAndHighlight() {
   const result = await chrome.storage.local.get(['dict', StorageKey.known, StorageKey.context])
-  dict = await getSelectedDicts(result.dict || (await waitForDictPrepare()))
+  fullDict = result.dict || (await waitForDictPrepare())
+  dict = await getSelectedDicts(fullDict)
   wordsKnown = result[StorageKey.known] || {}
   contexts = result[StorageKey.context] || {}
 
@@ -307,7 +321,7 @@ window.__updateDicts = () => {
 
 function listenBackgroundMessage() {
   chrome.runtime.onMessage.addListener((msg, sender: chrome.runtime.MessageSender) => {
-    const { action, word, context } = msg
+    const { action, word, context, normalTenseWord } = msg
     switch (action) {
       case Messages.set_known:
         _makeAsKnown(word)
@@ -316,10 +330,10 @@ function listenBackgroundMessage() {
         _makeAsAllKnown(msg.words)
         break
       case Messages.add_context:
-        _addContext(context)
+        _addContext(context, normalTenseWord)
         break
       case Messages.delete_context:
-        _deleteContext(context)
+        _deleteContext(context, normalTenseWord)
         break
       default:
         break
@@ -335,8 +349,13 @@ export function isInDict(word: string) {
   return word?.toLowerCase() in dict
 }
 
+export function getWordAllTenses(word: string) {
+  return getAllTenses(word, fullDict)
+}
+
 export function getWordContexts(word: string) {
-  return contexts[word] ?? []
+  const normalTenseWord = findNormalTense(word, fullDict)
+  return contexts[normalTenseWord] ?? []
 }
 
 export async function init() {

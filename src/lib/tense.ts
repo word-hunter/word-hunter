@@ -50,7 +50,7 @@ export function getAllTenses(word: string, dict: WordMap, isNormal = false) {
   return all
 }
 
-function findNormalTense(word: string, dict: WordMap) {
+export function findNormalTense(word: string, dict: WordMap) {
   if (word.length < 3) return word
 
   if (word.endsWith('ves')) {

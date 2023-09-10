@@ -17,7 +17,8 @@ import {
   setWordContexts,
   isWordKnownAble,
   zenExcludeWords,
-  setZenExcludeWords
+  setZenExcludeWords,
+  getWordAllTenses
 } from './highlight'
 import { getMessagePort } from '../lib/port'
 import { Dict } from './dict'
@@ -286,6 +287,7 @@ export function ZenMode() {
 }
 
 function ContextList(props: { contexts: WordContext[] }) {
+  const allTenstionWords = () => getWordAllTenses(curWord()).reverse()
   return (
     <Show
       when={props.contexts.length > 0}
@@ -299,9 +301,10 @@ function ContextList(props: { contexts: WordContext[] }) {
       <div class="contexts">
         <For each={props.contexts.reverse()}>
           {(context: WordContext) => {
+            const highlightedContext = safeEmphasizeWordInText(context.text, allTenstionWords().join('|'))
             return (
               <div>
-                <pre innerHTML={safeEmphasizeWordInText(context.text, curWord())}></pre>
+                <pre innerHTML={highlightedContext}></pre>
                 <p>
                   <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
                   <a href={context.url} target="_blank">

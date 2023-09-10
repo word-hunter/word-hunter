@@ -2,7 +2,7 @@ import { Messages, WordMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, mergeKnowns } from '../lib/storage'
 import { mergeSettings } from '../lib/settings'
-import { getAllTenses } from '../lib/tense'
+import { getAllTenses, findNormalTense } from '../lib/tense'
 
 let dict: WordMap = {}
 
@@ -160,27 +160,31 @@ async function setup() {
             break
           case Messages.add_context:
             storage.get([StorageKey.context], result => {
+              // record context in normal tense word key
+              const normalTenseWord = findNormalTense(word, dict)
               const contexts = result[StorageKey.context] ?? {}
-              const wordContexts = (contexts[word] ?? []) as WordContext[]
+              const wordContexts = (contexts[normalTenseWord] ?? []) as WordContext[]
               if (!wordContexts.find(c => c.text === context.text)) {
-                const newContexts = { ...contexts, [word]: [...wordContexts, context] }
+                const newContexts = { ...contexts, [normalTenseWord]: [...wordContexts, context] }
                 storage.set({ [StorageKey.context]: newContexts })
               }
-              sendMessageToAllTabs({ action, context })
+              sendMessageToAllTabs({ action, context, normalTenseWord })
             })
             break
           case Messages.delete_context:
             storage.get([StorageKey.context], result => {
+              // delete context in normal tense word key
+              const normalTenseWord = findNormalTense(word, dict)
               const contexts = result[StorageKey.context] ?? {}
-              const wordContexts = (contexts[word] ?? []) as WordContext[]
+              const wordContexts = (contexts[normalTenseWord] ?? []) as WordContext[]
               const index = wordContexts.findIndex(c => c.text === context.text)
               if (index > -1) {
                 wordContexts.splice(index, 1)
-                const { [word]: w, ...rest } = contexts
+                const { [normalTenseWord]: w, ...rest } = contexts
                 storage.set({
-                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest
+                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [normalTenseWord]: wordContexts } : rest
                 })
-                sendMessageToAllTabs({ action, context })
+                sendMessageToAllTabs({ action, context, normalTenseWord })
               }
             })
             break

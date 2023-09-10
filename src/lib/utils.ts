@@ -1,6 +1,6 @@
 export const safeEmphasizeWordInText = (text: string = '', word: string, tag: string = 'b') => {
-  const regex = new RegExp('(<.*>)?' + word + '(</.*>)?', 'gi')
-  return text.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(regex, `$1<${tag}>${word}</${tag}>$2`)
+  const regex = new RegExp('(<.*>)?(' + word + ')(</.*>)?', 'gi')
+  return text.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(regex, `$1<${tag}>$2</${tag}>$3`)
 }
 
 export const getFaviconUrl = () => {
