@@ -10,6 +10,13 @@ export const Levels = [
 
 export type LevelKey = typeof Levels[number][0]
 
+export type WordInfo = {
+  o: string
+  l: LevelKey
+  t: string
+}
+export type WordInfoMap = Record<string, WordInfo>
+
 export type WordMap = Record<string, LevelKey>
 
 export type WordContext = {

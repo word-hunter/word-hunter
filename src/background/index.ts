@@ -1,12 +1,11 @@
-import { Messages, WordMap, WordContext, StorageKey } from '../constant'
+import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, mergeKnowns } from '../lib/storage'
 import { mergeSettings } from '../lib/settings'
-import { getAllTenses, findNormalTense } from '../lib/tense'
 
-let dict: WordMap = {}
+let dict: WordInfoMap = {}
 
-async function readDict(): Promise<WordMap> {
+async function readDict(): Promise<WordInfoMap> {
   const url = chrome.runtime.getURL('dict.json')
   const res = await fetch(url)
   const dict = await res.text()
@@ -66,13 +65,17 @@ const setupOffscreenDocument = async (path: string) => {
 }
 
 const checkOffscreenDocumentExist = async (offscreenUrl: string) => {
+  // @ts-ignore
   if (chrome.runtime.getContexts) {
+    // @ts-ignore
     const existingContexts = await chrome.runtime.getContexts({
       contextTypes: ['OFFSCREEN_DOCUMENT'],
       documentUrls: [offscreenUrl]
     })
     return existingContexts.length > 0
+    // @ts-ignore
   } else if (globalThis.clients) {
+    // @ts-ignore
     const matchedClients = await globalThis.clients.matchAll()
 
     for (const client of matchedClients) {
@@ -136,12 +139,8 @@ async function setup() {
         switch (action) {
           case Messages.set_known:
             storage.get([StorageKey.known], result => {
-              const wordsWithAllTense = getAllTenses(word, dict)
-              const toAddWords: WordMap = {}
-              for (const w of wordsWithAllTense) {
-                toAddWords[w] = 'o'
-              }
-              const knownWords = { ...(result[StorageKey.known] ?? {}), ...toAddWords }
+              const normalTenseWord = dict[word]?.o ?? word
+              const knownWords = { ...(result[StorageKey.known] ?? {}), [normalTenseWord]: 'o' }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
               syncUpKnowns([word], knownWords)
@@ -161,20 +160,20 @@ async function setup() {
           case Messages.add_context:
             storage.get([StorageKey.context], result => {
               // record context in normal tense word key
-              const normalTenseWord = findNormalTense(word, dict)
+              const normalTenseWord = dict[word]?.o ?? word
               const contexts = result[StorageKey.context] ?? {}
               const wordContexts = (contexts[normalTenseWord] ?? []) as WordContext[]
               if (!wordContexts.find(c => c.text === context.text)) {
                 const newContexts = { ...contexts, [normalTenseWord]: [...wordContexts, context] }
                 storage.set({ [StorageKey.context]: newContexts })
               }
-              sendMessageToAllTabs({ action, context, normalTenseWord })
+              sendMessageToAllTabs({ action, context })
             })
             break
           case Messages.delete_context:
             storage.get([StorageKey.context], result => {
               // delete context in normal tense word key
-              const normalTenseWord = findNormalTense(word, dict)
+              const normalTenseWord = dict[word]?.o ?? word
               const contexts = result[StorageKey.context] ?? {}
               const wordContexts = (contexts[normalTenseWord] ?? []) as WordContext[]
               const index = wordContexts.findIndex(c => c.text === context.text)
@@ -184,7 +183,7 @@ async function setup() {
                 storage.set({
                   [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [normalTenseWord]: wordContexts } : rest
                 })
-                sendMessageToAllTabs({ action, context, normalTenseWord })
+                sendMessageToAllTabs({ action, context })
               }
             })
             break

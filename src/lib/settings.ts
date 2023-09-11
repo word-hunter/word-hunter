@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import { getStorageValues, uploadStorageValues } from './storage'
-import { StorageKey, LevelKey, WordMap } from '../constant'
+import { StorageKey, LevelKey, WordInfoMap } from '../constant'
 
 const DEFAULT_DICTS = {
   collins: true,
@@ -31,7 +31,7 @@ export const MarkStyles = [
 
 export const DEFAULT_SETTINGS = {
   colors: ['#9FB0EF', '#C175D8'],
-  markStyle: 'background' as (typeof MarkStyles)[number],
+  markStyle: 'background' as typeof MarkStyles[number],
   blacklist: [] as string[],
   dictTabs: DEFAULT_DICTS,
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
@@ -103,14 +103,14 @@ function mergeObjectDeep(target: Record<string, any>, source: Record<string, any
   }
 }
 
-export async function getSelectedDicts(dict: WordMap) {
+export async function getSelectedDicts(dict: WordInfoMap) {
   await mergeSettings()
   const levels = settings().levels
-  const newDict: WordMap = {}
+  const newDict: WordInfoMap = {}
   for (const word in dict) {
-    const level = dict[word] ?? 'o'
+    const level = dict[word].l ?? 'o'
     if (levels.includes(level)) {
-      newDict[word] = level
+      newDict[word] = dict[word]
     }
   }
   return newDict

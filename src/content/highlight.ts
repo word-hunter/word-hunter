@@ -7,25 +7,18 @@ import {
   WordContext,
   ContextMap,
   WordMap,
+  WordInfoMap,
   wordRegex,
   wordReplaceRegex,
   StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
-import {
-  getDocumentTitle,
-  getFaviconUrl,
-  settings,
-  mergeKnowns,
-  getSelectedDicts,
-  findNormalTense,
-  getAllTenses
-} from '../lib'
+import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns, getSelectedDicts } from '../lib'
 import { getMessagePort } from '../lib/port'
 
 let wordsKnown: WordMap = {}
-let fullDict: WordMap = {}
-let dict: WordMap = {}
+let fullDict: WordInfoMap = {}
+let dict: WordInfoMap = {}
 let contexts: ContextMap = {}
 const shouldKeepOriginNode = keepTextNodeHosts.includes(location.hostname)
 
@@ -37,6 +30,10 @@ function getNodeWord(node: HTMLElement | Node | undefined) {
   return (node.textContent ?? '').toLowerCase()
 }
 
+function isNormalTenseSame(word1: string, word2: string) {
+  return word1 === word2 || fullDict[word1]?.o === fullDict[word2]?.o
+}
+
 export function markAsKnown(word: string) {
   if (!wordRegex.test(word)) return
 
@@ -46,7 +43,7 @@ export function markAsKnown(word: string) {
 
 function _makeAsKnown(word: string) {
   document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (getNodeWord(node) === word) {
+    if (isNormalTenseSame(getNodeWord(node), word)) {
       node.className = classes.known
     }
   })
@@ -66,16 +63,15 @@ export function addContext(word: string, text: string) {
   getMessagePort().postMessage({ action: Messages.add_context, word: word, context })
 }
 
-function _addContext(context: WordContext, normalTenseWord: string) {
-  const word = normalTenseWord
+function _addContext(context: WordContext) {
+  const word = fullDict[context.word].o ?? context.word
   if (!(contexts[word] ?? []).find(c => c.text === context.text)) {
     contexts[word] = [...(contexts[word] ?? []), context]
   }
 
   setWordContexts(contexts[word])
-  const allTenseWords = getAllTenses(normalTenseWord, fullDict)
   document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (allTenseWords.includes(getNodeWord(node))) {
+    if (isNormalTenseSame(getNodeWord(node), word)) {
       node.setAttribute('have_context', contexts[word].length.toString())
     }
   })
@@ -85,16 +81,15 @@ export function deleteContext(context: WordContext) {
   getMessagePort().postMessage({ action: Messages.delete_context, word: context.word, context })
 }
 
-function _deleteContext(context: WordContext, normalTenseWord: string) {
-  const word = normalTenseWord
+function _deleteContext(context: WordContext) {
+  const word = fullDict[context.word].o ?? context.word
   const index = (contexts[word] ?? []).findIndex(c => c.text === context.text)
   if (index > -1) {
     contexts[word].splice(index, 1)
 
     setWordContexts([...contexts[word]])
-    const allTenseWords = getAllTenses(normalTenseWord, fullDict)
     document.querySelectorAll('.' + classes.mark).forEach(node => {
-      if (allTenseWords.includes(getNodeWord(node))) {
+      if (isNormalTenseSame(getNodeWord(node), word)) {
         if (contexts[word]?.length === 0) {
           node.removeAttribute('have_context')
         } else {
@@ -159,7 +154,7 @@ function autoPauseForYoutubeSubTitle(node: HTMLElement | null, toHighlightWords:
   }
 }
 
-function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordMap, contexts: ContextMap) {
+function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, contexts: ContextMap) {
   const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;')
   const toHighlightWords: string[] = []
   const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
@@ -197,7 +192,7 @@ function highlightTextNode(node: CharacterData, dict: WordMap, wordsKnown: WordM
   }
 }
 
-function highlight(textNodes: CharacterData[], dict: WordMap, wordsKnown: WordMap, contexts: ContextMap) {
+function highlight(textNodes: CharacterData[], dict: WordInfoMap, wordsKnown: WordMap, contexts: ContextMap) {
   for (const node of textNodes) {
     // skip if node is already highlighted when re-highlight
     if (node.parentElement?.classList.contains(classes.mark)) continue
@@ -321,7 +316,7 @@ window.__updateDicts = () => {
 
 function listenBackgroundMessage() {
   chrome.runtime.onMessage.addListener((msg, sender: chrome.runtime.MessageSender) => {
-    const { action, word, context, normalTenseWord } = msg
+    const { action, word, context } = msg
     switch (action) {
       case Messages.set_known:
         _makeAsKnown(word)
@@ -330,10 +325,10 @@ function listenBackgroundMessage() {
         _makeAsAllKnown(msg.words)
         break
       case Messages.add_context:
-        _addContext(context, normalTenseWord)
+        _addContext(context)
         break
       case Messages.delete_context:
-        _deleteContext(context, normalTenseWord)
+        _deleteContext(context)
         break
       default:
         break
@@ -350,11 +345,14 @@ export function isInDict(word: string) {
 }
 
 export function getWordAllTenses(word: string) {
-  return getAllTenses(word, fullDict)
+  const words = Object.entries(fullDict)
+    .filter(([_, info]) => info.o === word)
+    .map(([w, _]) => w)
+  return words
 }
 
 export function getWordContexts(word: string) {
-  const normalTenseWord = findNormalTense(word, fullDict)
+  const normalTenseWord = fullDict[word].o ?? word
   return contexts[normalTenseWord] ?? []
 }
 
