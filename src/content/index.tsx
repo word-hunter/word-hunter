@@ -1,7 +1,7 @@
 import '@webcomponents/custom-elements'
 import { render } from 'solid-js/web'
 import { ZenMode } from './card'
-import { genMarkStyle } from '../lib'
+import { genMarkStyle, settings } from '../lib'
 
 declare module 'solid-js' {
   namespace JSX {
@@ -21,6 +21,9 @@ const App = () => {
           :root {
               ${genMarkStyle()}
           }
+        `}
+        {`
+           ${!settings().showCnTrans && 'w-mark-t { display:none }'}
         `}
       </style>
     </>

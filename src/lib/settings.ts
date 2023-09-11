@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS = {
   blacklist: [] as string[],
   dictTabs: DEFAULT_DICTS,
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
+  showCnTrans: false,
   atuoPronounce: false,
   autoPauseYoutubeVideo: false,
   levels: ['4', '6', 'g', 'o'] as LevelKey[],
@@ -128,7 +129,10 @@ export function initSettings() {
     if (namespace === 'local' && changes[StorageKey.settings]) {
       const { oldValue, newValue } = changes[StorageKey.settings]
       setSettings(newValue)
-      if (JSON.stringify(oldValue?.levels) !== JSON.stringify(newValue?.levels)) {
+      if (
+        JSON.stringify(oldValue?.levels) !== JSON.stringify(newValue?.levels) ||
+        oldValue?.showCnTrans !== newValue?.showCnTrans
+      ) {
         window.__updateDicts?.()
       }
     }

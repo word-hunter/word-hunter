@@ -31,6 +31,42 @@
   }
 }
 
+w-mark-t {
+  position: relative;
+  display: inline-block;
+  line-height: normal;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 7em;
+  padding-inline: 0.3em;
+  text-indent: 0;
+  opacity: 0.5;
+  font-size: 0.8em;
+  font-style: italic;
+  font-weight: normal;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+    overflow: visible;
+    &::after {
+      position: absolute;
+      inset: 0;
+      left: 0.3em;
+      right: 0.3em;
+      padding-right: 0.3em;
+      z-index: 2;
+      white-space: nowrap;
+      width: max-content;
+      border-radius: 0.3em;
+      content: attr(data-trans);
+      color: var(--wh-mark-text-color-1);
+      background-color: var(--wh-mark-color-1);
+    }
+  }
+}
+
 .pdfViewer .__word_unknown {
   color: transparent;
 }

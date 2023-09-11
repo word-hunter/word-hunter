@@ -166,7 +166,9 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
         toHighlightWords.push(w)
         const contextLength = getWordContexts(w)?.length ?? 0
         const contextAttr = contextLength > 0 ? `have_context="${contextLength}"` : ''
-        return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${postfix}`
+        const trans = settings().showCnTrans && fullDict[fullDict[w]?.o]?.t
+        const transTag = !!trans ? `<w-mark-t data-trans="(${trans})">(${trans})</w-mark-t>` : ''
+        return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${transTag}${postfix}`
       }
     } else {
       return origin
@@ -235,6 +237,9 @@ async function readStorageAndHighlight() {
 
 function resetHighlight() {
   dict = {}
+  document.querySelectorAll('w-mark-t').forEach(node => {
+    node.remove()
+  })
   document.querySelectorAll('.' + classes.mark_parent).forEach(node => {
     const text = node.textContent ?? ''
     node.replaceWith(document.createTextNode(text))
