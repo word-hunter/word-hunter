@@ -26,7 +26,10 @@ export const getWordContext = (node: Node, originWord?: string): string => {
   let hasDot = false
   while (left) {
     const leftText =
-      left.nodeType === Node.ELEMENT_NODE || left.nodeType === Node.TEXT_NODE ? left.textContent ?? '' : ''
+      left.nodeName.toLowerCase() !== 'w-mark-t' &&
+      (left.nodeType === Node.ELEMENT_NODE || left.nodeType === Node.TEXT_NODE)
+        ? left.textContent ?? ''
+        : ''
     if (leftText.includes('.')) {
       hasDot = true
       text = leftText.split('.').at(-1) + ' ' + text
@@ -39,7 +42,10 @@ export const getWordContext = (node: Node, originWord?: string): string => {
 
   while (right) {
     const rightText =
-      right.nodeType === Node.ELEMENT_NODE || right.nodeType === Node.TEXT_NODE ? right.textContent ?? '' : ''
+      right.nodeName.toLowerCase() !== 'w-mark-t' &&
+      (right.nodeType === Node.ELEMENT_NODE || right.nodeType === Node.TEXT_NODE)
+        ? right.textContent ?? ''
+        : ''
     if (rightText.includes('.')) {
       hasDot = true
       text = text + ' ' + rightText.split('.')[0] + '.'

@@ -282,14 +282,16 @@ function observeDomChange() {
 
 function getHighlightCount(isVisible?: boolean) {
   const selector = isVisible ? `.${classes.unknown}` : `.${classes.unknown}`
-  let haveContextCount = 0
-  const unknownWords = Array.from(document.querySelectorAll(selector)).map(w => {
+  const contextWordsSet = new Set()
+  const unknownWordSet = new Set()
+  Array.from(document.querySelectorAll(selector)).map(w => {
+    const word = (w as HTMLElement).innerText.toLowerCase()
+    unknownWordSet.add(word)
     if (w.hasAttribute('have_context')) {
-      haveContextCount++
+      contextWordsSet.add(word)
     }
-    return (w as HTMLElement).innerText.toLowerCase()
   })
-  return [new Set(unknownWords).size, haveContextCount]
+  return [unknownWordSet.size, contextWordsSet.size]
 }
 
 function getPageStatistics() {

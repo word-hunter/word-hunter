@@ -48,4 +48,4 @@ This will make all "unknown" words as "known", except the words you excluded in 
 
 ## Similar projects
 
-- [word-discoverer](word-discoverer)
+- [word-discoverer](https://github.com/mechatroner/word-discoverer)
