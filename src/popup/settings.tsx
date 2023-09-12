@@ -1,4 +1,4 @@
-import styles from './settings.module.less'
+import styles from './settings.module.css'
 import { classes } from '../constant'
 import { settings, setSetting, MarkStyles, genMarkStyle } from '../lib'
 import { For } from 'solid-js'

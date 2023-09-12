@@ -1,4 +1,4 @@
-@import url('../assets/font.less');
+@import url('../assets/font.css');
 
 .__mark {
   display: inline;
@@ -59,7 +59,13 @@ w-mark-t {
       border-radius: 0.3em;
       content: attr(data-trans);
       color: var(--wh-mark-text-color-1);
+      box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255), 0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+      transition: background-color 0.5s;
       background-color: var(--wh-mark-color-1);
+
+      @starting-style {
+        background-color: transparent;
+      }
     }
   }
 }

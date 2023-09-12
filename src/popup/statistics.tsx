@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import { executeScript, settings } from '../lib'
-import styles from './statistics.module.less'
+import styles from './statistics.module.css'
 
 export const Statistics = () => {
   const [counts, setCounts] = createSignal([0, 0, 1]) // unknown,  have context, total

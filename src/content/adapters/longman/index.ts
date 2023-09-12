@@ -1,4 +1,4 @@
-import dictStyles from './index.less?inline'
+import dictStyles from './index.css?inline'
 import type { Adapter } from '../type'
 import { fetchText } from '../fetch'
 

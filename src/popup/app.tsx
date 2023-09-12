@@ -1,4 +1,4 @@
-import styles from './app.module.less'
+import styles from './app.module.css'
 import { Settings } from './settings'
 import { Statistics } from './statistics'
 import { createSignal } from 'solid-js'

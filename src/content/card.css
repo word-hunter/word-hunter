@@ -288,16 +288,16 @@
       animation: speaking 1s steps(6) infinite;
     }
   }
+}
 
-  @keyframes speaking {
-    from {
-      background-position-x: 0;
-    }
-    70% {
-      background-position-x: 100%;
-    }
-    100% {
-      background-position-x: 100%;
-    }
+@keyframes speaking {
+  from {
+    background-position-x: 0;
+  }
+  70% {
+    background-position-x: 100%;
+  }
+  100% {
+    background-position-x: 100%;
   }
 }

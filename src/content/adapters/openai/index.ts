@@ -1,6 +1,6 @@
 // reference: https://github.com/crimx/ext-saladict/blob/dev/src/components/dictionaries/googledict/engine.ts
 
-import dictStyles from './index.less?inline'
+import dictStyles from './index.css?inline'
 import type { Adapter } from '../type'
 import { Messages } from '../../../constant'
 import { sendMessage } from '../../../lib/port'

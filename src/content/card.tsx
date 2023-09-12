@@ -1,7 +1,7 @@
 import { reloadElement, ICustomElement } from 'component-register'
 
-import './index.less'
-import cardStyles from './card.less?inline'
+import './index.css'
+import cardStyles from './card.css?inline'
 import { createSignal, Show, For, Switch, Match, batch, onMount } from 'solid-js'
 import { customElement } from 'solid-element'
 import { classes, Messages, WordContext } from '../constant'
