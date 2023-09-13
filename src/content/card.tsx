@@ -262,13 +262,19 @@ export function ZenMode() {
   return (
     <Show when={zenMode()}>
       <div class={classes.zen_mode}>
+        <div class="zen_close_btn" title="close" onclick={toggleZenMode}>
+          <img src={chrome.runtime.getURL('icons/cancel.png')} width="30" height="30" alt="delete" />
+        </div>
         <pre>
           <p>
             Note: use <kbd>⌘</kbd> + <kbd>Click</kbd> to unselect word
           </p>
         </pre>
         <div class="zen_buttons">
-          <button onclick={onSetAllKnown}>Set all words as known</button>
+          <button onclick={onSetAllKnown} title="Set all words as known">
+            <img src={chrome.runtime.getURL('icons/checked.png')} width="20" height="20" alt="Set all words as known" />
+            Set all words as known
+          </button>
         </div>
         <div class="zen_words">
           <For each={zenModeWords()}>

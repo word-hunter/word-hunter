@@ -47,9 +47,10 @@ w-mark-t {
   &:hover {
     opacity: 1;
     overflow: visible;
+    color: transparent;
     &::after {
       position: absolute;
-      inset: 0;
+      top: 0;
       left: 0.3em;
       right: 0.3em;
       padding-right: 0.3em;
@@ -60,7 +61,7 @@ w-mark-t {
       content: attr(data-trans);
       color: var(--wh-mark-text-color-1);
       box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255), 0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
-      transition: background-color 0.5s;
+      transition: background-color 0.3s;
       background-color: var(--wh-mark-color-1);
 
       @starting-style {
@@ -94,10 +95,33 @@ body:has(.__zen_mode) {
     border: none;
   }
 
+  w-mark-parent {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .zen_close_btn {
+    position: absolute;
+    cursor: pointer;
+    right: 20px;
+    top: 20px;
+    transition: opacity 0.5s;
+    :hover {
+      opacity: 0.8;
+    }
+  }
+
   .zen_buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     margin-bottom: 40px;
+    button {
+      padding: 5px 10px;
+      img {
+        vertical-align: middle;
+        margin-right: 10px;
+      }
+    }
   }
 
   .zen_words {
@@ -126,7 +150,7 @@ body:has(.__zen_mode) {
 
   p {
     width: max-content;
-    margin: 0 auto 20px auto;
+    margin: 0 auto 40px auto;
     padding: 10px;
     outline: 5px dashed rgba(0, 0, 0, 0.1);
     font-size: 10px;
@@ -137,7 +161,7 @@ body:has(.__zen_mode) {
 
   kbd,
   button {
-    display: inline-block;
+    display: inline-flex;
     margin: 0px 0.1em;
     padding: 0.1em 0.6em;
     border-radius: 3px;
