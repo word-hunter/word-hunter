@@ -352,8 +352,9 @@ export function isInDict(word: string) {
 }
 
 export function getWordAllTenses(word: string) {
+  const originWord = fullDict[word]?.o ?? word
   const words = Object.entries(fullDict)
-    .filter(([_, info]) => info.o === word)
+    .filter(([_, info]) => info.o === originWord)
     .map(([w, _]) => w)
   return words
 }
