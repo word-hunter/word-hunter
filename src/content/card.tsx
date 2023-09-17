@@ -174,7 +174,6 @@ export const WhCard = customElement('wh-card', () => {
       if (e.key === 's') {
         onAddContext(e)
       }
-      console.log(e)
       e.preventDefault()
     }
   })
@@ -472,6 +471,9 @@ function bindEvents() {
 
     if (node.classList.contains(classes.mark)) {
       // skip when redirecting in card dictionary
+      const mosueKey = settings().mosueKey
+      if (mosueKey !== 'NONE' && !e[mosueKey]) return false
+
       if (inDirecting) {
         inDirecting = false
         return false

@@ -10,6 +10,7 @@ const DEFAULT_DICTS = {
 }
 
 export type DictName = keyof typeof DEFAULT_DICTS
+export type MouseKey = 'NONE' | 'ctrlKey' | 'altKey' | 'shiftKey' | 'metaKey'
 
 export const MarkStyles = [
   'background',
@@ -37,6 +38,7 @@ export const DEFAULT_SETTINGS = {
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
   showCnTrans: false,
   atuoPronounce: false,
+  mosueKey: 'NONE' as MouseKey,
   volume: 95,
   autoPauseYoutubeVideo: false,
   levels: ['4', '6', 'g', 'o'] as LevelKey[],

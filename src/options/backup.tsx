@@ -1,6 +1,7 @@
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
 import { syncUpKnowns } from '../lib/storage'
+import { Note } from './note'
 
 const timeFormatter = new Intl.DateTimeFormat('en-US')
 
@@ -74,6 +75,7 @@ export const Backup = () => {
   return (
     <section class="section">
       <h2 class="h2">backup</h2>
+      <Note>Automatically sync between devices, but also can do it manually.</Note>
       <dialog id="restoreDialog" ref={dialogRef!} class="modal">
         <form method="dialog" class="modal-box">
           <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -97,7 +99,7 @@ export const Backup = () => {
         </form>
       </dialog>
 
-      <div class="grid grid-cols-2 gap-4 pt-4">
+      <div class="grid grid-cols-2 gap-4 pt-1">
         <button onclick={showModal} class="btn btn-block btn-lg">
           ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
           restore

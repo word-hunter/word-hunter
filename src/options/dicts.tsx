@@ -1,5 +1,6 @@
 import { For, JSXElement, createSignal } from 'solid-js'
 import { settings, setSetting, DictName } from '../lib'
+import { Note } from './note'
 import {
   useDragDropContext,
   DragDropProvider,
@@ -37,17 +38,7 @@ export const DictsSetting = () => {
   return (
     <section class="section">
       <h2 class="h2">Dicts</h2>
-      <div class="alert my-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
-        </svg>
-        <span>You can drag & drop to adjust the order</span>
-      </div>
+      <Note>You can drag & drop to adjust the order</Note>
       <div class="flex flex-col items-end">
         <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>
           <DragDropSensors />
