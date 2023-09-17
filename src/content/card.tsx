@@ -53,16 +53,20 @@ export const WhCard = customElement('wh-card', () => {
     })
   })
 
-  const onKnown = (e: MouseEvent) => {
+  const onKnown = (e: MouseEvent | KeyboardEvent) => {
     e.preventDefault()
     const word = curWord()
     markAsKnown(word)
     setCurWord('')
     hidePopupDelay(0)
-    explode(e.pageX, e.pageY)
+    if (e instanceof MouseEvent && e.pageX) {
+      explode(e.pageX, e.pageY)
+    } else {
+      explode(rect.left, rect.top)
+    }
   }
 
-  const onAddContext = (e: MouseEvent) => {
+  const onAddContext = (e: MouseEvent | KeyboardEvent) => {
     if (zenMode()) return false
     e.preventDefault()
     const word = curWord()
@@ -164,6 +168,13 @@ export const WhCard = customElement('wh-card', () => {
       if (e.key === 'Escape') {
         hidePopupDelay(0)
       }
+      if (e.key === 'a') {
+        onKnown(e)
+      }
+      if (e.key === 's') {
+        onAddContext(e)
+      }
+      console.log(e)
       e.preventDefault()
     }
   })
