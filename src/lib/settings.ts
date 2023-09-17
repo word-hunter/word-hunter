@@ -37,6 +37,7 @@ export const DEFAULT_SETTINGS = {
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
   showCnTrans: false,
   atuoPronounce: false,
+  volume: 95,
   autoPauseYoutubeVideo: false,
   levels: ['4', '6', 'g', 'o'] as LevelKey[],
   openai: {

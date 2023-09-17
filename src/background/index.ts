@@ -1,6 +1,6 @@
 import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
-import { syncUpKnowns, mergeKnowns } from '../lib/storage'
+import { syncUpKnowns, mergeKnowns, getStorageValues } from '../lib/storage'
 import { mergeSettings } from '../lib/settings'
 
 let dict: WordInfoMap = {}
@@ -31,16 +31,21 @@ function updateBadge(wordsKnown: WordMap) {
 
 const playAudio = async (audio: string) => {
   const autioPageUrl = chrome.runtime.getURL('audio.html')
+  const storage = await getStorageValues([StorageKey.settings])
+  const volume = storage[StorageKey.settings]?.volume ?? 100
 
   if (!chrome.offscreen) {
-    return createAudioWindow(`${autioPageUrl}?audio=${encodeURIComponent(audio)}`)
+    return createAudioWindow(`${autioPageUrl}?audio=${encodeURIComponent(audio)}&?volume=${volume}`)
   }
 
   await setupOffscreenDocument(autioPageUrl)
   chrome.runtime.sendMessage({
     type: 'play-audio',
     target: 'offscreen',
-    data: audio
+    data: {
+      audio,
+      volume
+    }
   })
 }
 

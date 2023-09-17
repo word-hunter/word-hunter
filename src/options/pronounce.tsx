@@ -6,6 +6,11 @@ export const PronounceSetting = () => {
     setSetting('atuoPronounce', target.checked)
   }
 
+  const onVolumeChange = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    setSetting('volume', target.valueAsNumber)
+  }
+
   return (
     <section class="section">
       <h2 class="h2">Pronounce</h2>
@@ -21,6 +26,18 @@ export const PronounceSetting = () => {
             oninput={onInput}
           />
         </label>
+      </div>
+      <div>
+        <label class="block pt-8 pb-4 text-right">volume ({settings().volume})</label>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={settings().volume}
+          step="1"
+          class="range  range-info range-xs"
+          oninput={onVolumeChange}
+        />
       </div>
     </section>
   )

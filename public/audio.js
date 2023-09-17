@@ -1,10 +1,13 @@
 // this method is for chrome version 109 or lower, which don't support chrome.offscreen
 // https://developer.chrome.com/docs/extensions/reference/offscreen/
 onload = async () => {
-  const src = new URL(location.href).searchParams.get('audio')
+  const params = new URL(location.href).searchParams
+  const src = params.get('audio')
+  const volume = params.get('volume')
   if (!src) return
 
   const audio = new Audio(src)
+  audio.volume = volume / 100
   audio
     .play()
     .then(_ => console.log('Playing...'))
@@ -21,7 +24,8 @@ onload = async () => {
 chrome.runtime.onMessage.addListener(message => {
   if (message.target !== 'offscreen') return
   if (message.type === 'play-audio') {
-    const audio = new Audio(message.data)
+    const audio = new Audio(message.data?.audio)
+    audio.volume = message.data?.volume / 100
     audio.play().catch(error => console.log(error))
   }
 })
