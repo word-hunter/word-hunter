@@ -5,7 +5,9 @@ export const safeEmphasizeWordInText = (text: string = '', word: string, tag: st
 
 export const getFaviconUrl = () => {
   const favicon = document.querySelector('link[rel*="icon"]') as HTMLLinkElement
-  return favicon?.href ?? ''
+  const iconUrl = favicon?.href ?? ''
+  if (iconUrl.startsWith('data:image')) return ''
+  return iconUrl
 }
 
 export const getFaviconByDomain = (url: string) => {
