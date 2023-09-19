@@ -212,7 +212,8 @@ async function setup() {
           }
           case Messages.ai_explain:
             const { text, uuid } = msg
-            const explain = await explainWord(word, text)
+            const settings = (await getStorageValues([StorageKey.settings]))[StorageKey.settings]
+            const explain = await explainWord(word, text, settings?.openai.model)
             port.postMessage({ result: explain, uuid })
         }
       })

@@ -25,7 +25,8 @@ export const OpenAISetting = () => {
             aria-placeholder="select model"
           >
             <option disabled>Select Model</option>
-            <option value="text-davinci-003">text-davinci-003</option>
+            <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            <option value="gpt-3.5-turbo-instruct">gpt-3.5-turbo-instruct</option>
             <option value="gpt-4">gpt-4</option>
           </select>
         </div>
