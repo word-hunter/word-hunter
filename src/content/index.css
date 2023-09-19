@@ -1,14 +1,15 @@
 @import url('../assets/font.css');
 
-.__mark {
-  display: inline;
-  padding-inline: 0.1em;
-  margin-inline: -0.1em;
+/* some site set style to role=button globally, we need to prevent it for mark */
+w-mark-parent {
+  w-mark[role='button'] {
+    all: unset;
+    color: inherit;
+  }
 }
 
-.__word_known {
-  color: inherit;
-  background-color: unset;
+.__mark {
+  display: inline;
 }
 
 .__word_unknown,

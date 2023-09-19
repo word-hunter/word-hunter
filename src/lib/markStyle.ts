@@ -30,6 +30,8 @@ export function genMarkStyle() {
           color: var(--wh-mark-text-color-0);
           background-color: var(--wh-mark-color-0);
           border-radius: 0.3em;
+          padding-inline: 0.1em;
+          margin-inline: -0.1em;
           ${contextSelector} {
             color: var(--wh-mark-text-color-1);
             background-color: var(--wh-mark-color-1);
