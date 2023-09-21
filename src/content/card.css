@@ -5,7 +5,7 @@
   --border-color: rgba(0, 0, 0, 0.3);
   --color-main: #759fc9;
   --height: 600px;
-  --max-height: 80vh;
+  --max-height: calc(100vh - 120px);
 
   width: 490px;
   max-width: 90%;
@@ -37,7 +37,7 @@
     position: relative;
     padding: 10px 15px;
     height: var(--height);
-    max-height: var(--max-height);
+    max-height: calc(var(--max-height) - 82px);
     overflow-y: auto;
     overflow-x: clip;
     overscroll-behavior: contain;
@@ -254,7 +254,7 @@
     > div {
       padding: 5px 0px 0 0px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
       gap: 1px;
       background-color: #ececeb;
     }

@@ -1,11 +1,9 @@
 @import url('../assets/font.css');
 
 /* some site set style to role=button globally, we need to prevent it for mark */
-w-mark-parent {
-  w-mark[role='button'] {
-    all: unset;
-    color: inherit;
-  }
+w-mark[role='button'] {
+  all: unset;
+  color: inherit;
 }
 
 .__mark {

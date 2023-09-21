@@ -30,15 +30,12 @@ export const OpenAISetting = () => {
             <option value="gpt-4">gpt-4</option>
           </select>
         </div>
-        <div>
-          <textarea
-            placeholder="input your openai apikey"
-            class="textarea textarea-bordered textarea-lg w-full max-w-xs text-sm leading-5"
-            style={{ width: '350px', height: '100px' }}
-            value={settings()['openai'].apiKey}
-            oninput={onApiKeyChange}
-          />
-        </div>
+        <textarea
+          placeholder="input your openai apikey"
+          class="textarea textarea-bordered textarea-lg w-full max-w-xs text-sm leading-5"
+          value={settings()['openai'].apiKey}
+          oninput={onApiKeyChange}
+        />
       </div>
     </section>
   )

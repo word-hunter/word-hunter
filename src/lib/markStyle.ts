@@ -3,24 +3,27 @@ import { invertHexColor } from './utils'
 import { classes } from '../constant'
 
 export function genMarkStyle() {
-  const unknownSelector = `.${classes.unknown}, .${classes.zen_mode} .${classes.unknown}`
-  const contextSelector = `&[have_context]`
+  const unknownSelector = `.${classes.mark}.${classes.unknown}, .${classes.zen_mode} .${classes.mark}.${classes.unknown}`
+  const contextSelector = `.${classes.mark}.${classes.unknown}[have_context], .${classes.zen_mode} .${classes.mark}.${classes.unknown}[have_context]`
   const markStyle = settings().markStyle ?? MarkStyles[0]
 
   let style = `
+    :root {
       --wh-mark-text-color-0: ${invertHexColor(settings()['colors'][0])};
       --wh-mark-text-color-1: ${invertHexColor(settings()['colors'][1])};
       --wh-mark-color-0: ${settings()['colors'][0]};
       --wh-mark-color-1: ${settings()['colors'][1]};
+    }
+
   `
   switch (markStyle) {
     case 'text':
       style += `
         ${unknownSelector} {
           color: var(--wh-mark-color-0);
-          ${contextSelector} {
-            color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          color: var(--wh-mark-color-1);
         }
       `
       break
@@ -32,22 +35,22 @@ export function genMarkStyle() {
           border-radius: 0.3em;
           padding-inline: 0.1em;
           margin-inline: -0.1em;
-          ${contextSelector} {
-            color: var(--wh-mark-text-color-1);
-            background-color: var(--wh-mark-color-1);
-          }
-        }
 
+        }
+        ${contextSelector} {
+          color: var(--wh-mark-text-color-1);
+          background-color: var(--wh-mark-color-1);
+        }
       `
       break
     case 'outline':
       style += `
         ${unknownSelector} {
-          outline: inset var(--wh-mark-color-0);
+          outline: inset var(--wh-mark-color-0) !important;
           border-radius: 0.3em;
-          ${contextSelector} {
-            outline: inset var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          outline: inset var(--wh-mark-color-1) !important;
         }
       `
       break
@@ -57,9 +60,9 @@ export function genMarkStyle() {
           text-decoration-line: underline;
           text-decoration-style: dashed;
           text-decoration-color: var(--wh-mark-color-0);
-          ${contextSelector} {
-             text-decoration-color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          text-decoration-color: var(--wh-mark-color-1);
         }
       `
       break
@@ -69,9 +72,9 @@ export function genMarkStyle() {
           text-decoration-line: underline;
           text-decoration-style: dotted;
           text-decoration-color: var(--wh-mark-color-0);
-          ${contextSelector} {
-             text-decoration-color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          text-decoration-color: var(--wh-mark-color-1);
         }
       `
       break
@@ -81,9 +84,9 @@ export function genMarkStyle() {
           text-decoration-line: underline;
           text-decoration-style: solid;
           text-decoration-color: var(--wh-mark-color-0);
-          ${contextSelector} {
-             text-decoration-color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          text-decoration-color: var(--wh-mark-color-1);
         }
       `
       break
@@ -93,9 +96,9 @@ export function genMarkStyle() {
           text-decoration-line: underline;
           text-decoration-style: double;
           text-decoration-color: var(--wh-mark-color-0);
-          ${contextSelector} {
-             text-decoration-color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          text-decoration-color: var(--wh-mark-color-1);
         }
       `
       break
@@ -117,9 +120,9 @@ export function genMarkStyle() {
          text-emphasis: dot;
          text-emphasis-position: under right;
          text-emphasis-color: var(--wh-mark-color-0);
-          ${contextSelector} {
-            text-emphasis-color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          text-emphasis-color: var(--wh-mark-color-1);
         }
       `
       break
@@ -141,9 +144,9 @@ export function genMarkStyle() {
          text-emphasis: open circle;
          text-emphasis-position: under right;
          text-emphasis-color: var(--wh-mark-color-0);
-          ${contextSelector} {
-            text-emphasis-color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          text-emphasis-color: var(--wh-mark-color-1);
         }
       `
       break
@@ -153,9 +156,9 @@ export function genMarkStyle() {
          text-emphasis: triangle;
          text-emphasis-position: under right;
          text-emphasis-color: var(--wh-mark-color-0);
-          ${contextSelector} {
-            text-emphasis-color: var(--wh-mark-color-1);
-          }
+        }
+        ${contextSelector} {
+          text-emphasis-color: var(--wh-mark-color-1);
         }
       `
       break
@@ -179,10 +182,10 @@ export function genMarkStyle() {
             padding: 0 3px 3px 3px;
             opacity: 0.3;
           }
-          ${contextSelector} {
-            &::before {
-              background: var(--wh-mark-color-1);
-            }
+        }
+        ${contextSelector} {
+          &::before {
+            background: var(--wh-mark-color-1);
           }
         }
       `
@@ -202,10 +205,10 @@ export function genMarkStyle() {
             transform: rotate(-2deg);
             background: linear-gradient(135deg, var(--wh-mark-color-0) 0%, rgba(0,0,0,0) 100%);
           }
-          ${contextSelector} {
-            &::before {
-              background: linear-gradient(135deg, var(--wh-mark-color-1) 0%, rgba(0,0,0,0) 100%);
-            }
+        }
+        ${contextSelector} {
+          &::before {
+            background: linear-gradient(135deg, var(--wh-mark-color-1) 0%, rgba(0,0,0,0) 100%);
           }
         }
       `
@@ -249,13 +252,13 @@ export function genMarkStyle() {
             opacity:0.7;
             border-radius:50%;
           }
-          ${contextSelector} {
-            &::before {
-              border-color: var(--wh-mark-color-1);
-            }
-            &::after {
-              border-color: var(--wh-mark-color-1);
-            }
+        }
+        ${contextSelector} {
+          &::before {
+            border-color: var(--wh-mark-color-1);
+          }
+          &::after {
+            border-color: var(--wh-mark-color-1);
           }
         }
       `

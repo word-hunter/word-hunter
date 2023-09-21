@@ -18,12 +18,10 @@ const App = () => {
       <ZenMode />
       <style>
         {`
-          :root {
-              ${genMarkStyle()}
-          }
+          ${genMarkStyle()}
         `}
         {`
-           ${!settings().showCnTrans && 'w-mark-t { display:none }'}
+          ${!settings().showCnTrans && 'w-mark-t { display:none }'}
         `}
       </style>
     </>
