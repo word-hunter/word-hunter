@@ -112,6 +112,7 @@ body:has(.__zen_mode) {
 
   .zen_buttons {
     display: flex;
+    gap: 20px;
     justify-content: center;
     margin-bottom: 40px;
     button {

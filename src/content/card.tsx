@@ -269,6 +269,10 @@ export function ZenMode() {
     confirm('Are you sure you want to mark all unknown words on this page as known?') && markAsAllKnown()
   }
 
+  const onUnselectAll = () => {
+    setZenExcludeWords([...zenModeWords()])
+  }
+
   return (
     <Show when={zenMode()}>
       <div class={classes.zen_mode}>
@@ -281,6 +285,10 @@ export function ZenMode() {
           </p>
         </pre>
         <div class="zen_buttons">
+          <button onclick={onUnselectAll} title="Unselect All">
+            <img src={chrome.runtime.getURL('icons/unselect.png')} width="20" height="20" alt="Unselect all words" />
+            Unselect All
+          </button>
           <button onclick={onSetAllKnown} title="Set all words as known">
             <img src={chrome.runtime.getURL('icons/checked.png')} width="20" height="20" alt="Set all words as known" />
             Set all words as known
