@@ -37,7 +37,7 @@
     position: relative;
     padding: 10px 15px;
     height: var(--height);
-    max-height: calc(var(--max-height) - 82px);
+    max-height: var(--max-height);
     overflow-y: auto;
     overflow-x: clip;
     overscroll-behavior: contain;

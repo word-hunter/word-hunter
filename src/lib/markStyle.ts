@@ -3,8 +3,8 @@ import { invertHexColor } from './utils'
 import { classes } from '../constant'
 
 export function genMarkStyle() {
-  const unknownSelector = `.${classes.mark}.${classes.unknown}, .${classes.zen_mode} .${classes.mark}.${classes.unknown}`
-  const contextSelector = `.${classes.mark}.${classes.unknown}[have_context], .${classes.zen_mode} .${classes.mark}.${classes.unknown}[have_context]`
+  const unknownSelector = `.${classes.mark}.${classes.unknown}`
+  const contextSelector = `.${classes.mark}.${classes.unknown}[have_context]`
   const markStyle = settings().markStyle ?? MarkStyles[0]
 
   let style = `
