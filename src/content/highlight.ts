@@ -30,8 +30,8 @@ function getNodeWord(node: HTMLElement | Node | undefined) {
   return (node.textContent ?? '').toLowerCase()
 }
 
-function isNormalTenseSame(word1: string, word2: string) {
-  return word1 === word2 || fullDict[word1]?.o === fullDict[word2]?.o
+function isOriginFormSame(word1: string, word2: string) {
+  return word1 === word2 || getOriginForm(word1) === getOriginForm(word2)
 }
 
 export function markAsKnown(word: string) {
@@ -43,7 +43,7 @@ export function markAsKnown(word: string) {
 
 function _makeAsKnown(word: string) {
   document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (isNormalTenseSame(getNodeWord(node), word)) {
+    if (isOriginFormSame(getNodeWord(node), word)) {
       node.className = classes.known
     }
   })
@@ -64,14 +64,14 @@ export function addContext(word: string, text: string) {
 }
 
 function _addContext(context: WordContext) {
-  const word = fullDict[context.word].o ?? context.word
+  const word = getOriginForm(context.word)
   if (!(contexts[word] ?? []).find(c => c.text === context.text)) {
     contexts[word] = [...(contexts[word] ?? []), context]
   }
 
   setWordContexts(contexts[word])
   document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (isNormalTenseSame(getNodeWord(node), word)) {
+    if (isOriginFormSame(getNodeWord(node), word)) {
       node.setAttribute('have_context', contexts[word].length.toString())
     }
   })
@@ -82,14 +82,14 @@ export function deleteContext(context: WordContext) {
 }
 
 function _deleteContext(context: WordContext) {
-  const word = fullDict[context.word].o ?? context.word
+  const word = getOriginForm(context.word)
   const index = (contexts[word] ?? []).findIndex(c => c.text === context.text)
   if (index > -1) {
     contexts[word].splice(index, 1)
 
     setWordContexts([...contexts[word]])
     document.querySelectorAll('.' + classes.mark).forEach(node => {
-      if (isNormalTenseSame(getNodeWord(node), word)) {
+      if (isOriginFormSame(getNodeWord(node), word)) {
         if (contexts[word]?.length === 0) {
           node.removeAttribute('have_context')
         } else {
@@ -160,13 +160,14 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
   const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
     const w = word.toLowerCase()
     if (w in dict) {
-      if (w in wordsKnown) {
+      const originFormWord = getOriginForm(w)
+      if (originFormWord in wordsKnown) {
         return origin
       } else {
         toHighlightWords.push(w)
         const contextLength = getWordContexts(w)?.length ?? 0
         const contextAttr = contextLength > 0 ? `have_context="${contextLength}"` : ''
-        const trans = settings().showCnTrans && fullDict[fullDict[w]?.o]?.t
+        const trans = settings().showCnTrans && fullDict[originFormWord]?.t
         const transTag = !!trans ? `<w-mark-t data-trans="(${trans})">(${trans})</w-mark-t>` : ''
         return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${transTag}${postfix}`
       }
@@ -344,15 +345,19 @@ function listenBackgroundMessage() {
 }
 
 export function isWordKnownAble(word: string) {
-  return word in dict && !(word in wordsKnown)
+  return word in dict && !(getOriginForm(word) in wordsKnown)
 }
 
 export function isInDict(word: string) {
   return word?.toLowerCase() in dict
 }
 
+export function getOriginForm(word: string) {
+  return fullDict[word]?.o ?? word
+}
+
 export function getWordAllTenses(word: string) {
-  const originWord = fullDict[word]?.o ?? word
+  const originWord = getOriginForm(word)
   const words = Object.entries(fullDict)
     .filter(([_, info]) => info.o === originWord)
     .map(([w, _]) => w)
@@ -360,8 +365,8 @@ export function getWordAllTenses(word: string) {
 }
 
 export function getWordContexts(word: string) {
-  const normalTenseWord = fullDict[word].o ?? word
-  return contexts[normalTenseWord] ?? []
+  const originFormWord = getOriginForm(word)
+  return contexts[originFormWord] ?? []
 }
 
 export async function init() {

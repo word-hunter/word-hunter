@@ -144,8 +144,8 @@ async function setup() {
         switch (action) {
           case Messages.set_known:
             storage.get([StorageKey.known], result => {
-              const normalTenseWord = dict[word]?.o ?? word
-              const knownWords = { ...(result[StorageKey.known] ?? {}), [normalTenseWord]: 'o' }
+              const originFormWord = dict[word]?.o ?? word
+              const knownWords = { ...(result[StorageKey.known] ?? {}), [originFormWord]: 'o' }
               storage.set({ [StorageKey.known]: knownWords })
               updateBadge(knownWords)
               syncUpKnowns([word], knownWords)
@@ -165,11 +165,11 @@ async function setup() {
           case Messages.add_context:
             storage.get([StorageKey.context], result => {
               // record context in normal tense word key
-              const normalTenseWord = dict[word]?.o ?? word
+              const originFormWord = dict[word]?.o ?? word
               const contexts = result[StorageKey.context] ?? {}
-              const wordContexts = (contexts[normalTenseWord] ?? []) as WordContext[]
+              const wordContexts = (contexts[originFormWord] ?? []) as WordContext[]
               if (!wordContexts.find(c => c.text === context.text)) {
-                const newContexts = { ...contexts, [normalTenseWord]: [...wordContexts, context] }
+                const newContexts = { ...contexts, [originFormWord]: [...wordContexts, context] }
                 storage.set({ [StorageKey.context]: newContexts })
               }
               sendMessageToAllTabs({ action, context })
@@ -178,15 +178,15 @@ async function setup() {
           case Messages.delete_context:
             storage.get([StorageKey.context], result => {
               // delete context in normal tense word key
-              const normalTenseWord = dict[word]?.o ?? word
+              const originFormWord = dict[word]?.o ?? word
               const contexts = result[StorageKey.context] ?? {}
-              const wordContexts = (contexts[normalTenseWord] ?? []) as WordContext[]
+              const wordContexts = (contexts[originFormWord] ?? []) as WordContext[]
               const index = wordContexts.findIndex(c => c.text === context.text)
               if (index > -1) {
                 wordContexts.splice(index, 1)
-                const { [normalTenseWord]: w, ...rest } = contexts
+                const { [originFormWord]: w, ...rest } = contexts
                 storage.set({
-                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [normalTenseWord]: wordContexts } : rest
+                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [originFormWord]: wordContexts } : rest
                 })
                 sendMessageToAllTabs({ action, context })
               }
