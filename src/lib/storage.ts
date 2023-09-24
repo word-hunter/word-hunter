@@ -1,4 +1,4 @@
-import { STORAGE_KEY_INDICES, StorageKey, WordMap } from '../constant'
+import { STORAGE_KEY_INDICES, StorageKey, WordMap, ContextMap } from '../constant'
 
 export async function getAllKnownSync() {
   const record = (await chrome.storage.sync.get(STORAGE_KEY_INDICES)) as Record<string, string[]>
@@ -10,7 +10,7 @@ export async function getAllKnownSync() {
   return Object.fromEntries(wordEntries) as WordMap
 }
 
-export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
+export async function syncUpKnowns(words: string[], localKnowns: WordMap, updateTime: number = Date.now()) {
   const toSyncKnowns = {} as Record<string, string[]>
 
   const localKnownsGroupByKeys = {} as Record<string, string[]>
@@ -48,31 +48,81 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap) {
   if (Object.keys(toSyncKnowns).length > 0) {
     try {
       await chrome.storage.sync.set(toSyncKnowns)
+      await chrome.storage.sync.set({
+        [StorageKey.knwon_update_timestamp]: updateTime
+      })
     } catch (e) {
       console.log(e)
     }
   }
 }
 
-export async function mergeKnowns() {
-  const allKnownSynced = await getAllKnownSync()
-  const knownsLocal = await chrome.storage.local.get([StorageKey.known])
-  if (Object.keys(knownsLocal).length !== Object.keys(allKnownSynced).length) {
-    const knowns = { ...allKnownSynced, ...knownsLocal[StorageKey.known] }
-    await chrome.storage.local.set({ [StorageKey.known]: knowns })
-    syncUpKnowns(Object.keys(knowns), knowns)
+export async function mergeKnowns(gDriveKnowns: WordMap = {}) {
+  const knownsLocal: WordMap = await getLocalValue(StorageKey.known)
+  const KnownSynced = await getAllKnownSync()
+  const mergedUpdateTime = Date.now()
+
+  // sort by length
+  const knownsList = [knownsLocal, KnownSynced, gDriveKnowns].sort((a, b) => {
+    return Object.keys(a).length - Object.keys(b).length
+  })
+
+  // current just merge all knowns to one object, keep words from all soruce
+  const mergedKnowns = {}
+  knownsList.forEach(knowns => {
+    Object.assign(mergedKnowns, knowns)
+  })
+
+  if (Object.keys(mergedKnowns).length !== Object.keys(knownsLocal).length) {
+    await chrome.storage.local.set({
+      [StorageKey.known]: mergedKnowns,
+      [StorageKey.knwon_update_timestamp]: mergedUpdateTime
+    })
   }
+
+  if (Object.keys(mergedKnowns).length !== Object.keys(KnownSynced).length) {
+    syncUpKnowns(Object.keys(mergedKnowns), mergedKnowns, mergedUpdateTime)
+  }
+
+  return [mergedKnowns, mergedUpdateTime] as const
 }
 
-export async function getStorageValues(keys: StorageKey[]) {
-  return await chrome.storage.local.get(keys)
+export async function mergeContexts(remoteContext?: ContextMap, remoteUpdateTime: number = 0) {
+  let localUpdateTime: number = (await getLocalValue(StorageKey.context_update_timestamp)) ?? 0
+  const contextLocal: ContextMap = await getLocalValue(StorageKey.context)
+
+  let mergedContexts = contextLocal
+  let needUpdateLocal = false
+  let needUpdateRemote = false
+  let mergedUpdateTime = Date.now()
+
+  if (remoteContext) {
+    if (remoteUpdateTime > localUpdateTime) {
+      mergedContexts = remoteContext
+      needUpdateLocal = true
+    }
+    if (localUpdateTime > remoteUpdateTime) {
+      needUpdateRemote = true
+    }
+  }
+
+  return [mergedContexts, mergedUpdateTime] as const
 }
 
-export async function uploadStorageValues(keys: StorageKey[]) {
-  const localValues = await chrome.storage.local.get(keys)
-  try {
-    await chrome.storage.sync.set(localValues)
-  } catch (e) {
-    console.log(e)
-  }
+// clean up unused context words
+export function cleanupContexts(contexts: ContextMap, known: WordMap) {
+  const cleanContexts = Object.fromEntries(
+    Object.entries(contexts).filter(([word]) => {
+      return !(word in known)
+    })
+  )
+  return cleanContexts
+}
+
+export async function getLocalValue(key: StorageKey) {
+  return (await chrome.storage.local.get(key))[key]
+}
+
+export async function getSyncValue(key: StorageKey) {
+  return (await chrome.storage.sync.get(key))[key]
 }

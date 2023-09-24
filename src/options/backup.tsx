@@ -1,114 +1,178 @@
+import { createSignal, Show } from 'solid-js'
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
-import { syncUpKnowns } from '../lib/storage'
+import { syncUpKnowns, getLocalValue } from '../lib/storage'
 import { Note } from './note'
-
-const timeFormatter = new Intl.DateTimeFormat('en-US')
+import { syncWithDrive, getLocalData } from './backup/sync'
 
 export const Backup = () => {
   let dialogRef: HTMLDialogElement
   let fileRef: HTMLInputElement
 
+  const timeFormatter = new Intl.DateTimeFormat('en-US')
+  const timeLongFormatter = new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'short',
+    timeStyle: 'medium'
+  })
+
+  const [toastSuccess, setToastSuccess] = createSignal('')
+  const [toastError, setToastError] = createSignal('')
+  const [syning, setSyning] = createSignal(false)
+  const [latestSyncTime, setLatestSyncTime] = createSignal(0)
+
+  getLocalValue(StorageKey.latest_sync_time).then(time => {
+    if (time) {
+      setLatestSyncTime(time)
+    }
+  })
+
+  const showModal = () => {
+    dialogRef.showModal()
+  }
+
+  const toastS = (message: string) => {
+    setToastSuccess('✅ ' + message)
+    setTimeout(() => {
+      setToastSuccess('')
+    }, 5000)
+  }
+
+  const toastE = (message: string) => {
+    setToastError('❌ ' + message)
+    setTimeout(() => {
+      setToastError('')
+    }, 5000)
+  }
+
   const onRestore = () => {
     const fileList = fileRef.files
     if (!fileList?.length) {
-      alert('no files')
+      toastE('no files')
       return false
     }
 
     const reader = new FileReader()
     reader.onload = async () => {
       const data = reader.result
-      if (typeof data !== 'string') return
       try {
-        const json = JSON.parse(data)
-        if (!json[StorageKey.known]) {
-          alert('invalid file ❗️')
-          return
-        }
-
-        await chrome.storage.local.set({
-          [StorageKey.context]: json[StorageKey.context] ?? {},
-          [StorageKey.known]: json[StorageKey.known] ?? {}
-        })
-        syncUpKnowns(Object.keys(json[StorageKey.known] ?? {}), json[StorageKey.known])
-        // if (json[StorageKey.settings]) {
-        await resotreSettings(json[StorageKey.settings])
-        // }
-        alert('restore success ✅')
+        await restoreData(data as string)
+        toastS('restore success')
       } catch (e) {
-        alert('invalid file ❗️')
+        toastE('invalid file')
       }
     }
     reader.readAsText(fileList[0])
   }
 
-  const showModal = () => {
-    dialogRef.showModal()
+  const restoreData = async (data: string) => {
+    if (typeof data !== 'string') return
+    const json = JSON.parse(data)
+    if (!json[StorageKey.known]) {
+      toastE('invalid file️')
+      return
+    }
+    const updateTime = Date.now()
+    await chrome.storage.local.set({
+      [StorageKey.context]: json[StorageKey.context] ?? {},
+      [StorageKey.known]: json[StorageKey.known] ?? {},
+      [StorageKey.knwon_update_timestamp]: updateTime,
+      [StorageKey.context_update_timestamp]: updateTime
+    })
+    syncUpKnowns(Object.keys(json[StorageKey.known] ?? {}), json[StorageKey.known])
+    await resotreSettings(json[StorageKey.settings])
   }
 
-  const onBackup = () => {
-    chrome.storage.local.get([StorageKey.known, StorageKey.context, StorageKey.settings], result => {
-      const now = Date.now()
-      const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
+  const onBackup = async () => {
+    const now = Date.now()
+    const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
+    const backupData = await getLocalData()
+    downloadAsJsonFile(JSON.stringify(backupData), fileName)
+  }
 
-      // clean up unused context words
-      const known = result[StorageKey.known] || {}
-      const contexts = result[StorageKey.context] || {}
-      const cleanContexts = Object.fromEntries(
-        Object.entries(contexts).filter(([word]) => {
-          return !(word in known)
-        })
-      )
-
-      downloadAsJsonFile(
-        JSON.stringify({
-          [StorageKey.known]: known,
-          [StorageKey.context]: cleanContexts,
-          [StorageKey.settings]: result[StorageKey.settings] || null
-        }),
-        fileName
-      )
-    })
+  const onDriveSync = async () => {
+    if (syning()) return
+    setSyning(true)
+    try {
+      const latestSyncTime = await syncWithDrive()
+      setLatestSyncTime(latestSyncTime)
+      setSyning(false)
+      toastS('sync success')
+    } catch (e: any) {
+      setSyning(false)
+      toastE('sync failed: ️' + e.message)
+    }
   }
 
   return (
-    <section class="section">
-      <h2 class="h2">backup</h2>
-      <Note>Automatically sync between devices, but also can do it manually.</Note>
-      <dialog id="restoreDialog" ref={dialogRef!} class="modal">
-        <form method="dialog" class="modal-box">
-          <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-          <div class="pt-10">
-            <input
-              type="file"
-              accept=".json"
-              ref={fileRef!}
-              class="file-input file-input-bordered file-input-lg w-full"
+    <>
+      <section class="section">
+        <h2 class="h2">backup</h2>
+        <Note>Automatically sync between Chromes (without context data)</Note>
+        <div class="divider">OR</div>
+        <dialog id="restoreDialog" ref={dialogRef!} class="modal">
+          <form method="dialog" class="modal-box">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            <div class="pt-10">
+              <input
+                type="file"
+                accept=".json"
+                ref={fileRef!}
+                class="file-input file-input-bordered file-input-lg w-full"
+              />
+            </div>
+            <div class="modal-action">
+              <button class="btn btn-outline" onclick={onRestore}>
+                confirm
+              </button>
+            </div>
+          </form>
+          <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
+
+        <div class="grid grid-cols-2 gap-4 pt-1">
+          <button onclick={showModal} class="btn btn-block btn-lg capitalize">
+            ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
+            restore
+          </button>
+          <button onclick={onBackup} class="btn btn-block btn-lg capitalize">
+            ️<img src={chrome.runtime.getURL('icons/download.png')} class="w-8 h-8" alt="backup" />
+            backup
+          </button>
+        </div>
+
+        <div class="divider">OR</div>
+
+        <div class="grid  gap-4 pt-1 pb-2">
+          <button onclick={onDriveSync} class="btn btn-block btn-lg capitalize">
+            <img
+              src={chrome.runtime.getURL('icons/gdrive.png')}
+              classList={{ 'animate-spin': syning() }}
+              class="w-8 h-8"
+              alt="upload"
             />
+            Sync with Google Drive
+          </button>
+          <Show when={latestSyncTime() > 0}>
+            <div class="text-center text-accent">Latest sync: {timeLongFormatter.format(latestSyncTime())}</div>
+          </Show>
+        </div>
+      </section>
+      <Show when={toastSuccess()}>
+        <div class="toast toast-end toast-bottom">
+          <div class="alert alert-success">
+            <span>{toastSuccess()}</span>
           </div>
-
-          <div class="modal-action">
-            <button class="btn btn-outline" onclick={onRestore}>
-              confirm
-            </button>
+        </div>
+      </Show>
+      <Show when={toastError()}>
+        <div class="toast toast-end toast-bottom">
+          <div class="alert alert-error">
+            <span>{toastError()}</span>
           </div>
-        </form>
-        <form method="dialog" class="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-
-      <div class="grid grid-cols-2 gap-4 pt-1">
-        <button onclick={showModal} class="btn btn-block btn-lg">
-          ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
-          restore
-        </button>
-        <button onclick={onBackup} class="btn btn-block btn-lg">
-          ️<img src={chrome.runtime.getURL('icons/download.png')} class="w-8 h-8" alt="backup" />
-          backup
-        </button>
-      </div>
-    </section>
+        </div>
+      </Show>
+    </>
   )
 }

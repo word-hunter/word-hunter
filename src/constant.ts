@@ -43,7 +43,10 @@ export const classes = {
 export enum StorageKey {
   'known' = 'known',
   'context' = 'context',
-  'settings' = 'settings'
+  'settings' = 'settings',
+  'knwon_update_timestamp' = 'knwon_update_timestamp',
+  'context_update_timestamp' = 'context_update_timestamp',
+  'latest_sync_time' = 'latest_sync_time'
 }
 
 export enum Messages {

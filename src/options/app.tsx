@@ -9,16 +9,18 @@ import { ControlSetting } from './control'
 
 export const App = () => {
   return (
-    <div class="container max-w-lg mx-auto p-4 my-10 grid gap-10 font-serif">
-      <h1 class="font-extrabold text-2xl text-center">Settings</h1>
-      <DictsSetting />
-      <LevelSetting />
-      <CnTransSetting />
-      <ControlSetting />
-      <YoutubeSetting />
-      <OpenAISetting />
-      <PronounceSetting />
-      <Backup />
+    <div class="w-full h-full bg-base-300">
+      <div class="container max-w-lg mx-auto p-4 py-10 grid gap-10 font-serif">
+        <h1 class="font-extrabold text-2xl text-center">Settings</h1>
+        <DictsSetting />
+        <LevelSetting />
+        <CnTransSetting />
+        <ControlSetting />
+        <YoutubeSetting />
+        <OpenAISetting />
+        <PronounceSetting />
+        <Backup />
+      </div>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { createSignal } from 'solid-js'
-import { getStorageValues, uploadStorageValues } from './storage'
+import { getLocalValue, getSyncValue } from './storage'
 import { StorageKey, LevelKey, WordInfoMap } from '../constant'
 
 const DEFAULT_DICTS = {
@@ -45,66 +45,73 @@ export const DEFAULT_SETTINGS = {
   openai: {
     apiKey: '',
     model: 'gpt-3.5-turbo-instruct'
-  }
+  },
+  update_timestamp: 1
 }
 
-type SettingType = typeof DEFAULT_SETTINGS
+export type SettingType = typeof DEFAULT_SETTINGS
 
 export const [settings, setSettings] = createSignal({ ...DEFAULT_SETTINGS })
 
 export async function setSetting<T extends keyof SettingType>(key: T, value: SettingType[T]) {
-  setSettings({ ...settings(), [key]: value })
+  setSettings({ ...settings(), [key]: value, update_timestamp: Date.now() })
   await chrome.storage.local.set({ settings: settings() })
-  await uploadStorageValues([StorageKey.settings])
+  await syncSettings(settings())
+}
+
+export async function syncSettings(settings: SettingType) {
+  try {
+    await chrome.storage.sync.set({ [StorageKey.settings]: settings })
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 export async function resotreSettings(values: SettingType) {
-  await chrome.storage.local.set({ settings: values ?? DEFAULT_SETTINGS })
-  await uploadStorageValues([StorageKey.settings])
-  await setSettings(values ?? DEFAULT_SETTINGS)
+  values = values ?? DEFAULT_SETTINGS
+  values.update_timestamp = Date.now()
+  await chrome.storage.local.set({ settings: values })
+  await syncSettings(values)
+  await setSettings(values)
 }
 
 export async function mergeSettings() {
-  const localSetting = await chrome.storage.local.get(StorageKey.settings)
-  const syncSetting = await chrome.storage.sync.get(StorageKey.settings)
+  const localSetting = await getLocalValue(StorageKey.settings)
+  const syncSetting = await getSyncValue(StorageKey.settings)
 
-  let mergedSettings: SettingType = { ...DEFAULT_SETTINGS }
+  if (localSetting.update_timestamp === syncSetting.update_timestamp) {
+    return
+  }
 
-  if (
-    localSetting[StorageKey.settings] &&
-    JSON.stringify(localSetting[StorageKey.settings]) !== JSON.stringify(mergedSettings)
-  ) {
-    for (const key in localSetting[StorageKey.settings]) {
-      if (localSetting[StorageKey.settings][key]) {
-        ;(mergedSettings as any)[key] = localSetting[StorageKey.settings][key]
-      }
-    }
-  }
-  if (
-    syncSetting[StorageKey.settings] &&
-    JSON.stringify(syncSetting[StorageKey.settings]) !== JSON.stringify(mergedSettings)
-  ) {
-    for (const key in syncSetting[StorageKey.settings]) {
-      if (syncSetting[StorageKey.settings][key]) {
-        ;(mergedSettings as any)[key] = syncSetting[StorageKey.settings][key]
-      }
-    }
-  }
+  let mergedSettings: SettingType = mergeSettingInOrder([localSetting, syncSetting])
   await chrome.storage.local.set({ settings: mergedSettings })
-  await uploadStorageValues([StorageKey.settings])
+  await syncSettings(mergedSettings)
   await setSettings(mergedSettings)
 }
 
-function mergeObjectDeep(target: Record<string, any>, source: Record<string, any>) {
+export function mergeSettingInOrder(settingsList: SettingType[]) {
+  let mergedSettings: SettingType = { ...DEFAULT_SETTINGS }
+  const settingsListInOrder = settingsList.sort((a, b) => (a.update_timestamp ?? 0) - (b.update_timestamp ?? 0))
+  settingsListInOrder.forEach(_settings => {
+    Object.assign(mergedSettings, fillUpNewSettingFiled(_settings, DEFAULT_SETTINGS))
+  })
+  // update timestamp
+  mergedSettings.update_timestamp = Date.now()
+  return mergedSettings
+}
+
+// fill up new setting field deeply
+function fillUpNewSettingFiled(target: Record<string, any>, source: Record<string, any>) {
   for (const key in source) {
     if (!target.hasOwnProperty(key)) {
       target[key] = source[key]
     } else {
-      if (typeof source[key] === 'object') {
-        mergeObjectDeep(target[key], source[key])
+      if (typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        fillUpNewSettingFiled(target[key], source[key])
       }
     }
   }
+  return target
 }
 
 export async function getSelectedDicts(dict: WordInfoMap) {
@@ -121,9 +128,8 @@ export async function getSelectedDicts(dict: WordInfoMap) {
 }
 
 export function initSettings() {
-  getStorageValues([StorageKey.settings]).then(result => {
-    mergeObjectDeep(result[StorageKey.settings], DEFAULT_SETTINGS)
-    setSettings(result[StorageKey.settings] ?? DEFAULT_SETTINGS)
+  getLocalValue(StorageKey.settings).then(localSettings => {
+    setSettings(localSettings ?? DEFAULT_SETTINGS)
     mergeSettings()
   })
 

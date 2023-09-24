@@ -13,7 +13,7 @@ export const CnTransSetting = () => {
         <label for="showCnTrans" class="label gap-4 cursor-pointer ">
           <span class="label-text">show Chinese translation</span>
           <input
-            class="toggle toggle-info"
+            class="toggle"
             type="checkbox"
             name="showCnTrans"
             id="showCnTrans"

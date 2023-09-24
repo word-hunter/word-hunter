@@ -1,6 +1,6 @@
 import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
-import { syncUpKnowns, mergeKnowns, getStorageValues } from '../lib/storage'
+import { syncUpKnowns, mergeKnowns, getLocalValue } from '../lib/storage'
 import { mergeSettings } from '../lib/settings'
 
 let dict: WordInfoMap = {}
@@ -31,8 +31,8 @@ function updateBadge(wordsKnown: WordMap) {
 
 const playAudio = async (audio: string) => {
   const autioPageUrl = chrome.runtime.getURL('audio.html')
-  const storage = await getStorageValues([StorageKey.settings])
-  const volume = storage[StorageKey.settings]?.volume ?? 100
+  const settings = await getLocalValue(StorageKey.settings)
+  const volume = settings?.volume ?? 100
 
   if (!chrome.offscreen) {
     return createAudioWindow(`${autioPageUrl}?audio=${encodeURIComponent(audio)}&?volume=${volume}`)
@@ -146,7 +146,7 @@ async function setup() {
             storage.get([StorageKey.known], result => {
               const originFormWord = dict[word]?.o ?? word
               const knownWords = { ...(result[StorageKey.known] ?? {}), [originFormWord]: 'o' }
-              storage.set({ [StorageKey.known]: knownWords })
+              storage.set({ [StorageKey.known]: knownWords, [StorageKey.knwon_update_timestamp]: Date.now() })
               updateBadge(knownWords)
               syncUpKnowns([word], knownWords)
               sendMessageToAllTabs({ action, word })
@@ -156,7 +156,7 @@ async function setup() {
             storage.get([StorageKey.known], result => {
               const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
               const knownWords = { ...(result[StorageKey.known] ?? {}), ...addedWords }
-              storage.set({ [StorageKey.known]: knownWords })
+              storage.set({ [StorageKey.known]: knownWords, [StorageKey.knwon_update_timestamp]: Date.now() })
               updateBadge(knownWords)
               syncUpKnowns(words, knownWords)
               sendMessageToAllTabs({ action, words })
@@ -170,7 +170,7 @@ async function setup() {
               const wordContexts = (contexts[originFormWord] ?? []) as WordContext[]
               if (!wordContexts.find(c => c.text === context.text)) {
                 const newContexts = { ...contexts, [originFormWord]: [...wordContexts, context] }
-                storage.set({ [StorageKey.context]: newContexts })
+                storage.set({ [StorageKey.context]: newContexts, [StorageKey.context_update_timestamp]: Date.now() })
               }
               sendMessageToAllTabs({ action, context })
             })
@@ -186,7 +186,8 @@ async function setup() {
                 wordContexts.splice(index, 1)
                 const { [originFormWord]: w, ...rest } = contexts
                 storage.set({
-                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [originFormWord]: wordContexts } : rest
+                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [originFormWord]: wordContexts } : rest,
+                  [StorageKey.context_update_timestamp]: Date.now()
                 })
                 sendMessageToAllTabs({ action, context })
               }
@@ -212,7 +213,7 @@ async function setup() {
           }
           case Messages.ai_explain:
             const { text, uuid } = msg
-            const settings = (await getStorageValues([StorageKey.settings]))[StorageKey.settings]
+            const settings = await getLocalValue(StorageKey.settings)
             const explain = await explainWord(word, text, settings?.openai.model)
             port.postMessage({ result: explain, uuid })
         }

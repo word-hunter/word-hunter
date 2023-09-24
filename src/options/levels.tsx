@@ -31,7 +31,7 @@ export const LevelSetting = () => {
                   <input
                     id={item[0]}
                     type="checkbox"
-                    class="toggle toggle-info"
+                    class="toggle"
                     checked={settings().levels.includes(item[0])}
                     value={item[0].toString()}
                     oninput={onInput}
