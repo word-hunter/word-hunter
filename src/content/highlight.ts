@@ -37,8 +37,9 @@ function isOriginFormSame(word1: string, word2: string) {
 export function markAsKnown(word: string) {
   if (!wordRegex.test(word)) return
 
-  wordsKnown[word] = 'o'
-  getMessagePort().postMessage({ action: Messages.set_known, word: word })
+  const originFormWord = getOriginForm(word)
+  wordsKnown[originFormWord] = 'o'
+  getMessagePort().postMessage({ action: Messages.set_known, word: originFormWord })
 }
 
 function _makeAsKnown(word: string) {
@@ -51,20 +52,21 @@ function _makeAsKnown(word: string) {
 
 export function addContext(word: string, text: string) {
   if (!wordRegex.test(word)) return
+  const originFormWord = getOriginForm(word)
 
   const context: WordContext = {
     url: location.href,
     title: getDocumentTitle(),
     text: text,
-    word: word,
+    word: originFormWord,
     timestamp: Date.now(),
     favicon: getFaviconUrl()
   }
-  getMessagePort().postMessage({ action: Messages.add_context, word: word, context })
+  getMessagePort().postMessage({ action: Messages.add_context, word: originFormWord, context })
 }
 
 function _addContext(context: WordContext) {
-  const word = getOriginForm(context.word)
+  const word = context.word
   if (!(contexts[word] ?? []).find(c => c.text === context.text)) {
     contexts[word] = [...(contexts[word] ?? []), context]
   }
@@ -106,6 +108,7 @@ export function markAsAllKnown() {
       return getNodeWord(node)
     })
     .filter(word => wordRegex.test(word) && !zenExcludeWords().includes(word))
+    .map(word => getOriginForm(word))
   getMessagePort().postMessage({ action: Messages.set_all_known, words })
 }
 
@@ -113,7 +116,7 @@ function _makeAsAllKnown(words: string[]) {
   const nodes = document.querySelectorAll('.' + classes.unknown)
   nodes.forEach(node => {
     const word = getNodeWord(node)
-    if (wordRegex.test(word) && words.includes(word)) {
+    if (wordRegex.test(word) && words.includes(getOriginForm(word))) {
       node.className = classes.known
     }
   })
