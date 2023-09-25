@@ -50,6 +50,12 @@ function _makeAsKnown(word: string) {
   })
 }
 
+function _makeAsUnknown(word: string) {
+  delete wordsKnown[word]
+  const textNodes = getTextNodes(document.body)
+  highlight(textNodes, dict, wordsKnown, contexts)
+}
+
 export function addContext(word: string, text: string) {
   if (!wordRegex.test(word)) return
   const originFormWord = getOriginForm(word)
@@ -334,6 +340,9 @@ function listenBackgroundMessage() {
         break
       case Messages.set_all_known:
         _makeAsAllKnown(msg.words)
+        break
+      case Messages.set_unknown:
+        _makeAsUnknown(word)
         break
       case Messages.add_context:
         _addContext(context)

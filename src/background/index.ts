@@ -3,6 +3,8 @@ import { explainWord } from '../lib/openai'
 import { syncUpKnowns, mergeKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
 
+let dict: WordInfoMap = {}
+
 async function readDict(): Promise<WordInfoMap> {
   const url = chrome.runtime.getURL('dict.json')
   const res = await fetch(url)
@@ -222,9 +224,29 @@ async function setup() {
     }
   })
 
+  chrome.contextMenus.create({
+    id: 'word-hunter',
+    title: 'Mark As Unknown',
+    contexts: ['selection' as any]
+  })
+
+  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if (info.menuItemId === 'word-hunter') {
+      const word = info.selectionText?.trim()
+      if (word && word in dict) {
+        const originFormWord = dict[word]?.o ?? word
+        delete knowns[originFormWord]
+        await syncUpKnowns([word], knowns, Date.now())
+        updateBadge(knowns)
+        sendMessageToAllTabs({ action: Messages.set_unknown, word: originFormWord })
+      }
+    }
+  })
+
   await mergeKnowns()
 
   readDict().then(localDict => {
+    dict = localDict
     chrome.storage.local.set({ dict: localDict }, () => {
       console.log('[storage] dict set up')
     })

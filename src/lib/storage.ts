@@ -32,6 +32,12 @@ export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, upd
         if (!toSyncKnowns[key].includes(word)) {
           toSyncKnowns[key].push(word)
         }
+
+        // remove the word as unknown
+        if (!knownsInMemory[word] && toSyncKnowns[key].includes(word)) {
+          toSyncKnowns[key].splice(toSyncKnowns[key].indexOf(word), 1)
+        }
+
         break
       }
     }

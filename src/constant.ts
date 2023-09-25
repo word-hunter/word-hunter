@@ -56,6 +56,7 @@ export enum StorageKey {
 export enum Messages {
   'set_known' = 'set_known',
   'set_all_known' = 'set_all_known',
+  'set_unknown' = 'set_unknown',
   'add_context' = 'add_context',
   'delete_context' = 'delete_context',
   'app_available' = 'app_available',
