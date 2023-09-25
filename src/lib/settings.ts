@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js'
 import { getSyncValue } from './storage'
 import { StorageKey, LevelKey, WordInfoMap } from '../constant'
+import { triggerGoogleDriveSyncJob } from './backup/sync'
 
 const DEFAULT_DICTS = {
   collins: true,
@@ -59,10 +60,13 @@ export const [settings, setSettings] = createSignal({ ...DEFAULT_SETTINGS }, { e
 export async function setSetting<T extends keyof SettingType>(key: T, value: SettingType[T]) {
   setSettings({ ...settings(), [key]: value })
   await syncSettings()
+  triggerGoogleDriveSyncJob()
 }
 
 export async function syncSettings(updateTime?: number) {
   try {
+    const oldSettings = await getSyncValue(StorageKey.settings)
+    if (isSettingsEqual(settings(), oldSettings)) return
     await chrome.storage.sync.set({
       [StorageKey.settings]: settings(),
       [StorageKey.settings_update_timestamp]: updateTime ?? Date.now()

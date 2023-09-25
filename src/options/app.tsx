@@ -12,6 +12,7 @@ export const App = () => {
     <div class="w-full h-full bg-base-300">
       <div class="container max-w-lg mx-auto p-4 py-10 grid gap-10 font-serif">
         <h1 class="font-extrabold text-2xl text-center">Settings</h1>
+        <Backup />
         <DictsSetting />
         <LevelSetting />
         <CnTransSetting />
@@ -19,7 +20,6 @@ export const App = () => {
         <YoutubeSetting />
         <OpenAISetting />
         <PronounceSetting />
-        <Backup />
       </div>
     </div>
   )

@@ -1,6 +1,6 @@
 import { StorageKey, WordMap, ContextMap } from '../../constant'
-import { mergeKnowns, mergeContexts, cleanupContexts, getAllKnownSync } from '../../lib'
-import { SettingType, mergeSetting } from '../../lib/settings'
+import { mergeKnowns, mergeContexts, cleanupContexts, getAllKnownSync, getSyncValue } from '../storage'
+import { SettingType, mergeSetting } from '../settings'
 import * as GDrive from './drive'
 
 type BackupData = {
@@ -30,8 +30,8 @@ export async function getBackupData(): Promise<BackupData> {
   }
 }
 
-export async function syncWithDrive() {
-  await GDrive.auth(true)
+export async function syncWithDrive(interactive: boolean = true) {
+  await GDrive.auth(interactive)
   let dirId = await GDrive.findDirId()
   let fileId = ''
   if (!dirId) {
@@ -77,4 +77,15 @@ export async function syncWithDrive() {
   const latest_sync_time = Date.now()
   await chrome.storage.sync.set({ [StorageKey.latest_sync_time]: latest_sync_time })
   return latest_sync_time
+}
+
+let syncTimer: number
+const SYNC_DELAY = 1 * 60 * 1000 // 1 minutes
+
+export async function triggerGoogleDriveSyncJob() {
+  if (!(await getSyncValue(StorageKey.latest_sync_time))) return
+  clearTimeout(syncTimer)
+  syncTimer = setTimeout(() => {
+    syncWithDrive(false)
+  }, SYNC_DELAY)
 }

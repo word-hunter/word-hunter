@@ -69,24 +69,36 @@ function makeRequest(
   responseType: 'json' | 'blob',
   data?: FormData
 ) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.responseType = responseType
-    xhr.open(method, url)
-    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`)
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        resolve(xhr.response)
-        return
-      }
-      if (xhr.status === 401) {
+  const headers = {
+    Authorization: `Bearer ${authToken}`
+  }
+
+  const options: RequestInit = {
+    method,
+    headers
+  }
+
+  if (data) {
+    options.body = data
+  }
+
+  return fetch(url, options).then(response => {
+    if (!response.ok) {
+      if (response.status === 401) {
         removeCachedAuthToken()
-        reject(new Error('Unauthorized, Please authorize again.'))
-        return
+        throw new Error('Unauthorized, Please authorize again.')
+      } else {
+        throw new Error(`Request failed with status: ${response.status}`)
       }
-      reject(xhr.status)
     }
-    xhr.send(data)
+
+    if (responseType === 'json') {
+      return response.json()
+    } else if (responseType === 'blob') {
+      return response.blob()
+    } else {
+      throw new Error('Invalid responseType')
+    }
   })
 }
 

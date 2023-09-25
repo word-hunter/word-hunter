@@ -2,6 +2,7 @@ import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../cons
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
+import { triggerGoogleDriveSyncJob, syncWithDrive } from '../lib/backup/sync'
 
 let dict: WordInfoMap = {}
 
@@ -147,6 +148,7 @@ async function setup() {
             await syncUpKnowns([word], knowns, Date.now())
             updateBadge(knowns)
             sendMessageToAllTabs({ action, word })
+            triggerGoogleDriveSyncJob()
             break
           case Messages.set_all_known:
             const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
@@ -154,6 +156,7 @@ async function setup() {
             await syncUpKnowns(words, knowns, Date.now())
             updateBadge(knowns)
             sendMessageToAllTabs({ action, words })
+            triggerGoogleDriveSyncJob()
             break
           case Messages.add_context: {
             const contexts = (await getLocalValue(StorageKey.context)) ?? {}
@@ -167,6 +170,7 @@ async function setup() {
               })
             }
             sendMessageToAllTabs({ action, context })
+            triggerGoogleDriveSyncJob()
             break
           }
           case Messages.delete_context: {
@@ -182,6 +186,7 @@ async function setup() {
                 [StorageKey.context_update_timestamp]: Date.now()
               })
               sendMessageToAllTabs({ action, context })
+              triggerGoogleDriveSyncJob()
             }
             break
           }
@@ -239,9 +244,12 @@ async function setup() {
         await syncUpKnowns([word], knowns, Date.now())
         updateBadge(knowns)
         sendMessageToAllTabs({ action: Messages.set_unknown, word: originFormWord })
+        triggerGoogleDriveSyncJob()
       }
     }
   })
+
+  syncWithDrive(false)
 
   readDict().then(localDict => {
     dict = localDict

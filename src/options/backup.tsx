@@ -3,7 +3,7 @@ import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
 import { syncUpKnowns, getSyncValue } from '../lib/storage'
 import { Note } from './note'
-import { syncWithDrive, getBackupData } from './backup/sync'
+import { syncWithDrive, getBackupData } from '../lib/backup/sync'
 
 export const Backup = () => {
   let dialogRef: HTMLDialogElement
@@ -11,7 +11,7 @@ export const Backup = () => {
 
   const timeFormatter = new Intl.DateTimeFormat('en-US')
   const timeLongFormatter = new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'short',
+    dateStyle: 'long',
     timeStyle: 'medium'
   })
 
@@ -91,7 +91,7 @@ export const Backup = () => {
     if (syning()) return
     setSyning(true)
     try {
-      const latestSyncTime = await syncWithDrive()
+      const latestSyncTime = await syncWithDrive(true)
       setLatestSyncTime(latestSyncTime)
       setSyning(false)
       toastS('sync success')
@@ -104,7 +104,7 @@ export const Backup = () => {
   return (
     <>
       <section class="section">
-        <h2 class="h2">backup</h2>
+        <h2 class="h2">Backup</h2>
         <Note>Automatically sync between Chromes (without context data)</Note>
         <div class="divider">OR</div>
         <dialog id="restoreDialog" ref={dialogRef!} class="modal">
