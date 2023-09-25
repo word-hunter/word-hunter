@@ -46,8 +46,8 @@ export async function syncWithDrive() {
     const gdriveData = (await GDrive.downloadFile(fileId)) as BackupData
 
     const [mergedSettings, setting_update_time] = await mergeSetting(
-      appData[StorageKey.settings],
-      gdriveData[StorageKey.settings],
+      appData[StorageKey.settings] ?? {},
+      gdriveData[StorageKey.settings] ?? {},
       appData[StorageKey.settings_update_timestamp],
       gdriveData[StorageKey.settings_update_timestamp]
     )

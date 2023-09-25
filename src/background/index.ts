@@ -1,6 +1,7 @@
 import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, mergeKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
+import { settings } from '../lib/settings'
 
 async function readDict(): Promise<WordInfoMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -28,8 +29,7 @@ function updateBadge(wordsKnown: WordMap) {
 
 const playAudio = async (audio: string) => {
   const autioPageUrl = chrome.runtime.getURL('audio.html')
-  const settings = await getLocalValue(StorageKey.settings)
-  const volume = settings?.volume ?? 100
+  const volume = settings().volume ?? 100
 
   if (!chrome.offscreen) {
     return createAudioWindow(`${autioPageUrl}?audio=${encodeURIComponent(audio)}&?volume=${volume}`)
@@ -203,8 +203,7 @@ async function setup() {
           }
           case Messages.ai_explain:
             const { text, uuid } = msg
-            const settings = await getLocalValue(StorageKey.settings)
-            const explain = await explainWord(word, text, settings?.openai.model)
+            const explain = await explainWord(word, text, settings().openai.model)
             port.postMessage({ result: explain, uuid })
         }
       })

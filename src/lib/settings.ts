@@ -44,7 +44,8 @@ export const DEFAULT_SETTINGS = {
   levels: ['4', '6', 'g', 'o'] as LevelKey[],
   openai: {
     apiKey: '',
-    model: 'gpt-3.5-turbo-instruct'
+    model: 'gpt-3.5-turbo-instruct',
+    prompt: 'explain the word ${word} in the sentence "${context}" with grade 2 English words'
   }
 }
 
@@ -78,19 +79,15 @@ export async function resotreSettings(values: SettingType) {
 }
 
 export async function mergeSetting(
-  syncdSettings: SettingType,
+  syncedSettings: SettingType,
   gdriveSettings: SettingType,
   syncedSettingTime: number = 0,
   gdriveSettingTime: number = 0
 ) {
   let mergedSettings: SettingType = { ...DEFAULT_SETTINGS }
   const updateTime = Date.now()
-  if (!syncdSettings || !gdriveSettings) {
-    return [mergedSettings, updateTime] as const
-  }
-
   const settingsList =
-    gdriveSettingTime > syncedSettingTime ? [syncdSettings, gdriveSettings] : [gdriveSettings, syncdSettings]
+    gdriveSettingTime > syncedSettingTime ? [syncedSettings, gdriveSettings] : [gdriveSettings, syncedSettings]
 
   settingsList.forEach(_settings => {
     Object.assign(mergedSettings, fillUpNewDefaultSettingFiled(_settings, DEFAULT_SETTINGS))
@@ -127,16 +124,18 @@ export async function getSelectedDicts(dict: WordInfoMap) {
 }
 
 export function initSettings() {
-  getSyncValue(StorageKey.settings).then(syncdSettings => {
-    setSettings(syncdSettings ?? DEFAULT_SETTINGS)
+  getSyncValue(StorageKey.settings).then(syncedSettings => {
+    syncedSettings = fillUpNewDefaultSettingFiled(syncedSettings ?? DEFAULT_SETTINGS, DEFAULT_SETTINGS)
+    setSettings(syncedSettings)
   })
 
-  // update context script after settings changed
-  if (typeof window !== 'undefined' && location?.protocol != 'chrome-extension:') {
-    const listener = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
-      if (namespace === 'sync' && changes[StorageKey.settings]) {
-        const { oldValue, newValue } = changes[StorageKey.settings]
-        setSettings(newValue)
+  const listener = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
+    if (namespace === 'sync' && changes[StorageKey.settings]) {
+      const { oldValue, newValue } = changes[StorageKey.settings]
+      setSettings(newValue)
+
+      // update context script after settings changed
+      if (typeof window !== 'undefined' && location?.protocol != 'chrome-extension:') {
         if (
           JSON.stringify(oldValue?.levels) !== JSON.stringify(newValue?.levels) ||
           oldValue?.showCnTrans !== newValue?.showCnTrans
@@ -145,8 +144,10 @@ export function initSettings() {
         }
       }
     }
+  }
 
-    chrome.storage.onChanged.addListener(listener)
+  chrome.storage.onChanged.addListener(listener)
+  if (typeof window !== 'undefined') {
     window.addEventListener('beforeunload', () => {
       chrome.storage.onChanged.removeListener(listener)
     })

@@ -1,14 +1,15 @@
 import { safeEmphasizeWordInText } from './index'
-import { settings } from './settings'
+import { DEFAULT_SETTINGS, settings } from './settings'
 
 function getHeaders() {
-  const apiKey = settings()['openai'].apiKey
+  const apiKey = settings().openai.apiKey
   return new Headers({ Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' })
 }
 
 export async function explainWord(word: string, context: string, model: string) {
   const headers = await getHeaders()
-  const prompt = `Can you explain the word ${word} in the sentence "${context}" with grade 2 English words ?`
+  const promptTemplate = settings().openai.prompt ?? DEFAULT_SETTINGS.openai.prompt
+  const prompt = promptTemplate.replace('${word}', word).replace('${context}', context)
 
   // replace old model with new ones
   if (model === 'text-davinci-003') {
