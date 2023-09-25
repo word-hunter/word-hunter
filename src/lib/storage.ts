@@ -10,11 +10,11 @@ export async function getAllKnownSync() {
   return Object.fromEntries(wordEntries) as WordMap
 }
 
-export async function syncUpKnowns(words: string[], localKnowns: WordMap, updateTime: number = Date.now()) {
+export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, updateTime: number = Date.now()) {
   const toSyncKnowns = {} as Record<string, string[]>
 
   const localKnownsGroupByKeys = {} as Record<string, string[]>
-  for (const word in localKnowns) {
+  for (const word in knownsInMemory) {
     for (const k of STORAGE_KEY_INDICES) {
       if (word.startsWith(k)) {
         localKnownsGroupByKeys[k] = localKnownsGroupByKeys[k] ?? []
@@ -31,7 +31,6 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap, update
 
         if (!toSyncKnowns[key].includes(word)) {
           toSyncKnowns[key].push(word)
-          localKnowns[word] = 'o'
         }
         break
       }
@@ -58,12 +57,11 @@ export async function syncUpKnowns(words: string[], localKnowns: WordMap, update
 }
 
 export async function mergeKnowns(gDriveKnowns: WordMap = {}) {
-  const knownsLocal: WordMap = await getLocalValue(StorageKey.known)
   const KnownSynced = await getAllKnownSync()
   const mergedUpdateTime = Date.now()
 
   // sort by length
-  const knownsList = [knownsLocal, KnownSynced, gDriveKnowns].sort((a, b) => {
+  const knownsList = [KnownSynced, gDriveKnowns].sort((a, b) => {
     return Object.keys(a).length - Object.keys(b).length
   })
 
@@ -72,13 +70,6 @@ export async function mergeKnowns(gDriveKnowns: WordMap = {}) {
   knownsList.forEach(knowns => {
     Object.assign(mergedKnowns, knowns)
   })
-
-  if (Object.keys(mergedKnowns).length !== Object.keys(knownsLocal).length) {
-    await chrome.storage.local.set({
-      [StorageKey.known]: mergedKnowns,
-      [StorageKey.knwon_update_timestamp]: mergedUpdateTime
-    })
-  }
 
   if (Object.keys(mergedKnowns).length !== Object.keys(KnownSynced).length) {
     syncUpKnowns(Object.keys(mergedKnowns), mergedKnowns, mergedUpdateTime)
@@ -106,6 +97,10 @@ export async function mergeContexts(remoteContext?: ContextMap, remoteUpdateTime
     }
   }
 
+  await chrome.storage.local.set({
+    [StorageKey.context]: mergedContexts,
+    [StorageKey.context_update_timestamp]: mergedUpdateTime
+  })
   return [mergedContexts, mergedUpdateTime] as const
 }
 

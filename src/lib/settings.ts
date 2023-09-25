@@ -1,5 +1,5 @@
 import { createSignal } from 'solid-js'
-import { getLocalValue, getSyncValue } from './storage'
+import { getSyncValue } from './storage'
 import { StorageKey, LevelKey, WordInfoMap } from '../constant'
 
 const DEFAULT_DICTS = {
@@ -45,23 +45,27 @@ export const DEFAULT_SETTINGS = {
   openai: {
     apiKey: '',
     model: 'gpt-3.5-turbo-instruct'
-  },
-  update_timestamp: 1
+  }
 }
 
 export type SettingType = typeof DEFAULT_SETTINGS
 
-export const [settings, setSettings] = createSignal({ ...DEFAULT_SETTINGS })
+const isSettingsEqual = (newSettings: SettingType, oldSettings: SettingType) =>
+  JSON.stringify(newSettings) === JSON.stringify(oldSettings)
+
+export const [settings, setSettings] = createSignal({ ...DEFAULT_SETTINGS }, { equals: isSettingsEqual })
 
 export async function setSetting<T extends keyof SettingType>(key: T, value: SettingType[T]) {
-  setSettings({ ...settings(), [key]: value, update_timestamp: Date.now() })
-  await chrome.storage.local.set({ settings: settings() })
-  await syncSettings(settings())
+  setSettings({ ...settings(), [key]: value })
+  await syncSettings()
 }
 
-export async function syncSettings(settings: SettingType) {
+export async function syncSettings(updateTime?: number) {
   try {
-    await chrome.storage.sync.set({ [StorageKey.settings]: settings })
+    await chrome.storage.sync.set({
+      [StorageKey.settings]: settings(),
+      [StorageKey.settings_update_timestamp]: updateTime ?? Date.now()
+    })
   } catch (e) {
     console.log(e)
   }
@@ -69,45 +73,41 @@ export async function syncSettings(settings: SettingType) {
 
 export async function resotreSettings(values: SettingType) {
   values = values ?? DEFAULT_SETTINGS
-  values.update_timestamp = Date.now()
-  await chrome.storage.local.set({ settings: values })
-  await syncSettings(values)
-  await setSettings(values)
+  setSettings(values)
+  await syncSettings()
 }
 
-export async function mergeSettings() {
-  const localSetting = await getLocalValue(StorageKey.settings)
-  const syncSetting = await getSyncValue(StorageKey.settings)
-
-  if (localSetting.update_timestamp === syncSetting.update_timestamp) {
-    return
+export async function mergeSetting(
+  syncdSettings: SettingType,
+  gdriveSettings: SettingType,
+  syncedSettingTime: number = 0,
+  gdriveSettingTime: number = 0
+) {
+  let mergedSettings: SettingType = { ...DEFAULT_SETTINGS }
+  const updateTime = Date.now()
+  if (!syncdSettings || !gdriveSettings) {
+    return [mergedSettings, updateTime] as const
   }
 
-  let mergedSettings: SettingType = mergeSettingInOrder([localSetting, syncSetting])
-  await chrome.storage.local.set({ settings: mergedSettings })
-  await syncSettings(mergedSettings)
-  await setSettings(mergedSettings)
-}
+  const settingsList =
+    gdriveSettingTime > syncedSettingTime ? [syncdSettings, gdriveSettings] : [gdriveSettings, syncdSettings]
 
-export function mergeSettingInOrder(settingsList: SettingType[]) {
-  let mergedSettings: SettingType = { ...DEFAULT_SETTINGS }
-  const settingsListInOrder = settingsList.sort((a, b) => (a.update_timestamp ?? 0) - (b.update_timestamp ?? 0))
-  settingsListInOrder.forEach(_settings => {
-    Object.assign(mergedSettings, fillUpNewSettingFiled(_settings, DEFAULT_SETTINGS))
+  settingsList.forEach(_settings => {
+    Object.assign(mergedSettings, fillUpNewDefaultSettingFiled(_settings, DEFAULT_SETTINGS))
   })
-  // update timestamp
-  mergedSettings.update_timestamp = Date.now()
-  return mergedSettings
+  setSettings(mergedSettings)
+  await syncSettings(updateTime)
+  return [mergedSettings, updateTime] as const
 }
 
 // fill up new setting field deeply
-function fillUpNewSettingFiled(target: Record<string, any>, source: Record<string, any>) {
+function fillUpNewDefaultSettingFiled(target: Record<string, any>, source: Record<string, any>) {
   for (const key in source) {
     if (!target.hasOwnProperty(key)) {
       target[key] = source[key]
     } else {
       if (typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        fillUpNewSettingFiled(target[key], source[key])
+        fillUpNewDefaultSettingFiled(target[key], source[key])
       }
     }
   }
@@ -115,7 +115,6 @@ function fillUpNewSettingFiled(target: Record<string, any>, source: Record<strin
 }
 
 export async function getSelectedDicts(dict: WordInfoMap) {
-  await mergeSettings()
   const levels = settings().levels
   const newDict: WordInfoMap = {}
   for (const word in dict) {
@@ -128,25 +127,25 @@ export async function getSelectedDicts(dict: WordInfoMap) {
 }
 
 export function initSettings() {
-  getLocalValue(StorageKey.settings).then(localSettings => {
-    setSettings(localSettings ?? DEFAULT_SETTINGS)
-    mergeSettings()
+  getSyncValue(StorageKey.settings).then(syncdSettings => {
+    setSettings(syncdSettings ?? DEFAULT_SETTINGS)
   })
 
   // update context script after settings changed
-  const listener = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
-    if (namespace === 'local' && changes[StorageKey.settings]) {
-      const { oldValue, newValue } = changes[StorageKey.settings]
-      setSettings(newValue)
-      if (
-        JSON.stringify(oldValue?.levels) !== JSON.stringify(newValue?.levels) ||
-        oldValue?.showCnTrans !== newValue?.showCnTrans
-      ) {
-        window.__updateDicts?.()
+  if (typeof window !== 'undefined' && location?.protocol != 'chrome-extension:') {
+    const listener = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
+      if (namespace === 'sync' && changes[StorageKey.settings]) {
+        const { oldValue, newValue } = changes[StorageKey.settings]
+        setSettings(newValue)
+        if (
+          JSON.stringify(oldValue?.levels) !== JSON.stringify(newValue?.levels) ||
+          oldValue?.showCnTrans !== newValue?.showCnTrans
+        ) {
+          window.__updateDicts?.()
+        }
       }
     }
-  }
-  if (typeof window !== 'undefined') {
+
     chrome.storage.onChanged.addListener(listener)
     window.addEventListener('beforeunload', () => {
       chrome.storage.onChanged.removeListener(listener)

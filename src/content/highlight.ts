@@ -13,7 +13,7 @@ import {
   StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns, getSelectedDicts } from '../lib'
+import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns, getSelectedDicts, getAllKnownSync } from '../lib'
 import { getMessagePort } from '../lib/port'
 
 let wordsKnown: WordMap = {}
@@ -229,10 +229,10 @@ async function waitForDictPrepare(): Promise<WordMap> {
 }
 
 async function readStorageAndHighlight() {
-  const result = await chrome.storage.local.get(['dict', StorageKey.known, StorageKey.context])
+  const result = await chrome.storage.local.get(['dict', StorageKey.context])
   fullDict = result.dict || (await waitForDictPrepare())
   dict = await getSelectedDicts(fullDict)
-  wordsKnown = result[StorageKey.known] || {}
+  wordsKnown = await getAllKnownSync()
   contexts = result[StorageKey.context] || {}
 
   const textNodes = getTextNodes(document.body)

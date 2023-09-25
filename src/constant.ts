@@ -41,11 +41,15 @@ export const classes = {
 }
 
 export enum StorageKey {
-  'known' = 'known',
+  // local storage keys
+  'dict' = 'dict',
   'context' = 'context',
+  'context_update_timestamp' = 'context_update_timestamp',
+  // sync storage keys
+  'known' = 'known',
   'settings' = 'settings',
   'knwon_update_timestamp' = 'knwon_update_timestamp',
-  'context_update_timestamp' = 'context_update_timestamp',
+  'settings_update_timestamp' = 'settings_update_timestamp',
   'latest_sync_time' = 'latest_sync_time'
 }
 

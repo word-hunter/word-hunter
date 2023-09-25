@@ -1,7 +1,6 @@
 import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
-import { syncUpKnowns, mergeKnowns, getLocalValue } from '../lib/storage'
-import { mergeSettings } from '../lib/settings'
+import { syncUpKnowns, mergeKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 
 async function readDict(): Promise<WordInfoMap> {
   const url = chrome.runtime.getURL('dict.json')
@@ -130,7 +129,7 @@ function autoDisconnectDelay(port: chrome.runtime.Port, tabId?: number) {
 }
 
 async function setup() {
-  const storage = chrome.storage.local
+  const knowns = await getAllKnownSync()
 
   chrome.runtime.onConnect.addListener(port => {
     if (port.name === 'word-hunter') {
@@ -142,53 +141,48 @@ async function setup() {
         const { action, word, words, context } = msg
         switch (action) {
           case Messages.set_known:
-            storage.get([StorageKey.known], result => {
-              const knownWords = { ...(result[StorageKey.known] ?? {}), [word]: 'o' }
-              storage.set({ [StorageKey.known]: knownWords, [StorageKey.knwon_update_timestamp]: Date.now() })
-              updateBadge(knownWords)
-              syncUpKnowns([word], knownWords)
-              sendMessageToAllTabs({ action, word })
-            })
+            knowns[word] = 'o'
+            await syncUpKnowns([word], knowns, Date.now())
+            updateBadge(knowns)
+            sendMessageToAllTabs({ action, word })
             break
           case Messages.set_all_known:
-            storage.get([StorageKey.known], result => {
-              const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
-              const knownWords = { ...(result[StorageKey.known] ?? {}), ...addedWords }
-              storage.set({ [StorageKey.known]: knownWords, [StorageKey.knwon_update_timestamp]: Date.now() })
-              updateBadge(knownWords)
-              syncUpKnowns(words, knownWords)
-              sendMessageToAllTabs({ action, words })
-            })
+            const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
+            Object.assign(knowns, addedWords)
+            await syncUpKnowns(words, knowns, Date.now())
+            updateBadge(knowns)
+            sendMessageToAllTabs({ action, words })
             break
-          case Messages.add_context:
-            storage.get([StorageKey.context], result => {
-              // record context in normal tense word key
-              const contexts = result[StorageKey.context] ?? {}
-              const wordContexts = (contexts[word] ?? []) as WordContext[]
-              if (!wordContexts.find(c => c.text === context.text)) {
-                const newContexts = { ...contexts, [word]: [...wordContexts, context] }
-                storage.set({ [StorageKey.context]: newContexts, [StorageKey.context_update_timestamp]: Date.now() })
-              }
+          case Messages.add_context: {
+            const contexts = (await getLocalValue(StorageKey.context)) ?? {}
+            // record context in normal tense word key
+            const wordContexts = (contexts[word] ?? []) as WordContext[]
+            if (!wordContexts.find(c => c.text === context.text)) {
+              const newContexts = { ...contexts, [word]: [...wordContexts, context] }
+              chrome.storage.local.set({
+                [StorageKey.context]: newContexts,
+                [StorageKey.context_update_timestamp]: Date.now()
+              })
+            }
+            sendMessageToAllTabs({ action, context })
+            break
+          }
+          case Messages.delete_context: {
+            const contexts = (await getLocalValue(StorageKey.context)) ?? {}
+            // delete context in normal tense word key
+            const wordContexts = (contexts[word] ?? []) as WordContext[]
+            const index = wordContexts.findIndex(c => c.text === context.text)
+            if (index > -1) {
+              wordContexts.splice(index, 1)
+              const { [word]: w, ...rest } = contexts
+              chrome.storage.local.set({
+                [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest,
+                [StorageKey.context_update_timestamp]: Date.now()
+              })
               sendMessageToAllTabs({ action, context })
-            })
+            }
             break
-          case Messages.delete_context:
-            storage.get([StorageKey.context], result => {
-              // delete context in normal tense word key
-              const contexts = result[StorageKey.context] ?? {}
-              const wordContexts = (contexts[word] ?? []) as WordContext[]
-              const index = wordContexts.findIndex(c => c.text === context.text)
-              if (index > -1) {
-                wordContexts.splice(index, 1)
-                const { [word]: w, ...rest } = contexts
-                storage.set({
-                  [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest,
-                  [StorageKey.context_update_timestamp]: Date.now()
-                })
-                sendMessageToAllTabs({ action, context })
-              }
-            })
-            break
+          }
           case Messages.play_audio:
             playAudio(msg.audio)
             break
@@ -225,17 +219,14 @@ async function setup() {
         }
       })
 
-      storage.get([StorageKey.known], result => {
-        updateBadge(msg.app_available ? result[StorageKey.known] || {} : {})
-      })
+      updateBadge(msg.app_available ? knowns : {})
     }
   })
 
   await mergeKnowns()
-  await mergeSettings()
 
   readDict().then(localDict => {
-    storage.set({ dict: localDict }, () => {
+    chrome.storage.local.set({ dict: localDict }, () => {
       console.log('[storage] dict set up')
     })
   })

@@ -1,9 +1,9 @@
 import { createSignal, Show } from 'solid-js'
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
-import { syncUpKnowns, getLocalValue } from '../lib/storage'
+import { syncUpKnowns, getSyncValue } from '../lib/storage'
 import { Note } from './note'
-import { syncWithDrive, getLocalData } from './backup/sync'
+import { syncWithDrive, getBackupData } from './backup/sync'
 
 export const Backup = () => {
   let dialogRef: HTMLDialogElement
@@ -20,7 +20,7 @@ export const Backup = () => {
   const [syning, setSyning] = createSignal(false)
   const [latestSyncTime, setLatestSyncTime] = createSignal(0)
 
-  getLocalValue(StorageKey.latest_sync_time).then(time => {
+  getSyncValue(StorageKey.latest_sync_time).then(time => {
     if (time) {
       setLatestSyncTime(time)
     }
@@ -74,18 +74,16 @@ export const Backup = () => {
     const updateTime = Date.now()
     await chrome.storage.local.set({
       [StorageKey.context]: json[StorageKey.context] ?? {},
-      [StorageKey.known]: json[StorageKey.known] ?? {},
-      [StorageKey.knwon_update_timestamp]: updateTime,
       [StorageKey.context_update_timestamp]: updateTime
     })
-    syncUpKnowns(Object.keys(json[StorageKey.known] ?? {}), json[StorageKey.known])
+    syncUpKnowns(Object.keys(json[StorageKey.known] ?? {}), json[StorageKey.known], updateTime)
     await resotreSettings(json[StorageKey.settings])
   }
 
   const onBackup = async () => {
     const now = Date.now()
     const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
-    const backupData = await getLocalData()
+    const backupData = await getBackupData()
     downloadAsJsonFile(JSON.stringify(backupData), fileName)
   }
 
