@@ -34,7 +34,7 @@ export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, upd
         }
 
         // remove the word as unknown
-        if (!knownsInMemory[word] && toSyncKnowns[key].includes(word)) {
+        if (!(word in knownsInMemory) && toSyncKnowns[key].includes(word)) {
           toSyncKnowns[key].splice(toSyncKnowns[key].indexOf(word), 1)
         }
 
@@ -62,9 +62,11 @@ export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, upd
   }
 }
 
-export async function mergeKnowns(gDriveKnowns: WordMap = {}) {
+export async function mergeKnowns(gDriveKnowns: WordMap) {
   const KnownSynced = await getAllKnownSync()
   const mergedUpdateTime = Date.now()
+
+  if (!gDriveKnowns) return [KnownSynced, mergedUpdateTime] as const
 
   // sort by length
   const knownsList = [KnownSynced, gDriveKnowns].sort((a, b) => {

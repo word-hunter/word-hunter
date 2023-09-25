@@ -13,7 +13,7 @@ import {
   StorageKey
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings, mergeKnowns, getSelectedDicts, getAllKnownSync } from '../lib'
+import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync } from '../lib'
 import { getMessagePort } from '../lib/port'
 
 let wordsKnown: WordMap = {}
@@ -382,7 +382,6 @@ export function getWordContexts(word: string) {
 }
 
 export async function init() {
-  await mergeKnowns()
   await readStorageAndHighlight()
   observeDomChange()
   listenBackgroundMessage()

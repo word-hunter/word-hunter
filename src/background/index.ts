@@ -1,6 +1,6 @@
 import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
-import { syncUpKnowns, mergeKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
+import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
 
 let dict: WordInfoMap = {}
@@ -242,8 +242,6 @@ async function setup() {
       }
     }
   })
-
-  await mergeKnowns()
 
   readDict().then(localDict => {
     dict = localDict
