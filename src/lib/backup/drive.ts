@@ -5,7 +5,20 @@ const UPLOAD_API_PATH = 'https://www.googleapis.com/upload/drive/v3/files'
 export const FOLDER_NAME = 'Word Hunter Backup'
 export const FILE_NAME = 'word_hunter_backup.json'
 
+export const isMobile = navigator.userAgent.includes('Mobile') || navigator.userAgent.includes('Android')
+
+export function isValidAuthToken(token: string) {
+  return !!token && /ya29.[0-9A-Za-z-_]+/.test(token)
+}
+
 export async function auth(interactive: boolean) {
+  if (isMobile) {
+    const tokenForMobile = (await chrome.storage.local.get(['mobile_auth_token'])).mobile_auth_token
+    if (isValidAuthToken(tokenForMobile)) {
+      authToken = tokenForMobile
+      return authToken
+    }
+  }
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({ interactive: interactive }, (token: string | undefined) => {
       if (token) {

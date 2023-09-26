@@ -1,9 +1,10 @@
 import { createSignal, Show } from 'solid-js'
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
-import { syncUpKnowns, getSyncValue } from '../lib/storage'
+import { syncUpKnowns, getSyncValue, getLocalValue } from '../lib/storage'
 import { Note } from './note'
 import { syncWithDrive, getBackupData } from '../lib/backup/sync'
+import { isMobile, isValidAuthToken } from '../lib/backup/drive'
 
 export const Backup = () => {
   let dialogRef: HTMLDialogElement
@@ -19,10 +20,31 @@ export const Backup = () => {
   const [toastError, setToastError] = createSignal('')
   const [syning, setSyning] = createSignal(false)
   const [latestSyncTime, setLatestSyncTime] = createSignal(0)
+  const [authToken, setAuthToken] = createSignal('')
+
+  const onAuthTokenInput = (e: Event) => {
+    const target = e.target as HTMLTextAreaElement
+    setAuthToken(target.value)
+    if (target.value.trim() === '') {
+      chrome.storage.local.remove([StorageKey.mobile_auth_token])
+    } else {
+      if (isValidAuthToken(target.value)) {
+        chrome.storage.local.set({ [StorageKey.mobile_auth_token]: target.value })
+      } else {
+        toastE('invalid auth token')
+      }
+    }
+  }
 
   getSyncValue(StorageKey.latest_sync_time).then(time => {
     if (time) {
       setLatestSyncTime(time)
+    }
+  })
+
+  getLocalValue(StorageKey.mobile_auth_token).then(token => {
+    if (token) {
+      setAuthToken(token)
     }
   })
 
@@ -130,11 +152,11 @@ export const Backup = () => {
         </dialog>
 
         <div class="grid grid-cols-2 gap-4 pt-1">
-          <button onclick={showModal} class="btn btn-block btn-lg capitalize">
+          <button onclick={showModal} class="btn btn-block btn-lg capitalize text-sm">
             ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
             restore
           </button>
-          <button onclick={onBackup} class="btn btn-block btn-lg capitalize">
+          <button onclick={onBackup} class="btn btn-block btn-lg capitalize text-sm">
             ️<img src={chrome.runtime.getURL('icons/download.png')} class="w-8 h-8" alt="backup" />
             backup
           </button>
@@ -142,8 +164,17 @@ export const Backup = () => {
 
         <div class="divider">OR</div>
 
-        <div class="grid  gap-4 pt-1 pb-2">
-          <button onclick={onDriveSync} class="btn btn-block btn-lg capitalize">
+        <div class="grid gap-4 pt-1 pb-2">
+          <Show when={isMobile}>
+            <textarea
+              placeholder="Only for Mobile browser:\n Run `await chrome.identity.getAuthToken()` in Desktop Chrome console in option page to get the token, then paste it here."
+              class="textarea textarea-bordered textarea-lg w-full h-24 text-sm leading-5"
+              classList={{ 'textarea-error': !!authToken() && !isValidAuthToken(authToken()) }}
+              value={authToken()}
+              oninput={onAuthTokenInput}
+            />
+          </Show>
+          <button onclick={onDriveSync} class="btn btn-block btn-lg capitalize text-sm">
             <img
               src={chrome.runtime.getURL('icons/gdrive.png')}
               classList={{ 'animate-spin': syning() }}
@@ -152,6 +183,7 @@ export const Backup = () => {
             />
             Sync with Google Drive
           </button>
+
           <Show when={latestSyncTime() > 0}>
             <div class="text-center text-accent">Latest sync: {timeLongFormatter.format(latestSyncTime())}</div>
           </Show>

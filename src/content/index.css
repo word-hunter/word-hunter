@@ -138,7 +138,7 @@ body:has(.__zen_mode) {
     font-size: 12px;
     line-height: 1.5;
     padding: 0 2px;
-    margin: 5px 5px;
+    margin: 5px 5px !important;
     &:nth-child(20n) {
       margin-bottom: 50px;
     }
