@@ -5,7 +5,7 @@
   --border-color: rgba(0, 0, 0, 0.3);
   --color-main: #759fc9;
   --height: 600px;
-  --max-height: calc(100vh - 120px);
+  --max-height: calc(100dvh - 120px);
 
   width: 490px;
   max-width: 90%;
