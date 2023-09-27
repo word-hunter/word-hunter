@@ -12,6 +12,7 @@
 .vscode
 dist.zip
 build.zip
+build.pem
 
 # misc
 .DS_Store

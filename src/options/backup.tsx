@@ -12,8 +12,9 @@ export const Backup = () => {
 
   const timeFormatter = new Intl.DateTimeFormat('en-US')
   const timeLongFormatter = new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'long',
-    timeStyle: 'medium'
+    dateStyle: 'medium',
+    timeStyle: 'long',
+    hour12: false
   })
 
   const [toastSuccess, setToastSuccess] = createSignal('')
