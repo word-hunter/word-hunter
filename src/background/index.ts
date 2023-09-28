@@ -1,6 +1,6 @@
 import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
 import { explainWord } from '../lib/openai'
-import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
+import { syncUpKnowns, getLocalValue, getAllKnownSync, addLocalKnownsLogs, removeLocalKnownsLogs } from '../lib/storage'
 import { settings } from '../lib/settings'
 import { triggerGoogleDriveSyncJob, syncWithDrive } from '../lib/backup/sync'
 
@@ -147,6 +147,7 @@ chrome.runtime.onConnect.addListener(async port => {
           updateBadge(knowns)
           sendMessageToAllTabs({ action, word })
           triggerGoogleDriveSyncJob()
+          addLocalKnownsLogs([word])
           break
         case Messages.set_all_known:
           const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
@@ -155,6 +156,7 @@ chrome.runtime.onConnect.addListener(async port => {
           updateBadge(knowns)
           sendMessageToAllTabs({ action, words })
           triggerGoogleDriveSyncJob()
+          addLocalKnownsLogs(words)
           break
         case Messages.add_context: {
           const contexts = (await getLocalValue(StorageKey.context)) ?? {}
@@ -265,6 +267,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       updateBadge(knowns)
       sendMessageToAllTabs({ action: Messages.set_unknown, word: originFormWord })
       triggerGoogleDriveSyncJob()
+      removeLocalKnownsLogs(originFormWord)
     }
   }
 })

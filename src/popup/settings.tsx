@@ -15,6 +15,7 @@ export const Settings = () => {
     if (chrome.sidePanel?.open) {
       const win = await chrome.windows.getCurrent()
       window.close()
+      chrome.sidePanel.setOptions({ path: 'src/options.html' })
       chrome.sidePanel.open({ windowId: win.id })
     } else {
       chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })

@@ -112,6 +112,33 @@ export async function mergeContexts(remoteContext?: ContextMap, remoteUpdateTime
   return [mergedContexts, mergedUpdateTime] as const
 }
 
+export type KnownsLogs = [string, number][]
+
+export async function addLocalKnownsLogs(words: string[]) {
+  const localKnownsLogs: KnownsLogs = (await getLocalValue(StorageKey.local_knowns_log)) ?? []
+  const now = Date.now()
+  words.forEach(word => {
+    if (!localKnownsLogs.find(([w]) => w === word)) {
+      localKnownsLogs.push([word, now])
+    }
+  })
+  chrome.storage.local.set({
+    // record latest 1000 logs
+    [StorageKey.local_knowns_log]: localKnownsLogs.slice(-1000)
+  })
+}
+
+export async function removeLocalKnownsLogs(word: string) {
+  const localKnownsLogs: KnownsLogs = (await getLocalValue(StorageKey.local_knowns_log)) ?? []
+  const index = localKnownsLogs.findIndex(([w]) => w === word)
+  if (index > -1) {
+    localKnownsLogs.splice(index, 1)
+    chrome.storage.local.set({
+      [StorageKey.local_knowns_log]: localKnownsLogs
+    })
+  }
+}
+
 // clean up unused context words
 export function cleanupContexts(contexts: ContextMap, known: WordMap) {
   const cleanContexts = Object.fromEntries(

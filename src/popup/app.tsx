@@ -27,6 +27,19 @@ export const App = () => {
     executeScript(() => window.__updateAppIcon())
   }
 
+  const onKnownLogs = async () => {
+    if (chrome.sidePanel?.open) {
+      const win = await chrome.windows.getCurrent()
+      window.close()
+      chrome.sidePanel.setOptions({ path: 'src/logs.html' })
+      chrome.sidePanel.open({ windowId: win.id })
+    } else {
+      chrome.tabs.create({
+        url: chrome.runtime.getURL('logs.html')
+      })
+    }
+  }
+
   const getBannedState = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
     const host = new URL(tabs[0].url!).host
@@ -57,6 +70,9 @@ export const App = () => {
             </button>
             <button onclick={onPdfViewer}>
               ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader
+            </button>
+            <button onclick={onKnownLogs}>
+              ️<img src={chrome.runtime.getURL('icons/logs.png')} width="20" height="20" /> Known Logs
             </button>
             <button onclick={onToggleBlacklist}>
               ️

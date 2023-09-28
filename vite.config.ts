@@ -7,6 +7,11 @@ export default defineConfig({
   build: {
     outDir: 'build',
     target: 'esnext',
+    rollupOptions: {
+      input: {
+        logs: 'src/logs.html'
+      }
+    },
     sourcemap: false
   },
   plugins: [solidPlugin(), crx({ manifest: manifest as ManifestV3Export })]

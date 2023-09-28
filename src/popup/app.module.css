@@ -4,7 +4,7 @@
   font-family: system-ui;
   color: #555;
   padding: 20px 0;
-  --section-height: 350px;
+  --section-height: 390px;
   .buttons {
     display: grid;
     justify-content: center;

@@ -51,7 +51,8 @@ export enum StorageKey {
   'knwon_update_timestamp' = 'knwon_update_timestamp',
   'settings_update_timestamp' = 'settings_update_timestamp',
   'latest_sync_time' = 'latest_sync_time',
-  'mobile_auth_token' = 'mobile_auth_token'
+  'mobile_auth_token' = 'mobile_auth_token',
+  'local_knowns_log' = 'local_knowns_log'
 }
 
 export enum Messages {
