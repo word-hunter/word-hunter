@@ -15,6 +15,9 @@
     "default_icon": "icon.png"
   },
   "options_page": "src/options.html",
+  "side_panel": {
+    "default_path": "src/options.html"
+  },
   "background": {
     "service_worker": "src/background/index.ts",
     "type": "module"
@@ -37,5 +40,5 @@
     "scopes": ["https://www.googleapis.com/auth/drive.file"]
   },
   "host_permissions": ["*://*.youglish.com/"],
-  "permissions": ["storage", "activeTab", "scripting", "tabs", "offscreen", "identity", "contextMenus"]
+  "permissions": ["storage", "activeTab", "scripting", "tabs", "offscreen", "identity", "contextMenus", "sidePanel"]
 }

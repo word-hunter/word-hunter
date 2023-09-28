@@ -11,8 +11,14 @@ export const Settings = () => {
     setSetting('colors', colors)
   }
 
-  const onDirectToOption = () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })
+  const onDirectToOption = async () => {
+    if (chrome.sidePanel?.open) {
+      const win = await chrome.windows.getCurrent()
+      window.close()
+      chrome.sidePanel.open({ windowId: win.id })
+    } else {
+      chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })
+    }
     return false
   }
 
