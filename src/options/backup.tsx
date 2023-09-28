@@ -138,7 +138,7 @@ export const Backup = () => {
                 type="file"
                 accept=".json"
                 ref={fileRef!}
-                class="file-input file-input-bordered file-input-lg w-full"
+                class="file-input file-input-bordered file-input-xs sm:file-input-sm w-full"
               />
             </div>
             <div class="modal-action">
@@ -152,7 +152,7 @@ export const Backup = () => {
           </form>
         </dialog>
 
-        <div class="grid grid-cols-2 gap-4 pt-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           <button onclick={showModal} class="btn btn-block btn-lg capitalize text-sm">
             ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
             restore
@@ -182,7 +182,7 @@ export const Backup = () => {
               class="w-8 h-8"
               alt="upload"
             />
-            Sync with Google Drive
+            Google Drive Sync
           </button>
 
           <Show when={latestSyncTime() > 0}>

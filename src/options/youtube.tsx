@@ -13,7 +13,7 @@ export const YoutubeSetting = () => {
         <label for="pause" class="label gap-4 cursor-pointer ">
           <span class="label-text">auto pause youtube video</span>
           <input
-            class="toggle"
+            class="toggle dark:toggle-info"
             type="checkbox"
             name="pause"
             id="pause"

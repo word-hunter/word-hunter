@@ -52,7 +52,7 @@ export const DictsSetting = () => {
                         <span class="label-text"> {item}</span>
                         <input
                           type="checkbox"
-                          class="toggle"
+                          class="toggle dark:toggle-info"
                           name="dicts"
                           id={item}
                           value={item}

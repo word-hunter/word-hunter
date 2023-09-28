@@ -18,7 +18,7 @@ export const PronounceSetting = () => {
         <label for="pronounce" class="label gap-4 cursor-pointer ">
           <span class="label-text">auto pronounce</span>
           <input
-            class="toggle"
+            class="toggle dark:toggle-info"
             type="checkbox"
             name="pronounce"
             id="pronounce"
@@ -35,7 +35,7 @@ export const PronounceSetting = () => {
           max="100"
           value={settings().volume}
           step="1"
-          class="range range-xs"
+          class="range dark:range-info range-xs"
           oninput={onVolumeChange}
         />
       </div>

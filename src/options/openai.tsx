@@ -22,7 +22,7 @@ export const OpenAISetting = () => {
   return (
     <section class="section">
       <h2 class="h2">OpenAI</h2>
-      <div class="flex flex-col items-end gap-4">
+      <div class="flex flex-col items-end gap-4 mt-4">
         <div>
           <select
             class="select select-bordered w-full max-w-xs"
