@@ -305,14 +305,9 @@ function getHighlightCount(isVisible?: boolean) {
 }
 
 function getPageStatistics() {
-  const words: string[] = []
-  const wordsInBody = [...(document.body.textContent ?? '').matchAll(/[a-z]+/gi)].map(w => w[0])
-  wordsInBody.forEach(w => {
-    const word = w.toLowerCase()
-    if (word in dict) {
-      words.push(word)
-    }
-  })
+  const words = [...(document.body.textContent ?? '').matchAll(/[a-z]+/gi)]
+    .map(w => w[0].toLowerCase())
+    .filter(w => w in dict)
   const wordCount = new Set(words).size
   const [unknownCount, haveContextCount] = getHighlightCount()
   return [unknownCount - haveContextCount, haveContextCount, wordCount] as const

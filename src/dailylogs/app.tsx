@@ -31,6 +31,7 @@ export const App = () => {
   )
 
   const logsGroupByDays = () => {
+    const timeFormatter = new Intl.DateTimeFormat('en-US')
     const cLogs = Object.entries(contexts())
       .filter(([_, context]) => context.length > 0)
       .map(([word, context]) => [word, context.at(-1)?.timestamp, true]) as unknown as KnownsLogs
@@ -42,7 +43,7 @@ export const App = () => {
       })
       .reduce((acc, log) => {
         const date = new Date(log[1])
-        const day = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+        const day = timeFormatter.format(date)
         if (acc[day]) {
           acc[day].push(log)
         } else {
