@@ -72,7 +72,8 @@ export const App = () => {
               ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader
             </button>
             <button onclick={onKnownLogs}>
-              ️<img src={chrome.runtime.getURL('icons/logs.png')} width="20" height="20" /> Known Logs
+              ️<img src={chrome.runtime.getURL('icons/logs.png')} width="20" height="20" />
+              Daily Logs
             </button>
             <button onclick={onToggleBlacklist}>
               ️

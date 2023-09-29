@@ -8,7 +8,7 @@ export const Levels = [
   ['o', '∞']
 ] as const
 
-export type LevelKey = typeof Levels[number][0]
+export type LevelKey = (typeof Levels)[number][0]
 
 export type WordInfo = {
   o: string
@@ -89,7 +89,8 @@ export const invalidTags = [
   'HEAD',
   'MAP',
   'META',
-  'OBJECT'
+  'OBJECT',
+  'WH-ROOT'
 ]
 
 export const invalidSelectors = ['.monaco-editor', '.CodeMirror-code', '#video-title']
