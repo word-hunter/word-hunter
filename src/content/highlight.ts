@@ -136,9 +136,9 @@ function getTextNodes(node: Node): CharacterData[] {
     return []
   }
 
-  const textNodes: CharacterData[] = []
+  let textNodes: CharacterData[] = []
   for (const childNode of node.childNodes) {
-    textNodes.push(...getTextNodes(childNode))
+    textNodes = textNodes.concat(getTextNodes(childNode))
   }
   return textNodes
 }
@@ -305,18 +305,13 @@ function getHighlightCount(isVisible?: boolean) {
 }
 
 function getPageStatistics() {
-  const textNodes = Array.from(getTextNodes(document.body))
-  const splitWordReg = /[\s\.,|?|!\(\)\[\]\{\}\/\\]+/
   const words: string[] = []
-  textNodes.forEach(node => {
-    const textValue = node.nodeValue || ''
-    const wordsInText = textValue.split(splitWordReg)
-    wordsInText.forEach(w => {
-      const word = w.toLowerCase()
-      if (word in dict) {
-        words.push(word)
-      }
-    })
+  const wordsInBody = [...(document.body.textContent ?? '').matchAll(/[a-z]+/gi)].map(w => w[0])
+  wordsInBody.forEach(w => {
+    const word = w.toLowerCase()
+    if (word in dict) {
+      words.push(word)
+    }
   })
   const wordCount = new Set(words).size
   const [unknownCount, haveContextCount] = getHighlightCount()
