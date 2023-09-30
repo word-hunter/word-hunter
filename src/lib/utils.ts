@@ -11,7 +11,7 @@ export const getFaviconUrl = () => {
 }
 
 export const getFaviconByDomain = (url: string) => {
-  const host = new URL(url).host
+  let host = new URL(url).host || 'localhost'
   return `https://s2.googleusercontent.com/s2/favicons?domain=${host}`
 }
 
