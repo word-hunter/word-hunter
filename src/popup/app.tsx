@@ -35,7 +35,7 @@ export const App = () => {
       chrome.sidePanel.open({ windowId: win.id })
     } else {
       chrome.tabs.create({
-        url: chrome.runtime.getURL('logs.html')
+        url: chrome.runtime.getURL('src/logs.html')
       })
     }
   }

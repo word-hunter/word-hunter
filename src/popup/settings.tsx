@@ -25,7 +25,7 @@ export const Settings = () => {
 
   const onMarkStyleChanged = (e: Event) => {
     const target = e.target as HTMLSelectElement
-    setSetting('markStyle', target.value as typeof MarkStyles[number])
+    setSetting('markStyle', target.value as (typeof MarkStyles)[number])
   }
 
   return (

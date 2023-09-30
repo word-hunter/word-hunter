@@ -260,7 +260,7 @@
   .cit.type-example,
   .translation .example {
     font-style: italic;
-    font-family: 'Times New Roman', Times, serif;
+    font-family: 'Zilla Slab', system-ui, Times, serif;
   }
   .cB-ts,
   .cB-n-w {

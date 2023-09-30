@@ -164,7 +164,7 @@ function autoPauseForYoutubeSubTitle(node: HTMLElement | null, toHighlightWords:
 }
 
 function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, contexts: ContextMap) {
-  const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;')
+  const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;').replaceAll('­', '')
   const toHighlightWords: string[] = []
   const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
     const w = word.toLowerCase()

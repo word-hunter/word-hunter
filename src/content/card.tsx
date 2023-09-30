@@ -138,43 +138,45 @@ export const WhCard = customElement('wh-card', () => {
     const cardNode = getCardNode()
     const container = cardNode.querySelector('.dict_container')!
     if (isCardVisible()) {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        const selector = getDictAdapter().sectionSelector
-        if (!selector) return
-        const sections = container.querySelectorAll(selector) as NodeListOf<HTMLElement>
-        const rootMargin = 30
-        const firstInViewportIndex = Array.from(sections).findIndex(s => {
-          return s.offsetTop > container.scrollTop
-        })
-        if (e.key === 'ArrowUp') {
-          if (firstInViewportIndex > 0) {
-            container.scrollTop = sections[firstInViewportIndex - 1].offsetTop - rootMargin
+      if (!e.altKey && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          const selector = getDictAdapter().sectionSelector
+          if (!selector) return
+          const sections = container.querySelectorAll(selector) as NodeListOf<HTMLElement>
+          const rootMargin = 30
+          const firstInViewportIndex = Array.from(sections).findIndex(s => {
+            return s.offsetTop > container.scrollTop
+          })
+          if (e.key === 'ArrowUp') {
+            if (firstInViewportIndex > 0) {
+              container.scrollTop = sections[firstInViewportIndex - 1].offsetTop - rootMargin
+            }
+          }
+          if (e.key === 'ArrowDown') {
+            if (firstInViewportIndex < sections.length - 1) {
+              container.scrollTop = sections[firstInViewportIndex + 1].offsetTop - rootMargin
+            }
           }
         }
-        if (e.key === 'ArrowDown') {
-          if (firstInViewportIndex < sections.length - 1) {
-            container.scrollTop = sections[firstInViewportIndex + 1].offsetTop - rootMargin
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
+          if (e.key === 'ArrowLeft') {
+            setTabIndex(tabIndex() > 0 ? tabIndex() - 1 : tabCount())
+          }
+          if (e.key === 'ArrowRight' || e.key === 'Tab') {
+            setTabIndex(tabIndex() < tabCount() ? tabIndex() + 1 : 0)
           }
         }
-      }
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Tab') {
-        if (e.key === 'ArrowLeft') {
-          setTabIndex(tabIndex() > 0 ? tabIndex() - 1 : tabCount())
+        if (e.key === 'Escape') {
+          hidePopupDelay(0)
         }
-        if (e.key === 'ArrowRight' || e.key === 'Tab') {
-          setTabIndex(tabIndex() < tabCount() ? tabIndex() + 1 : 0)
+        if (e.key === 'a') {
+          onKnown(e)
         }
+        if (e.key === 's') {
+          onAddContext(e)
+        }
+        e.preventDefault()
       }
-      if (e.key === 'Escape') {
-        hidePopupDelay(0)
-      }
-      if (e.key === 'a') {
-        onKnown(e)
-      }
-      if (e.key === 's') {
-        onAddContext(e)
-      }
-      e.preventDefault()
     }
   })
 
