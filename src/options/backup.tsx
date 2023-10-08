@@ -1,7 +1,7 @@
 import { createSignal, Show } from 'solid-js'
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
-import { syncUpKnowns, getSyncValue, getLocalValue } from '../lib/storage'
+import { syncUpKnowns, getLocalValue } from '../lib/storage'
 import { Note } from './note'
 import { syncWithDrive, getBackupData } from '../lib/backup/sync'
 import { isMobile, isValidAuthToken } from '../lib/backup/drive'
@@ -21,6 +21,7 @@ export const Backup = () => {
   const [toastError, setToastError] = createSignal('')
   const [syning, setSyning] = createSignal(false)
   const [latestSyncTime, setLatestSyncTime] = createSignal(0)
+  const [syncFailedMessage, setSyncFailedMessage] = createSignal('')
   const [authToken, setAuthToken] = createSignal('')
 
   const onAuthTokenInput = (e: Event) => {
@@ -37,9 +38,15 @@ export const Backup = () => {
     }
   }
 
-  getSyncValue(StorageKey.latest_sync_time).then(time => {
+  getLocalValue(StorageKey.latest_sync_time).then(time => {
     if (time) {
       setLatestSyncTime(time)
+    }
+  })
+
+  getLocalValue(StorageKey.sync_failed_message).then(message => {
+    if (message) {
+      setSyncFailedMessage(message)
     }
   })
 
@@ -116,10 +123,12 @@ export const Backup = () => {
     try {
       const latestSyncTime = await syncWithDrive(true)
       setLatestSyncTime(latestSyncTime)
+      setSyncFailedMessage('')
       setSyning(false)
       toastS('sync success')
     } catch (e: any) {
       setSyning(false)
+      setSyncFailedMessage(e.message)
       toastE('sync failed: ️' + e.message)
     }
   }
@@ -185,8 +194,11 @@ export const Backup = () => {
             Google Drive Sync
           </button>
 
-          <Show when={latestSyncTime() > 0}>
+          <Show when={latestSyncTime() > 0 && !syncFailedMessage()}>
             <div class="text-center text-accent">Latest sync: {timeLongFormatter.format(latestSyncTime())}</div>
+          </Show>
+          <Show when={!!syncFailedMessage()}>
+            <div class="text-center text-error">❌ Sync Failed: {syncFailedMessage()}</div>
           </Show>
         </div>
       </section>

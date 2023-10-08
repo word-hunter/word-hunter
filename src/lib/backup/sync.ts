@@ -1,5 +1,5 @@
 import { StorageKey, WordMap, ContextMap } from '../../constant'
-import { mergeKnowns, mergeContexts, cleanupContexts, getAllKnownSync, getSyncValue } from '../storage'
+import { mergeKnowns, mergeContexts, cleanupContexts, getAllKnownSync, getLocalValue, getSyncValue } from '../storage'
 import { SettingType, mergeSetting } from '../settings'
 import * as GDrive from './drive'
 
@@ -30,7 +30,7 @@ export async function getBackupData(): Promise<BackupData> {
   }
 }
 
-export async function syncWithDrive(interactive: boolean = true) {
+export async function _syncWithDrive(interactive: boolean = true) {
   await GDrive.auth(interactive)
   let dirId = await GDrive.findDirId()
   let fileId = ''
@@ -74,16 +74,28 @@ export async function syncWithDrive(interactive: boolean = true) {
     const file = new File([JSON.stringify(localData)], GDrive.FILE_NAME, { type: 'application/json' })
     await GDrive.uploadFile(file, 'application/json', dirId)
   }
-  const latest_sync_time = Date.now()
-  await chrome.storage.sync.set({ [StorageKey.latest_sync_time]: latest_sync_time })
-  return latest_sync_time
+}
+
+export async function syncWithDrive(interactive: boolean): Promise<number> {
+  try {
+    await _syncWithDrive(interactive)
+    const latest_sync_time = Date.now()
+    await chrome.storage.local.set({
+      [StorageKey.latest_sync_time]: latest_sync_time,
+      [StorageKey.sync_failed_message]: ''
+    })
+    return latest_sync_time
+  } catch (e: any) {
+    await chrome.storage.local.set({ [StorageKey.sync_failed_message]: e.message })
+    throw e
+  }
 }
 
 let syncTimer: number
 const SYNC_DELAY = 1 * 60 * 1000 // 1 minutes
 
 export async function triggerGoogleDriveSyncJob() {
-  if (!(await getSyncValue(StorageKey.latest_sync_time))) return
+  if (!(await getLocalValue(StorageKey.latest_sync_time)) || !(await getSyncValue(StorageKey.latest_sync_time))) return
   clearTimeout(syncTimer)
   syncTimer = setTimeout(() => {
     syncWithDrive(false)

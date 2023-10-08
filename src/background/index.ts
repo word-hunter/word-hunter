@@ -135,7 +135,7 @@ chrome.runtime.onConnect.addListener(async port => {
   if (port.name === 'word-hunter') {
     knowns = knowns ?? (await getAllKnownSync())
     const tabId = port.sender?.tab?.id
-    // autoDisconnectDelay(port, tabId)
+    autoDisconnectDelay(port, tabId)
 
     port.onMessage.addListener(async msg => {
       // here, word and words are all in origin form
@@ -233,11 +233,33 @@ chrome.runtime.onInstalled.addListener(details => {
   })
 })
 
+function setFailedBadge(message: string) {
+  chrome.action.setBadgeText({ text: '❌' })
+  chrome.action.setTitle({ title: 'Google drive sync failed: ' + message })
+}
+
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === 'local' && changes[StorageKey.sync_failed_message]) {
+    const { newValue } = changes[StorageKey.sync_failed_message]
+    if (!!newValue) {
+      setFailedBadge(newValue)
+    } else {
+      updateBadge(knowns)
+    }
+  }
+})
+
 //avoid reactivate service worker invoke syncWithDrive multiple times
 chrome.runtime.onStartup.addListener(async () => {
   chrome.storage.local.set({ [Messages.app_available]: true })
   knowns = await getAllKnownSync()
+
   updateBadge(knowns)
+
+  const syncFailedMessage = await getLocalValue(StorageKey.sync_failed_message)
+  if (syncFailedMessage) {
+    setFailedBadge(syncFailedMessage)
+  }
   syncWithDrive(false)
 })
 

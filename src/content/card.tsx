@@ -1,5 +1,3 @@
-import { reloadElement, ICustomElement } from 'component-register'
-
 import './index.css'
 import cardStyles from './card.css?inline'
 import { createSignal, Show, For, Switch, Match, batch, onMount } from 'solid-js'

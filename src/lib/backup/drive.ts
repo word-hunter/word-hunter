@@ -19,28 +19,20 @@ export async function auth(interactive: boolean) {
       return authToken
     }
   }
-  return new Promise((resolve, reject) => {
-    chrome.identity.getAuthToken({ interactive: interactive }, (token: string | undefined) => {
-      if (token) {
-        resolve(token)
-        authToken = token
-      } else {
-        reject(new Error('Failed to get token.'))
-      }
-    })
-  })
+  const { token } = await chrome.identity.getAuthToken({ interactive: interactive })
+  if (token) {
+    authToken = token
+  } else {
+    throw new Error('Failed to get token.')
+  }
 }
 
 export async function removeCachedAuthToken() {
   if (authToken) {
-    chrome.identity.removeCachedAuthToken(
-      {
-        token: authToken
-      },
-      () => {
-        authToken = ''
-      }
-    )
+    await chrome.identity.removeCachedAuthToken({
+      token: authToken
+    })
+    authToken = ''
   }
 }
 
@@ -76,7 +68,7 @@ export async function downloadFile(fileId: string) {
 
 export async function mergeAndSync() {}
 
-function makeRequest(
+async function makeRequest(
   method: 'GET' | 'POST' | 'PUT' | 'PATCH',
   url: string,
   responseType: 'json' | 'blob',
@@ -95,24 +87,24 @@ function makeRequest(
     options.body = data
   }
 
-  return fetch(url, options).then(response => {
-    if (!response.ok) {
-      if (response.status === 401) {
-        removeCachedAuthToken()
-        throw new Error('Unauthorized, Please authorize again.')
-      } else {
-        throw new Error(`Request failed with status: ${response.status}`)
-      }
-    }
+  const response = await fetch(url, options)
 
-    if (responseType === 'json') {
-      return response.json()
-    } else if (responseType === 'blob') {
-      return response.blob()
+  if (!response.ok) {
+    if (response.status === 401) {
+      await removeCachedAuthToken()
+      throw new Error('Unauthorized, Please authorize again.')
     } else {
-      throw new Error('Invalid responseType')
+      throw new Error(`Request failed with status: ${response.status}`)
     }
-  })
+  }
+
+  if (responseType === 'json') {
+    return response.json()
+  } else if (responseType === 'blob') {
+    return response.blob()
+  } else {
+    throw new Error('Invalid responseType')
+  }
 }
 
 export async function findFileId(dirId: string) {
