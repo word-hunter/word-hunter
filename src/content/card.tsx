@@ -45,7 +45,7 @@ export const WhCard = customElement('wh-card', () => {
 
   onMount(() => {
     readBlacklist().then(async blacklist => {
-      if (blacklist.includes(location.host)) return
+      if (blacklist.includes(location.host) || blacklist.includes(top?.location.host)) return
       await highlightInit()
       bindEvents()
     })
