@@ -40,5 +40,15 @@
     "scopes": ["https://www.googleapis.com/auth/drive.file"]
   },
   "host_permissions": ["*://*.youglish.com/"],
-  "permissions": ["storage", "activeTab", "scripting", "tabs", "offscreen", "identity", "contextMenus", "sidePanel"]
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs",
+    "offscreen",
+    "identity",
+    "contextMenus",
+    "sidePanel",
+    "alarms"
+  ]
 }

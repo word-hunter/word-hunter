@@ -91,13 +91,18 @@ export async function syncWithDrive(interactive: boolean): Promise<number> {
   }
 }
 
-let syncTimer: number
-const SYNC_DELAY = 1 * 60 * 1000 // 1 minutes
+const SYNC_ALARM_NAME = 'SYNC_WITH_GDRIVE'
 
 export async function triggerGoogleDriveSyncJob() {
   if (!(await getLocalValue(StorageKey.latest_sync_time)) || !(await getSyncValue(StorageKey.latest_sync_time))) return
-  clearTimeout(syncTimer)
-  syncTimer = setTimeout(() => {
-    syncWithDrive(false)
-  }, SYNC_DELAY)
+  chrome.alarms.clear(SYNC_ALARM_NAME)
+  chrome.alarms.create(SYNC_ALARM_NAME, {
+    delayInMinutes: 1
+  })
 }
+
+chrome.alarms?.onAlarm?.addListener(({ name }) => {
+  if (name === SYNC_ALARM_NAME) {
+    syncWithDrive(false)
+  }
+})
