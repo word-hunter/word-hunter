@@ -1,62 +1,98 @@
+:root {
+  --bg-color: #fff;
+  --text-color: #666;
+  --border-color: #ddd;
+  --btn-text-color: #777;
+  --btn-bg-color: #efefef;
+  --shadow-color: rgba(0, 0, 0, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1d232a;
+    --text-color: #8b919d;
+    --border-color: #666;
+    --btn-text-color: #8b919d;
+    --btn-bg-color: #2a323c;
+    --shadow-color: rgba(255, 255, 255, 0.25);
+  }
+  img {
+    filter: contrast(0.75);
+  }
+}
+
+html,
+body {
+  background: var(--bg-color);
+}
+
 .page {
-  width: 300px;
-  margin: 0 auto;
   font-family: system-ui;
-  color: #555;
-  padding: 20px 0;
-  --section-height: 390px;
+  color: var(--text-color);
+  padding: 20px 20px;
   .buttons {
     display: grid;
     justify-content: center;
-    padding: 10px 20px 30px 20px;
+    margin-top: 20px;
     gap: 10px;
     button {
-      display: inline-flex;
+      display: flex;
       justify-content: center;
       align-items: center;
-      width: 200px;
       padding: 5px 10px;
+      border: 0.5px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--btn-bg-color);
       gap: 5px;
-      color: #555;
+      color: var(--btn-text-color);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      &:hover {
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      }
     }
   }
 
-  > section {
-    margin: 2px 20px;
-
-    h2 {
-      position: relative;
-      background-color: #e8f0f5;
-      padding: 5px 0;
-      margin: 0;
-      font-size: 14px;
-      text-align: center;
-      border-radius: 4px;
-      cursor: pointer;
-      span {
-        position: absolute;
-        right: 10px;
-        transform: rotate(0deg);
-        color: #999;
-        transition: all 0.3s;
-      }
+  .preference {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    display: block;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all 0.3s;
+    font-size: 1.8em;
+    &:hover {
+      text-shadow: 1px 1px 2px var(--shadow-color);
+      transform: scale(1.2);
     }
+  }
 
-    > div {
-      height: 0;
-      opacity: 0;
-      overflow: hidden;
-      transition: all 0.3s;
-    }
-
-    &[data-active='true'] > div {
-      opacity: 1;
-      height: var(--section-height);
-    }
-
-    &[data-active='true'] > h2 {
-      span {
-        transform: rotate(90deg);
+  .stat {
+    display: flex;
+    width: 200px;
+    margin: 20px auto 0px auto;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .pie {
+      margin-top: 20px;
+      width: 100px;
+      height: 100px;
+      background: var(--btn-bg-color);
+      border-radius: 50%;
+      border: 0.15em solid var(--bg-color);
+      box-shadow: 0 0.075em 0.2em 0.05em var(--shadow-color);
+      background-origin: border-box;
+      transform: rotate(-90deg);
+      circle {
+        fill: none;
+        stroke-width: 32;
+        transition: stroke-dasharray 0.5s ease-in;
+        &:last-child {
+          animation-delay: 0.5s;
+        }
       }
     }
   }

@@ -38,13 +38,13 @@ export const OpenAISetting = () => {
         </div>
         <textarea
           placeholder="input your openai apikey"
-          class="textarea textarea-bordered textarea-lg w-full h-24 max-w-xs text-sm leading-5"
+          class="textarea textarea-bordered textarea-lg w-full h-28 md:h-24 max-w-xs text-sm leading-5"
           value={settings().openai.apiKey}
           oninput={onApiKeyChange}
         />
         <textarea
           placeholder="custom your prompt"
-          class="textarea textarea-bordered textarea-lg w-full h-24 max-w-xs text-sm leading-5"
+          class="textarea textarea-bordered textarea-lg w-full h-28 md:h-24 max-w-xs text-sm leading-5"
           value={settings().openai.prompt}
           oninput={onPromptChange}
         />

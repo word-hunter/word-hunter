@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import { executeScript, settings } from '../lib'
-import styles from './statistics.module.css'
+import styles from './app.module.css'
 
 export const Statistics = () => {
   const [counts, setCounts] = createSignal([0, 0, 1]) // unknown,  have context, total
@@ -17,7 +17,7 @@ export const Statistics = () => {
   getStatistics()
 
   return (
-    <div class={styles.container}>
+    <div class={styles.stat}>
       <div>
         Page Stats: ( <span style={{ color: settings()['colors'][0] }}>{counts()[0]}</span> +{' '}
         <span style={{ color: settings()['colors'][1] }}>{counts()[1]}</span> ) / {counts()[2]}
