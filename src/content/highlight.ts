@@ -46,6 +46,9 @@ function _makeAsKnown(word: string) {
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (isOriginFormSame(getNodeWord(node), word)) {
       node.className = classes.known
+      if (node.nextSibling?.nodeName === 'W-MARK-T') {
+        node.nextSibling.remove()
+      }
     }
   })
 }
