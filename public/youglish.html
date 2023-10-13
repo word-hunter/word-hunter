@@ -1,47 +1,53 @@
-<head>
-  <title>YouGlish</title>
-  <style>
-    #dice {
-      position: absolute;
-      top: 300px;
-      left: 100%;
-      margin-left: 10px;
-      z-index: 10;
-      font-size: 50px;
-      appearance: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      &.rolling {
-        animation: spin 0.3s linear infinite;
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>YouGlish</title>
+    <meta charset="UTF-8" />
+    <style>
+      #dice {
+        position: absolute;
+        top: 300px;
+        left: 100%;
+        margin-left: 10px;
+        z-index: 10;
+        font-size: 50px;
+        appearance: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        &.rolling {
+          animation: spin 0.3s linear infinite;
+        }
       }
-    }
 
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
       }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
-</head>
-<div style="width: 80%; max-height: 100vh; margin: 0 auto; position: relative">
-  <a
-    id="yg-widget-0"
-    class="youglish-widget"
-    data-query="great%20power"
-    data-lang="english"
-    data-accent="us"
-    data-zones="all,us,uk"
-    data-components="57567"
-    data-bkg-color="theme_light"
-    rel="nofollow"
-    href="https://youglish.com"
-    >Visit YouGlish.com</a
-  >
-  <button id="dice" title="get a random word from context">🎲</button>
-</div>
-<script src="youglish-prepare.js" charset="utf-8"></script>
-<script async src="youglish.js" charset="utf-8"></script>
+    </style>
+  </head>
+  <body>
+    <div style="width: 80%; max-height: 100vh; margin: 0 auto; position: relative">
+      <a
+        id="yg-widget-0"
+        class="youglish-widget"
+        data-query="great%20power"
+        data-lang="english"
+        data-accent="us"
+        data-zones="all,us,uk"
+        data-components="57567"
+        data-bkg-color="theme_light"
+        rel="nofollow"
+        href="https://youglish.com"
+        >Visit YouGlish.com</a
+      >
+      <button id="dice" title="get a random word from context">🎲</button>
+    </div>
+    <script src="youglish-prepare.js" charset="utf-8"></script>
+    <script async src="youglish.js" charset="utf-8"></script>
+  </body>
+</html>
