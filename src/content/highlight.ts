@@ -10,7 +10,8 @@ import {
   WordInfoMap,
   wordRegex,
   wordReplaceRegex,
-  StorageKey
+  StorageKey,
+  cnRegex
 } from '../constant'
 import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync } from '../lib'
@@ -46,6 +47,9 @@ function _makeAsKnown(word: string) {
   document.querySelectorAll('.' + classes.mark).forEach(node => {
     if (isOriginFormSame(getNodeWord(node), word)) {
       node.className = classes.known
+      if (node.nextSibling?.nodeName === 'W-MARK-T') {
+        node.nextSibling.remove()
+      }
     }
   })
 }
@@ -177,7 +181,7 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
         const contextLength = getWordContexts(w)?.length ?? 0
         const contextAttr = contextLength > 0 ? `have_context="${contextLength}"` : ''
         const trans = settings().showCnTrans && fullDict[originFormWord]?.t
-        const transTag = !!trans ? `<w-mark-t data-trans="(${trans})">(${trans})</w-mark-t>` : ''
+        const transTag = !!trans ? `<w-mark-t data-trans="(${trans})">(${cnRegex.exec(trans)?.[0]})</w-mark-t>` : ''
         return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${transTag}${postfix}`
       }
     } else {

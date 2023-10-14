@@ -98,6 +98,7 @@ export const invalidSelectors = ['.monaco-editor', '.CodeMirror-code', '#video-t
 
 export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
+export const cnRegex = /[\u4E00-\u9FA5]+/
 
 export const keepTextNodeHosts = ['reader.ttsu.app']
 
