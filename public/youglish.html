@@ -3,6 +3,7 @@
   <head>
     <title>YouGlish</title>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="dark light" />
     <style>
       #dice {
         position: absolute;
@@ -31,23 +32,12 @@
     </style>
   </head>
   <body>
+    <!-- 1. The widget will replace this <div> tag. -->
     <div style="width: 80%; max-height: 100vh; margin: 0 auto; position: relative">
-      <a
-        id="yg-widget-0"
-        class="youglish-widget"
-        data-query="great%20power"
-        data-lang="english"
-        data-accent="us"
-        data-zones="all,us,uk"
-        data-components="57567"
-        data-bkg-color="theme_light"
-        rel="nofollow"
-        href="https://youglish.com"
-        >Visit YouGlish.com</a
-      >
+      <div id="widget-1"></div>
       <button id="dice" title="get a random word from context">🎲</button>
     </div>
-    <script src="youglish-prepare.js" charset="utf-8"></script>
+    <script async src="youglish-prepare.js" charset="utf-8"></script>
     <script async src="youglish.js" charset="utf-8"></script>
   </body>
 </html>

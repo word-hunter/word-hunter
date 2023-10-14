@@ -90,8 +90,8 @@ body:has(.__zen_mode) {
   font-family: BlinkMacSystemFont, sans-serif;
 
   pre {
-    background-color: unset;
-    border: none;
+    background-color: unset !important;
+    border: none !important;
   }
 
   w-mark-parent {
