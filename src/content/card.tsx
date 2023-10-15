@@ -45,7 +45,11 @@ export const WhCard = customElement('wh-card', () => {
 
   onMount(() => {
     readBlacklist().then(async blacklist => {
-      if (blacklist.includes(location.host) || blacklist.includes(top?.location.host)) return
+      try {
+        if (blacklist.includes(location.host) || blacklist.includes(top?.location.host)) return
+      } catch (e) {
+        // do nothing, some times the frame is cross origin, and will throw error for `top.location.host`
+      }
       await highlightInit()
       bindEvents()
     })
