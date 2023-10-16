@@ -136,6 +136,11 @@ export const WhCard = customElement('wh-card', () => {
     }
   }
 
+  // for page like calibre, stop the document scroll when mouse wheel on card
+  const onWheel = (e: WheelEvent) => {
+    e.stopImmediatePropagation()
+  }
+
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     const cardNode = getCardNode()
     const container = cardNode.querySelector('.dict_container')!
@@ -224,7 +229,7 @@ export const WhCard = customElement('wh-card', () => {
           </button>
         </div>
       </div>
-      <div class="dict_container">
+      <div class="dict_container" onWheel={onWheel}>
         <Show when={curWord()}>
           <Switch fallback={null}>
             <Match when={tabIndex() === tabCount()}>
