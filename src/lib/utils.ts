@@ -19,68 +19,20 @@ export const getDocumentTitle = () => {
   return document.title.substring(0, 40)
 }
 
-export const getWordContext = (node: Node, originWord?: string): string => {
-  if (!node) return originWord ?? ''
-  let text = originWord ?? node.textContent ?? ''
-  let left = node.previousSibling
-  let right = node.nextSibling
-
-  let hasDot = false
-  while (left) {
-    const leftText =
-      left.nodeName.toLowerCase() !== 'w-mark-t' &&
-      (left.nodeType === Node.ELEMENT_NODE || left.nodeType === Node.TEXT_NODE)
-        ? left.textContent ?? ''
-        : ''
-    if (leftText.includes('.')) {
-      hasDot = true
-      text = leftText.split('.').at(-1) + ' ' + text
-      left = null
-    } else {
-      text = leftText + ' ' + text
-      left = left.previousSibling
-    }
+export const getWordContext = (range: Range, originWord?: string): string => {
+  let pNode = range.commonAncestorContainer?.parentElement as HTMLElement
+  while (getComputedStyle(pNode).display.startsWith('inline')) {
+    pNode = pNode.parentElement as HTMLElement
   }
 
-  while (right) {
-    const rightText =
-      right.nodeName.toLowerCase() !== 'w-mark-t' &&
-      (right.nodeType === Node.ELEMENT_NODE || right.nodeType === Node.TEXT_NODE)
-        ? right.textContent ?? ''
-        : ''
-    if (rightText.includes('.')) {
-      hasDot = true
-      text = text + ' ' + rightText.split('.')[0] + '.'
-      right = null
-    } else {
-      text = text + ' ' + rightText
-      right = findRightSibling(right)
-    }
-  }
-
-  if (text.split(' ').length < 5 && !hasDot && getComputedStyle(node as HTMLElement).display.startsWith('inline')) {
-    return getWordContext(node.parentElement!)
-  }
-
-  return text.slice(0, 300)
-}
-
-function findRightSibling(el: Node) {
-  if (el.nextSibling) {
-    return el.nextSibling
-  } else {
-    const p = el.parentElement
-    if (
-      p?.classList.contains('__mark_parent') ||
-      // handle class for youtube video captions in one-line, let it expand to multiple lines
-      p?.classList.contains('caption-visual-line') ||
-      p?.classList.contains('ytp-caption-segment')
-    ) {
-      return findRightSibling(p)
-    } else {
-      return null
-    }
-  }
+  const text = pNode?.textContent ?? originWord ?? ''
+  const sliceStart = text.indexOf(range.commonAncestorContainer?.textContent ?? originWord ?? '') ?? 0
+  let start = sliceStart + range.startOffset
+  let end = sliceStart + range.endOffset
+  while (start > 0 && text.at(start - 1) !== '.') start--
+  while (end < text.length && text.at(end) !== '.') end++
+  if (text.at(end) === '.') end++
+  return text.slice(start, end)
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {

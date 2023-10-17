@@ -13,27 +13,11 @@ const DEFAULT_DICTS = {
 export type DictName = keyof typeof DEFAULT_DICTS
 export type MouseKey = 'NONE' | 'ctrlKey' | 'altKey' | 'shiftKey' | 'metaKey'
 
-export const MarkStyles = [
-  'background',
-  'text',
-  'outline',
-  'underline',
-  'double-underline',
-  'wavy',
-  'dotted',
-  'dashed',
-  'emphasis-dot',
-  'emphasis-circle',
-  'emphasis-open-circle',
-  'emphasis-triangle',
-  'shape',
-  'slanting',
-  'pen'
-] as const
+export const MarkStyles = ['background', 'text', 'underline', 'double-underline', 'wavy', 'dotted', 'dashed'] as const
 
 export const DEFAULT_SETTINGS = {
   colors: ['#9FB0EF', '#C175D8'],
-  markStyle: 'background' as typeof MarkStyles[number],
+  markStyle: 'background' as (typeof MarkStyles)[number],
   blacklist: [] as string[],
   dictTabs: DEFAULT_DICTS,
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],

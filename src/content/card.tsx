@@ -5,6 +5,9 @@ import { customElement } from 'solid-element'
 import { classes, Messages, WordContext } from '../constant'
 import {
   init as highlightInit,
+  unknownHL,
+  contextHL,
+  getRangeWord,
   markAsKnown,
   markAsAllKnown,
   addContext,
@@ -16,7 +19,8 @@ import {
   isWordKnownAble,
   zenExcludeWords,
   setZenExcludeWords,
-  getWordAllTenses
+  getWordAllTenses,
+  getRangeAtPoint
 } from './highlight'
 import { getMessagePort } from '../lib/port'
 import { Dict } from './dict'
@@ -27,7 +31,7 @@ import { readBlacklist } from '../lib/blacklist'
 let timerShowRef: number
 let timerHideRef: number
 let inDirecting = false
-let rect: DOMRect
+let rangeRect: DOMRect
 
 const [curWord, setCurWord] = createSignal('')
 const [dictHistory, setDictHistory] = createSignal<string[]>([])
@@ -64,7 +68,7 @@ export const WhCard = customElement('wh-card', () => {
     if (e instanceof MouseEvent && e.pageX) {
       explode(e.pageX, e.pageY)
     } else {
-      explode(rect.left, rect.top)
+      explode(rangeRect.left, rangeRect.top)
     }
   }
 
@@ -120,7 +124,7 @@ export const WhCard = customElement('wh-card', () => {
   }
 
   const onDictSettle = () => {
-    adjustCardPosition(rect, inDirecting)
+    adjustCardPosition(rangeRect, inDirecting)
     inDirecting = false
     runAtuoPronounce()
   }
@@ -176,22 +180,16 @@ export const WhCard = customElement('wh-card', () => {
         if (e.key === 'Escape') {
           hidePopupDelay(0)
         }
-        if (e.key === 'a') {
-          onKnown(e)
-        }
-        if (e.key === 's') {
-          onAddContext(e)
-        }
         e.preventDefault()
       }
     }
   })
 
   return (
-    <div class="word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
+    <div class="word_card" onclick={onCardClick} ondblclick={onCardDoubleClick}>
       <div class="toolbar">
         <div>
-          <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
+          <button disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
             <img src={chrome.runtime.getURL('icons/checked.png')} alt="ok" />
           </button>
           <button onclick={onAddContext} disabled={inWordContexts() || dictHistory().length > 1} title="save context">
@@ -397,9 +395,8 @@ const runAtuoPronounce = () => {
 
 function hidePopupDelay(ms: number) {
   clearTimerHideRef()
-  const cardNode = getCardNode()
   timerHideRef = window.setTimeout(() => {
-    cardNode.classList.remove('card_visible')
+    getCardNode().classList.remove('card_visible')
     setDictHistory([])
   }, ms)
 }
@@ -410,7 +407,7 @@ function clearTimerHideRef() {
 
 function toggleZenMode() {
   if (!zenMode()) {
-    const words = Array.from(document.querySelectorAll('.' + classes.unknown)).map(node => getNodeWord(node))
+    const words = [...unknownHL.values(), ...contextHL.values()].map(range => getRangeWord(range))
     batch(() => {
       setZenModeWords([...new Set(words)])
       setZenExcludeWords([])
@@ -421,18 +418,6 @@ function toggleZenMode() {
 
 // this function expose to be called in popup page
 window.__toggleZenMode = toggleZenMode
-
-function hidePopup(e: Event) {
-  const node = e.target as HTMLElement
-  timerShowRef && clearTimeout(timerShowRef)
-  if (node.classList.contains(classes.mark) || node.classList.contains(classes.card)) {
-    hidePopupDelay(500)
-  }
-
-  if (node.classList.contains(classes.mark)) {
-    node.removeEventListener('mouseleave', hidePopup)
-  }
-}
 
 function showPopup() {
   const dictTabs = () => settings()['dictTabs']
@@ -483,10 +468,12 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
 }
 
 function bindEvents() {
-  document.addEventListener('mouseover', async (e: MouseEvent) => {
-    const node = e.target as HTMLElement
-
-    if (node.classList.contains(classes.mark)) {
+  document.addEventListener('mousemove', async (e: MouseEvent) => {
+    const range = getRangeAtPoint(e)
+    if (range) {
+      clearTimerHideRef()
+      const word = range.toString().trim().toLowerCase()
+      if (isCardVisible() && word === curWord()) return false
       // skip when redirecting in card dictionary
       const mosueKey = settings().mosueKey
       if (mosueKey !== 'NONE' && !e[mosueKey]) return false
@@ -496,13 +483,11 @@ function bindEvents() {
         return false
       }
 
-      const word = getNodeWord(node)
-
-      rect = node.getBoundingClientRect()
-      adjustCardPosition(rect)
+      rangeRect = range.getBoundingClientRect()
+      adjustCardPosition(rangeRect)
       batch(() => {
         setCurWord(word)
-        setCurContextText(getWordContext(node))
+        setCurContextText(getWordContext(range))
         setWordContexts(getWordContexts(word))
         setDictHistory([word])
       })
@@ -511,13 +496,23 @@ function bindEvents() {
       timerShowRef = window.setTimeout(() => {
         showPopup()
       }, 200)
-
-      clearTimerHideRef()
-      node.addEventListener('mouseleave', hidePopup)
+    } else {
+      const target = e.target as HTMLElement
+      if (isCardVisible()) {
+        if (target.tagName !== 'WH-CARD' && !getCardNode().contains(target)) {
+          hidePopupDelay(500)
+        } else {
+          clearTimerHideRef()
+        }
+      }
     }
+  })
 
-    if (node.shadowRoot === document.querySelector('wh-card')?.shadowRoot) {
-      clearTimerHideRef()
+  // hide popup when click outside card
+  document.addEventListener('click', async (e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (isCardVisible() && !getCardNode().contains(target)) {
+      hidePopupDelay(0)
     }
   })
 }

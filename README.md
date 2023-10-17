@@ -45,8 +45,6 @@ This will make all "unknown" words as "known", except the words you excluded in 
 - <kbd>↓</kbd> scroll down dict section
 - <kbd>↑</kbd> scroll up dict section
 - <kbd>ESC</kbd> close dict panel / close zen mode
-- <kbd>a</kbd> mark as known
-- <kbd>s</kbd> save context
 
 ## Similar projects
 

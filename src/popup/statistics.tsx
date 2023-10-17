@@ -6,7 +6,7 @@ export const Statistics = () => {
   const [counts, setCounts] = createSignal([0, 0, 1]) // unknown,  have context, total
   const getStatistics = async () => {
     const res = await executeScript(() => {
-      return window.__getPageStatistics()
+      return window.__getPageStatistics?.()
     })
     setCounts([...res[0].result])
   }

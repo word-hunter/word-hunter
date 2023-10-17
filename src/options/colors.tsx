@@ -1,4 +1,3 @@
-import { classes } from '../constant'
 import { settings, setSetting, MarkStyles, genMarkStyle } from '../lib'
 import { For } from 'solid-js'
 
@@ -45,10 +44,7 @@ export const ColorsSetting = () => {
 
       <section class="section">
         <h2 class="h2">
-          <span class="z-0" classList={{ [classes.unknown]: true, [classes.mark]: true }}>
-            Mark
-          </span>{' '}
-          style:
+          <span class="z-0">Mark</span> style:
         </h2>
         <div class="flex flex-col items-end gap-4 mt-4">
           <select class="select select-bordered max-w-xs" value={settings().markStyle} onChange={onMarkStyleChanged}>
