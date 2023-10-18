@@ -31,10 +31,6 @@ export type WordContext = {
 export type ContextMap = Record<string, WordContext[]>
 
 export const classes = {
-  mark: '__mark',
-  mark_parent: '__mark_parent',
-  known: '__word_known',
-  unknown: '__word_unknown',
   card: 'word_card',
   zen_mode: '__zen_mode',
   excluded: '__excluded'
@@ -94,13 +90,8 @@ export const invalidTags = [
   'WH-ROOT'
 ]
 
-export const invalidSelectors = ['.monaco-editor', '.CodeMirror-code', '#video-title']
-
-export const wordReplaceRegex = /(\b|\s)([a-z]+)(\s|,|\.|\b)/gi
 export const wordRegex = /^[a-z]+$/i
 export const cnRegex = /[\u4E00-\u9FA5]+/
-
-export const keepTextNodeHosts = ['reader.ttsu.app']
 
 /**
  * group storage.sync items by word prefix, to avoid hitting the 512 items and 8kb limit per item.

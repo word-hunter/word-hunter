@@ -1,33 +1,5 @@
 @import url('../assets/font.css');
 
-/* some site set style to role=button globally, we need to prevent it for mark */
-w-mark[role='button'] {
-  all: unset;
-  color: inherit;
-}
-
-.__mark {
-  display: inline;
-}
-
-.__word_unknown,
-.__zen_mode .__word_unknown {
-  pointer-events: auto;
-  -webkit-text-fill-color: currentColor !important;
-  &[have_context] {
-    &::after {
-      font-size: 50%;
-      vertical-align: super;
-      content: '(' attr(have_context) ')';
-    }
-  }
-  &[have_context='1'] {
-    &::after {
-      display: none;
-    }
-  }
-}
-
 w-mark-t {
   position: relative;
   display: inline-block;
@@ -70,10 +42,6 @@ w-mark-t {
   }
 }
 
-.pdfViewer .__word_unknown {
-  color: transparent;
-}
-
 body:has(.__zen_mode) {
   overflow: hidden;
 }
@@ -90,13 +58,10 @@ body:has(.__zen_mode) {
   font-family: BlinkMacSystemFont, sans-serif;
 
   pre {
+    padding: 0;
+    margin: 0;
     background-color: unset !important;
     border: none !important;
-  }
-
-  w-mark-parent {
-    display: inline-flex;
-    align-items: center;
   }
 
   .zen_close_btn {
@@ -117,9 +82,21 @@ body:has(.__zen_mode) {
     margin-bottom: 40px;
     button {
       padding: 5px 10px;
+      font-size: 14px;
       img {
         vertical-align: middle;
         margin-right: 10px;
+      }
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      color: #666;
+      font-size: 14px;
+      input {
+        cursor: pointer;
       }
     }
   }
@@ -129,18 +106,17 @@ body:has(.__zen_mode) {
     column-gap: 7rem;
     column-rule: 4px dotted turquoise;
     word-break: break-all;
-  }
-
-  w-mark {
-    display: inline-block;
-    break-inside: avoid;
-    white-space: nowrap;
-    font-size: 12px;
-    line-height: 1.5;
-    padding: 0 2px;
-    margin: 5px 5px !important;
-    &:nth-child(20n) {
-      margin-bottom: 50px;
+    span {
+      display: inline-block;
+      break-inside: avoid;
+      white-space: nowrap;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 0 2px;
+      margin: 5px 5px !important;
+      &:nth-child(20n) {
+        margin-bottom: 50px;
+      }
     }
   }
 

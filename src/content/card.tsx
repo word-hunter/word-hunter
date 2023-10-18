@@ -5,6 +5,9 @@ import { customElement } from 'solid-element'
 import { classes, Messages, WordContext } from '../constant'
 import {
   init as highlightInit,
+  unknownHL,
+  contextHL,
+  getRangeWord,
   markAsKnown,
   markAsAllKnown,
   addContext,
@@ -16,7 +19,8 @@ import {
   isWordKnownAble,
   zenExcludeWords,
   setZenExcludeWords,
-  getWordAllTenses
+  getWordAllTenses,
+  getRangeAtPoint
 } from './highlight'
 import { getMessagePort } from '../lib/port'
 import { Dict } from './dict'
@@ -27,12 +31,13 @@ import { readBlacklist } from '../lib/blacklist'
 let timerShowRef: number
 let timerHideRef: number
 let inDirecting = false
-let rect: DOMRect
+let rangeRect: DOMRect
 
 const [curWord, setCurWord] = createSignal('')
 const [dictHistory, setDictHistory] = createSignal<string[]>([])
 const [zenMode, setZenMode] = createSignal(false)
 const [zenModeWords, setZenModeWords] = createSignal<string[]>([])
+const [cardDisabledInZenMode, setCardDisabledInZenMode] = createSignal(false)
 const [curContextText, setCurContextText] = createSignal('')
 const [tabIndex, setTabIndex] = createSignal(0)
 
@@ -64,7 +69,7 @@ export const WhCard = customElement('wh-card', () => {
     if (e instanceof MouseEvent && e.pageX) {
       explode(e.pageX, e.pageY)
     } else {
-      explode(rect.left, rect.top)
+      explode(rangeRect.left, rangeRect.top)
     }
   }
 
@@ -120,7 +125,7 @@ export const WhCard = customElement('wh-card', () => {
   }
 
   const onDictSettle = () => {
-    adjustCardPosition(rect, inDirecting)
+    adjustCardPosition(rangeRect, inDirecting)
     inDirecting = false
     runAtuoPronounce()
   }
@@ -188,10 +193,10 @@ export const WhCard = customElement('wh-card', () => {
   })
 
   return (
-    <div class="word_card" onclick={onCardClick} onmouseleave={hidePopup} ondblclick={onCardDoubleClick}>
+    <div class="word_card" onclick={onCardClick} ondblclick={onCardDoubleClick}>
       <div class="toolbar">
         <div>
-          <button data-class={classes.known} disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
+          <button disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
             <img src={chrome.runtime.getURL('icons/checked.png')} alt="ok" />
           </button>
           <button onclick={onAddContext} disabled={inWordContexts() || dictHistory().length > 1} title="save context">
@@ -257,6 +262,10 @@ export const WhCard = customElement('wh-card', () => {
 })
 
 export function ZenMode() {
+  const setCardDisabledStatus = (e: InputEvent) => {
+    setCardDisabledInZenMode((e.target as HTMLInputElement).checked)
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && zenMode() && !isCardVisible()) {
       toggleZenMode()
@@ -266,10 +275,11 @@ export function ZenMode() {
   const onWordClick = (e: MouseEvent) => {
     const node = e.target as HTMLElement
     if (e.metaKey || e.ctrlKey) {
-      if (zenExcludeWords().includes(getNodeWord(node))) {
+      const word = node.dataset.word!
+      if (zenExcludeWords().includes(word)) {
         setZenExcludeWords(zenExcludeWords().filter(w => w !== curWord()))
       } else {
-        setZenExcludeWords([...zenExcludeWords(), getNodeWord(node)])
+        setZenExcludeWords([...zenExcludeWords(), word])
       }
     }
   }
@@ -279,7 +289,11 @@ export function ZenMode() {
   }
 
   const onUnselectAll = () => {
-    setZenExcludeWords([...zenModeWords()])
+    if (zenExcludeWords().length > 0) {
+      setZenExcludeWords([])
+    } else {
+      setZenExcludeWords([...zenModeWords()])
+    }
   }
 
   return (
@@ -302,12 +316,20 @@ export function ZenMode() {
             <img src={chrome.runtime.getURL('icons/checked.png')} width="20" height="20" alt="Set all words as known" />
             Set all words as known
           </button>
+          <label>
+            <input type="checkbox" oninput={setCardDisabledStatus} checked={cardDisabledInZenMode()} />
+            disable card popup
+          </label>
         </div>
         <div class="zen_words">
           <For each={zenModeWords()}>
             {(word: string) => {
               return (
-                <span classList={{ [classes.excluded]: zenExcludeWords().includes(word) }} onclick={onWordClick}>
+                <span
+                  classList={{ [classes.excluded]: zenExcludeWords().includes(word) }}
+                  onclick={onWordClick}
+                  data-word={word}
+                >
                   {word}
                 </span>
               )
@@ -397,9 +419,8 @@ const runAtuoPronounce = () => {
 
 function hidePopupDelay(ms: number) {
   clearTimerHideRef()
-  const cardNode = getCardNode()
   timerHideRef = window.setTimeout(() => {
-    cardNode.classList.remove('card_visible')
+    getCardNode().classList.remove('card_visible')
     setDictHistory([])
   }, ms)
 }
@@ -410,7 +431,7 @@ function clearTimerHideRef() {
 
 function toggleZenMode() {
   if (!zenMode()) {
-    const words = Array.from(document.querySelectorAll('.' + classes.unknown)).map(node => getNodeWord(node))
+    const words = [...unknownHL.values(), ...contextHL.values()].map(range => getRangeWord(range))
     batch(() => {
       setZenModeWords([...new Set(words)])
       setZenExcludeWords([])
@@ -421,18 +442,6 @@ function toggleZenMode() {
 
 // this function expose to be called in popup page
 window.__toggleZenMode = toggleZenMode
-
-function hidePopup(e: Event) {
-  const node = e.target as HTMLElement
-  timerShowRef && clearTimeout(timerShowRef)
-  if (node.classList.contains(classes.mark) || node.classList.contains(classes.card)) {
-    hidePopupDelay(500)
-  }
-
-  if (node.classList.contains(classes.mark)) {
-    node.removeEventListener('mouseleave', hidePopup)
-  }
-}
 
 function showPopup() {
   const dictTabs = () => settings()['dictTabs']
@@ -483,10 +492,16 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
 }
 
 function bindEvents() {
-  document.addEventListener('mouseover', async (e: MouseEvent) => {
-    const node = e.target as HTMLElement
+  document.addEventListener('mousemove', async (e: MouseEvent) => {
+    if (zenMode() && cardDisabledInZenMode()) {
+      return false
+    }
 
-    if (node.classList.contains(classes.mark)) {
+    const range = getRangeAtPoint(e)
+    if (range) {
+      clearTimerHideRef()
+      const word = range.toString().trim().toLowerCase()
+      if (isCardVisible() && word === curWord()) return false
       // skip when redirecting in card dictionary
       const mosueKey = settings().mosueKey
       if (mosueKey !== 'NONE' && !e[mosueKey]) return false
@@ -496,13 +511,11 @@ function bindEvents() {
         return false
       }
 
-      const word = getNodeWord(node)
-
-      rect = node.getBoundingClientRect()
-      adjustCardPosition(rect)
+      rangeRect = range.getBoundingClientRect()
+      adjustCardPosition(rangeRect)
       batch(() => {
         setCurWord(word)
-        setCurContextText(getWordContext(node))
+        setCurContextText(getWordContext(range))
         setWordContexts(getWordContexts(word))
         setDictHistory([word])
       })
@@ -511,13 +524,23 @@ function bindEvents() {
       timerShowRef = window.setTimeout(() => {
         showPopup()
       }, 200)
-
-      clearTimerHideRef()
-      node.addEventListener('mouseleave', hidePopup)
+    } else {
+      const target = e.target as HTMLElement
+      if (isCardVisible()) {
+        if (target.tagName !== 'WH-CARD' && !getCardNode().contains(target)) {
+          hidePopupDelay(500)
+        } else {
+          clearTimerHideRef()
+        }
+      }
     }
+  })
 
-    if (node.shadowRoot === document.querySelector('wh-card')?.shadowRoot) {
-      clearTimerHideRef()
+  // hide popup when click outside card
+  document.addEventListener('click', async (e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (isCardVisible() && !getCardNode().contains(target)) {
+      hidePopupDelay(0)
     }
   })
 }

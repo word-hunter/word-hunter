@@ -1,15 +1,11 @@
 import {
-  classes,
   invalidTags,
-  invalidSelectors,
-  keepTextNodeHosts,
   Messages,
   WordContext,
   ContextMap,
   WordMap,
   WordInfoMap,
   wordRegex,
-  wordReplaceRegex,
   StorageKey,
   cnRegex
 } from '../constant'
@@ -17,18 +13,38 @@ import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync } from '../lib'
 import { getMessagePort } from '../lib/port'
 
+declare global {
+  interface Highlight extends Set<Range> {
+    readonly priority: number
+  }
+
+  const Highlight: {
+    prototype: Highlight
+    new (...initialRanges: Array<Range>): Highlight
+  }
+
+  type HighlightRegistry = Map<string, Highlight>
+
+  namespace CSS {
+    const highlights: HighlightRegistry
+  }
+}
+
+export const unknownHL = new Highlight()
+export const contextHL = new Highlight()
+CSS.highlights.set('wh-unknown', unknownHL)
+CSS.highlights.set('wh-context', contextHL)
+
 let wordsKnown: WordMap = {}
 let fullDict: WordInfoMap = {}
 let dict: WordInfoMap = {}
 let contexts: ContextMap = {}
-const shouldKeepOriginNode = keepTextNodeHosts.includes(location.hostname)
 
 export const [zenExcludeWords, setZenExcludeWords] = createSignal<string[]>([])
 export const [wordContexts, setWordContexts] = createSignal<WordContext[]>([])
 
-function getNodeWord(node: HTMLElement | Node | undefined) {
-  if (!node) return ''
-  return (node.textContent ?? '').toLowerCase()
+export function getRangeWord(range: Range) {
+  return range.toString().toLowerCase()
 }
 
 function isOriginFormSame(word1: string, word2: string) {
@@ -44,20 +60,19 @@ export function markAsKnown(word: string) {
 }
 
 function _makeAsKnown(word: string) {
-  document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (isOriginFormSame(getNodeWord(node), word)) {
-      node.className = classes.known
-      if (node.nextSibling?.nodeName === 'W-MARK-T') {
-        node.nextSibling.remove()
+  ;[unknownHL, contextHL].forEach(hl => {
+    hl.forEach(range => {
+      const rangeWord = getRangeWord(range)
+      if (isOriginFormSame(rangeWord, word)) {
+        hl.delete(range)
       }
-    }
+    })
   })
 }
 
 function _makeAsUnknown(word: string) {
   delete wordsKnown[word]
-  const textNodes = getTextNodes(document.body)
-  highlight(textNodes, dict, wordsKnown, contexts)
+  highlight(document.body)
 }
 
 export function addContext(word: string, text: string) {
@@ -82,9 +97,11 @@ function _addContext(context: WordContext) {
   }
 
   setWordContexts(contexts[word])
-  document.querySelectorAll('.' + classes.mark).forEach(node => {
-    if (isOriginFormSame(getNodeWord(node), word)) {
-      node.setAttribute('have_context', contexts[word].length.toString())
+  unknownHL.forEach(range => {
+    const rangeWord = getRangeWord(range)
+    if (isOriginFormSame(rangeWord, word)) {
+      unknownHL.delete(range)
+      contextHL.add(range)
     }
   })
 }
@@ -100,50 +117,49 @@ function _deleteContext(context: WordContext) {
     contexts[word].splice(index, 1)
 
     setWordContexts([...contexts[word]])
-    document.querySelectorAll('.' + classes.mark).forEach(node => {
-      if (isOriginFormSame(getNodeWord(node), word)) {
-        if (contexts[word]?.length === 0) {
-          node.removeAttribute('have_context')
-        } else {
-          node.setAttribute('have_context', contexts[word].length.toString())
-        }
+    contextHL.forEach(range => {
+      const rangeWord = getRangeWord(range)
+      if (isOriginFormSame(rangeWord, word)) {
+        contextHL.delete(range)
+        unknownHL.add(range)
       }
     })
   }
 }
 
 export function markAsAllKnown() {
-  const words = Array.from(document.querySelectorAll('.' + classes.unknown))
-    .map(node => {
-      return getNodeWord(node)
-    })
+  const words = [...unknownHL.values(), ...contextHL.values()]
+    .map(getRangeWord)
     .filter(word => wordRegex.test(word) && !zenExcludeWords().includes(word))
     .map(word => getOriginForm(word))
   getMessagePort().postMessage({ action: Messages.set_all_known, words })
 }
 
 function _makeAsAllKnown(words: string[]) {
-  const nodes = document.querySelectorAll('.' + classes.unknown)
-  nodes.forEach(node => {
-    const word = getNodeWord(node)
-    if (wordRegex.test(word) && words.includes(getOriginForm(word))) {
-      node.className = classes.known
-    }
+  ;[unknownHL, contextHL].forEach(hl => {
+    hl.forEach(range => {
+      const rangeWord = getRangeWord(range)
+      if (words.includes(rangeWord)) {
+        hl.delete(range)
+      }
+    })
   })
 }
 
-function getTextNodes(node: Node): CharacterData[] {
-  if (node.nodeType === Node.TEXT_NODE) {
-    return [node as CharacterData]
-    // https://johnresig.com/blog/nodename-case-sensitivity/
-  } else if (invalidTags.includes(node.nodeName?.toUpperCase())) {
-    return []
+function getTextNodes(node: Node): Text[] {
+  const textNodes = []
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, (node: Node) => {
+    if (invalidTags.includes(node.parentElement?.tagName ?? '')) {
+      return NodeFilter.FILTER_REJECT
+    } else {
+      return NodeFilter.FILTER_ACCEPT
+    }
+  })
+
+  while (walker.nextNode()) {
+    textNodes.push(walker.currentNode as Text)
   }
 
-  let textNodes: CharacterData[] = []
-  for (const childNode of node.childNodes) {
-    textNodes = textNodes.concat(getTextNodes(childNode))
-  }
   return textNodes
 }
 
@@ -167,62 +183,98 @@ function autoPauseForYoutubeSubTitle(node: HTMLElement | null, toHighlightWords:
   }
 }
 
-function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, contexts: ContextMap) {
-  const text = (node.nodeValue || '').replaceAll('>', '&gt;').replaceAll('<', '&lt;').replaceAll('­', '')
-  const toHighlightWords: string[] = []
-  const html = text.replace(wordReplaceRegex, (origin, prefix, word, postfix) => {
-    const w = word.toLowerCase()
-    if (w in dict) {
-      const originFormWord = getOriginForm(w)
-      if (originFormWord in wordsKnown) {
-        return origin
-      } else {
-        toHighlightWords.push(w)
-        const contextLength = getWordContexts(w)?.length ?? 0
-        const contextAttr = contextLength > 0 ? `have_context="${contextLength}"` : ''
-        const trans = settings().showCnTrans && fullDict[originFormWord]?.t
-        const transTag = !!trans ? `<w-mark-t data-trans="(${trans})">(${cnRegex.exec(trans)?.[0]})</w-mark-t>` : ''
-        return `${prefix}<w-mark tabindex="0" class="${classes.mark} ${classes.unknown}" ${contextAttr} role="button">${word}</w-mark>${transTag}${postfix}`
+let rangesWithRectAtMouseOverCache: { range: Range; rect: DOMRect }[] = []
+
+document.addEventListener('mouseover', (e: MouseEvent) => {
+  const node = e.target as HTMLElement
+  const ranges = [...unknownHL.values(), ...contextHL.values()] as Range[]
+  rangesWithRectAtMouseOverCache = ranges
+    .filter(range => {
+      return node.contains(range.commonAncestorContainer)
+    })
+    .map(range => {
+      return {
+        range,
+        rect: range.getBoundingClientRect()
       }
-    } else {
-      return origin
+    })
+})
+
+export function getRangeAtPoint(e: MouseEvent) {
+  const rangeAtPoint = rangesWithRectAtMouseOverCache.find(
+    ({ rect }) =>
+      rect && rect.left <= e.clientX && rect.right >= e.clientX && rect.top <= e.clientY && rect.bottom >= e.clientY
+  )
+  return rangeAtPoint?.range ?? null
+}
+
+const segmenterEn = new Intl.Segmenter('en-US', { granularity: 'word' })
+function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, word?: string) {
+  const text = node.nodeValue || ''
+  let toHighlightWords = []
+  const segments = segmenterEn.segment(text)
+
+  const totalLength = node.length
+  let preEnd = 0
+  let curNode = node
+
+  for (const segment of segments) {
+    const w = segment.segment.toLowerCase()
+    if (segment.isWordLike && w in dict) {
+      const originFormWord = getOriginForm(w)
+      if (!(originFormWord in wordsKnown)) {
+        if (word && word !== originFormWord) continue
+        const range = new Range()
+        range.setStart(curNode, segment.index - preEnd)
+        range.setEnd(curNode, segment.index - preEnd + w.length)
+
+        const trans = settings().showCnTrans && fullDict[originFormWord]?.t
+        if (trans) {
+          // avoid duplicated
+          if (range.endContainer.nextSibling?.nodeName === 'W-MARK-T') {
+            continue
+          }
+          // insert trans tag after range
+          const newRange = range.cloneRange()
+          newRange.collapse(false)
+          const transNode = document.createElement('w-mark-t')
+          transNode.textContent = `(${cnRegex.exec(trans)?.[0]})`
+          transNode.dataset.trans = `(${trans})`
+          // TODO: insertNode performance is terrible, need to optimize
+          newRange.insertNode(transNode)
+          newRange.detach()
+          // if transNode is not the last node, move cursor to next text node
+          preEnd = segment.index + w.length
+          if (preEnd < totalLength) {
+            curNode = transNode.nextSibling as Text
+          }
+        }
+
+        const contextLength = getWordContexts(w)?.length ?? 0
+        if (contextLength > 0) {
+          contextHL.add(range)
+        } else {
+          unknownHL.add(range)
+        }
+
+        toHighlightWords.push(w)
+      }
     }
-  })
-  if (text !== html) {
+  }
+
+  if (toHighlightWords.length > 0) {
     autoPauseForYoutubeSubTitle(node.parentElement, toHighlightWords)
-    if (shouldKeepOriginNode) {
-      node.parentElement?.insertAdjacentHTML(
-        'afterend',
-        `<w-mark-parent class="${classes.mark_parent}">${html}</w-mark-parent>`
-      )
-      // move the origin text node into a isolate node, but don't delete it
-      // this is for compatible with some website which use the origin text node always
-      const newNode = document.createElement('div')
-      newNode.appendChild(node)
-    } else {
-      const newNode = document.createElement('w-mark-parent')
-      newNode.className = classes.mark_parent
-      newNode.innerHTML = html
-      node.replaceWith(newNode)
-    }
   }
 }
 
-function highlight(textNodes: CharacterData[], dict: WordInfoMap, wordsKnown: WordMap, contexts: ContextMap) {
+function isTextNodeValid(textNode: Text) {
+  return !invalidTags.includes(textNode.parentNode?.nodeName?.toUpperCase() ?? '')
+}
+
+function highlight(node: Node, word?: string) {
+  const textNodes = getTextNodes(node)
   for (const node of textNodes) {
-    // skip if node is already highlighted when re-highlight
-    if (node.parentElement?.classList.contains(classes.mark)) continue
-    if (invalidTags.includes(node.parentNode?.nodeName?.toUpperCase() ?? '')) {
-      continue
-    }
-
-    for (const selector of invalidSelectors) {
-      if (node.parentElement?.closest(selector)) {
-        return
-      }
-    }
-
-    highlightTextNode(node, dict, wordsKnown, contexts)
+    highlightTextNode(node, dict, wordsKnown, word)
   }
 }
 
@@ -245,19 +297,13 @@ async function readStorageAndHighlight() {
   wordsKnown = await getAllKnownSync()
   contexts = result[StorageKey.context] || {}
 
-  const textNodes = getTextNodes(document.body)
-  highlight(textNodes, dict, wordsKnown, contexts)
+  highlight(document.body)
 }
 
 function resetHighlight() {
   dict = {}
-  document.querySelectorAll('w-mark-t').forEach(node => {
-    node.remove()
-  })
-  document.querySelectorAll('.' + classes.mark_parent).forEach(node => {
-    const text = node.textContent ?? ''
-    node.replaceWith(document.createTextNode(text))
-  })
+  unknownHL.clear()
+  contextHL.clear()
 }
 
 function observeDomChange() {
@@ -265,24 +311,31 @@ function observeDomChange() {
     mutations.forEach(mutation => {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
-          if (
-            !node.isConnected ||
-            !node.parentNode?.isConnected ||
-            (node as HTMLElement).classList?.contains(classes.mark) ||
-            (node as HTMLElement).classList?.contains(classes.mark_parent)
-          ) {
+          if (!node.isConnected || !node.parentNode?.isConnected) {
             return false
           }
           if (node.nodeType === Node.TEXT_NODE) {
-            highlight([node as CharacterData], dict, wordsKnown, contexts)
+            if (isTextNodeValid(node as Text)) {
+              highlightTextNode(node as Text, dict, wordsKnown)
+            }
           } else {
             if ((node as HTMLElement).isContentEditable || node.parentElement?.isContentEditable) {
               return false
             }
-            const textNodes = getTextNodes(node)
-            highlight(textNodes, dict, wordsKnown, contexts)
+            highlight(node)
           }
         })
+
+        // when remove node, remove highlight range
+        if (mutations.length > 0) {
+          ;[unknownHL, contextHL].forEach(hl => {
+            hl.forEach(r => {
+              if (!r.toString()) {
+                hl.delete(r)
+              }
+            })
+          })
+        }
       }
     })
   })
@@ -294,16 +347,16 @@ function observeDomChange() {
   })
 }
 
-function getHighlightCount(isVisible?: boolean) {
-  const selector = isVisible ? `.${classes.unknown}` : `.${classes.unknown}`
+function getHighlightCount() {
   const contextWordsSet = new Set()
   const unknownWordSet = new Set()
-  Array.from(document.querySelectorAll(selector)).map(w => {
-    const word = (w as HTMLElement).innerText.toLowerCase()
+  unknownHL.forEach((range: Range) => {
+    const word = getRangeWord(range)
     unknownWordSet.add(word)
-    if (w.hasAttribute('have_context')) {
-      contextWordsSet.add(word)
-    }
+  })
+  contextHL.forEach((range: Range) => {
+    const word = getRangeWord(range)
+    contextWordsSet.add(word)
   })
   return [unknownWordSet.size, contextWordsSet.size]
 }
@@ -314,13 +367,16 @@ function getPageStatistics() {
     .filter(w => w in dict)
   const wordCount = new Set(words).size
   const [unknownCount, haveContextCount] = getHighlightCount()
-  return [unknownCount - haveContextCount, haveContextCount, wordCount] as const
+  return [unknownCount, haveContextCount, wordCount] as const
 }
 
 // this function expose to be called in popup page
 window.__getPageStatistics = getPageStatistics
 
 window.__updateDicts = () => {
+  document.querySelectorAll('w-mark-t').forEach(node => {
+    node.remove()
+  })
   resetHighlight()
   readStorageAndHighlight()
 }
