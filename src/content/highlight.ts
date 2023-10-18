@@ -230,6 +230,10 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
 
         const trans = settings().showCnTrans && fullDict[originFormWord]?.t
         if (trans) {
+          // avoid duplicated
+          if (range.endContainer.nextSibling?.nodeName === 'W-MARK-T') {
+            continue
+          }
           // insert trans tag after range
           const newRange = range.cloneRange()
           newRange.collapse(false)
