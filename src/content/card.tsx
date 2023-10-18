@@ -37,6 +37,7 @@ const [curWord, setCurWord] = createSignal('')
 const [dictHistory, setDictHistory] = createSignal<string[]>([])
 const [zenMode, setZenMode] = createSignal(false)
 const [zenModeWords, setZenModeWords] = createSignal<string[]>([])
+const [cardDisabledInZenMode, setCardDisabledInZenMode] = createSignal(false)
 const [curContextText, setCurContextText] = createSignal('')
 const [tabIndex, setTabIndex] = createSignal(0)
 
@@ -261,6 +262,10 @@ export const WhCard = customElement('wh-card', () => {
 })
 
 export function ZenMode() {
+  const setCardDisabledStatus = (e: InputEvent) => {
+    setCardDisabledInZenMode((e.target as HTMLInputElement).checked)
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && zenMode() && !isCardVisible()) {
       toggleZenMode()
@@ -270,10 +275,11 @@ export function ZenMode() {
   const onWordClick = (e: MouseEvent) => {
     const node = e.target as HTMLElement
     if (e.metaKey || e.ctrlKey) {
-      if (zenExcludeWords().includes(getNodeWord(node))) {
+      const word = node.dataset.word!
+      if (zenExcludeWords().includes(word)) {
         setZenExcludeWords(zenExcludeWords().filter(w => w !== curWord()))
       } else {
-        setZenExcludeWords([...zenExcludeWords(), getNodeWord(node)])
+        setZenExcludeWords([...zenExcludeWords(), word])
       }
     }
   }
@@ -283,7 +289,11 @@ export function ZenMode() {
   }
 
   const onUnselectAll = () => {
-    setZenExcludeWords([...zenModeWords()])
+    if (zenExcludeWords().length > 0) {
+      setZenExcludeWords([])
+    } else {
+      setZenExcludeWords([...zenModeWords()])
+    }
   }
 
   return (
@@ -306,12 +316,20 @@ export function ZenMode() {
             <img src={chrome.runtime.getURL('icons/checked.png')} width="20" height="20" alt="Set all words as known" />
             Set all words as known
           </button>
+          <label>
+            <input type="checkbox" oninput={setCardDisabledStatus} checked={cardDisabledInZenMode()} />
+            disable card popup
+          </label>
         </div>
         <div class="zen_words">
           <For each={zenModeWords()}>
             {(word: string) => {
               return (
-                <span classList={{ [classes.excluded]: zenExcludeWords().includes(word) }} onclick={onWordClick}>
+                <span
+                  classList={{ [classes.excluded]: zenExcludeWords().includes(word) }}
+                  onclick={onWordClick}
+                  data-word={word}
+                >
                   {word}
                 </span>
               )
@@ -475,6 +493,10 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
 
 function bindEvents() {
   document.addEventListener('mousemove', async (e: MouseEvent) => {
+    if (zenMode() && cardDisabledInZenMode()) {
+      return false
+    }
+
     const range = getRangeAtPoint(e)
     if (range) {
       clearTimerHideRef()

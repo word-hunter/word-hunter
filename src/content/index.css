@@ -88,6 +88,17 @@ body:has(.__zen_mode) {
         margin-right: 10px;
       }
     }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      color: #666;
+      font-size: 14px;
+      input {
+        cursor: pointer;
+      }
+    }
   }
 
   .zen_words {
