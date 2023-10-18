@@ -180,6 +180,12 @@ export const WhCard = customElement('wh-card', () => {
         if (e.key === 'Escape') {
           hidePopupDelay(0)
         }
+        if (e.key === 'a') {
+          onKnown(e)
+        }
+        if (e.key === 's') {
+          onAddContext(e)
+        }
         e.preventDefault()
       }
     }

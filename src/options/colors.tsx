@@ -14,6 +14,15 @@ export const ColorsSetting = () => {
     setSetting('markStyle', target.value as (typeof MarkStyles)[number])
   }
 
+  // for the breaking change of removing depleted markStyles
+  const resolvedMarkStyle = () => {
+    const s = settings().markStyle
+    if (!MarkStyles.includes(s)) {
+      return MarkStyles[0]
+    }
+    return s
+  }
+
   return (
     <>
       <section class="section">
@@ -47,7 +56,7 @@ export const ColorsSetting = () => {
           <span class="z-0">Mark</span> style:
         </h2>
         <div class="flex flex-col items-end gap-4 mt-4">
-          <select class="select select-bordered max-w-xs" value={settings().markStyle} onChange={onMarkStyleChanged}>
+          <select class="select select-bordered max-w-xs" value={resolvedMarkStyle()} onChange={onMarkStyleChanged}>
             <For each={MarkStyles}>
               {item => (
                 <option id={item} value={item}>
