@@ -9,8 +9,7 @@ export const ControlSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Control Keys</h2>
-      <Note>Choose the key when mouse over word to show dict window</Note>
+      <h2 class="h2">Control Keys<Note>Choose the key when mouse over word to show dict window</Note></h2>
       <div class="flex flex-col items-end gap-4">
         <div>
           <select

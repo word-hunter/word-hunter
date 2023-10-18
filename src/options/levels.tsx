@@ -19,8 +19,7 @@ export const LevelSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Levels</h2>
-      <Note>Select the Dicts used for highlight</Note>
+      <h2 class="h2">Levels<Note>Select the Dicts used for highlight</Note></h2>
       <div>
         <div class="form-control flex flex-col items-end">
           <For each={Levels}>
