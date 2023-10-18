@@ -90,7 +90,6 @@ export const invalidTags = [
   'WH-ROOT'
 ]
 
-export const wordReplaceRegex = /(\b)([a-z]+)(\b)/gi
 export const wordRegex = /^[a-z]+$/i
 export const cnRegex = /[\u4E00-\u9FA5]+/
 

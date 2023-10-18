@@ -6,7 +6,6 @@ import {
   WordMap,
   WordInfoMap,
   wordRegex,
-  wordReplaceRegex,
   StorageKey,
   cnRegex
 } from '../constant'
@@ -73,8 +72,7 @@ function _makeAsKnown(word: string) {
 
 function _makeAsUnknown(word: string) {
   delete wordsKnown[word]
-  const textNodes = getTextNodes(document.body)
-  highlight(textNodes, dict, wordsKnown, word)
+  highlight(document.body)
 }
 
 export function addContext(word: string, text: string) {
@@ -148,10 +146,10 @@ function _makeAsAllKnown(words: string[]) {
   })
 }
 
-function getTextNodes(node: Node): CharacterData[] {
+function getTextNodes(node: Node): Text[] {
   const textNodes = []
   const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, (node: Node) => {
-    if (invalidTags.includes(node.nodeName?.toUpperCase())) {
+    if (invalidTags.includes(node.parentElement?.tagName ?? '')) {
       return NodeFilter.FILTER_REJECT
     } else {
       return NodeFilter.FILTER_ACCEPT
@@ -159,7 +157,7 @@ function getTextNodes(node: Node): CharacterData[] {
   })
 
   while (walker.nextNode()) {
-    textNodes.push(walker.currentNode as CharacterData)
+    textNodes.push(walker.currentNode as Text)
   }
 
   return textNodes
@@ -211,19 +209,21 @@ export function getRangeAtPoint(e: MouseEvent) {
 }
 
 // TODO: show trans
+const segmenterEn = new Intl.Segmenter('en-US', { granularity: 'word' })
 function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, word?: string) {
   const text = node.nodeValue || ''
-  let arr
   let toHighlightWords = []
-  while ((arr = wordReplaceRegex.exec(text)) !== null) {
-    const w = arr[2]?.trim().toLowerCase()
-    if (w in dict) {
+  const segments = segmenterEn.segment(text)
+
+  for (const segment of segments) {
+    const w = segment.segment.toLowerCase()
+    if (segment.isWordLike && w in dict) {
       const originFormWord = getOriginForm(w)
       if (!(originFormWord in wordsKnown)) {
         if (word && word !== originFormWord) continue
         const range = new Range()
-        range.setStart(node, arr.index)
-        range.setEnd(node, arr.index + w.length)
+        range.setStart(node, segment.index)
+        range.setEnd(node, segment.index + w.length)
         const contextLength = getWordContexts(w)?.length ?? 0
         if (contextLength > 0) {
           contextHL.add(range)
@@ -234,17 +234,19 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
       }
     }
   }
+
   if (toHighlightWords.length > 0) {
     autoPauseForYoutubeSubTitle(node.parentElement, toHighlightWords)
   }
 }
 
-function highlight(textNodes: CharacterData[], dict: WordInfoMap, wordsKnown: WordMap, word?: string) {
-  for (const node of textNodes) {
-    if (invalidTags.includes(node.parentNode?.nodeName?.toUpperCase() ?? '')) {
-      continue
-    }
+function isTextNodeValid(textNode: Text) {
+  return !invalidTags.includes(textNode.parentNode?.nodeName?.toUpperCase() ?? '')
+}
 
+function highlight(node: Node, word?: string) {
+  const textNodes = getTextNodes(node)
+  for (const node of textNodes) {
     highlightTextNode(node, dict, wordsKnown, word)
   }
 }
@@ -268,8 +270,7 @@ async function readStorageAndHighlight() {
   wordsKnown = await getAllKnownSync()
   contexts = result[StorageKey.context] || {}
 
-  const textNodes = getTextNodes(document.body)
-  highlight(textNodes, dict, wordsKnown)
+  highlight(document.body)
 }
 
 function resetHighlight() {
@@ -287,13 +288,14 @@ function observeDomChange() {
             return false
           }
           if (node.nodeType === Node.TEXT_NODE) {
-            highlight([node as CharacterData], dict, wordsKnown)
+            if (isTextNodeValid(node as Text)) {
+              highlightTextNode(node as Text, dict, wordsKnown)
+            }
           } else {
             if ((node as HTMLElement).isContentEditable || node.parentElement?.isContentEditable) {
               return false
             }
-            const textNodes = getTextNodes(node)
-            highlight(textNodes, dict, wordsKnown)
+            highlight(node)
           }
         })
 
@@ -338,7 +340,7 @@ function getPageStatistics() {
     .filter(w => w in dict)
   const wordCount = new Set(words).size
   const [unknownCount, haveContextCount] = getHighlightCount()
-  return [unknownCount - haveContextCount, haveContextCount, wordCount] as const
+  return [unknownCount, haveContextCount, wordCount] as const
 }
 
 // this function expose to be called in popup page
