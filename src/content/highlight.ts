@@ -208,12 +208,15 @@ export function getRangeAtPoint(e: MouseEvent) {
   return rangeAtPoint?.range ?? null
 }
 
-// TODO: show trans
 const segmenterEn = new Intl.Segmenter('en-US', { granularity: 'word' })
 function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, word?: string) {
   const text = node.nodeValue || ''
   let toHighlightWords = []
   const segments = segmenterEn.segment(text)
+
+  const totalLength = node.length
+  let preEnd = 0
+  let curNode = node
 
   for (const segment of segments) {
     const w = segment.segment.toLowerCase()
@@ -222,14 +225,34 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
       if (!(originFormWord in wordsKnown)) {
         if (word && word !== originFormWord) continue
         const range = new Range()
-        range.setStart(node, segment.index)
-        range.setEnd(node, segment.index + w.length)
+        range.setStart(curNode, segment.index - preEnd)
+        range.setEnd(curNode, segment.index - preEnd + w.length)
+
+        const trans = settings().showCnTrans && fullDict[originFormWord]?.t
+        if (trans) {
+          // insert trans tag after range
+          const newRange = range.cloneRange()
+          newRange.collapse(false)
+          const transNode = document.createElement('w-mark-t')
+          transNode.textContent = `(${cnRegex.exec(trans)?.[0]})`
+          transNode.dataset.trans = `(${trans})`
+          // TODO: insertNode performance is terrible, need to optimize
+          newRange.insertNode(transNode)
+          newRange.detach()
+          // if transNode is not the last node, move cursor to next text node
+          preEnd = segment.index + w.length
+          if (preEnd < totalLength) {
+            curNode = transNode.nextSibling as Text
+          }
+        }
+
         const contextLength = getWordContexts(w)?.length ?? 0
         if (contextLength > 0) {
           contextHL.add(range)
         } else {
           unknownHL.add(range)
         }
+
         toHighlightWords.push(w)
       }
     }
@@ -347,6 +370,9 @@ function getPageStatistics() {
 window.__getPageStatistics = getPageStatistics
 
 window.__updateDicts = () => {
+  document.querySelectorAll('w-mark-t').forEach(node => {
+    node.remove()
+  })
   resetHighlight()
   readStorageAndHighlight()
 }
