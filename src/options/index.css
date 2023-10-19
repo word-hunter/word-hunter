@@ -10,7 +10,7 @@
     @apply w-full pb-3 mb-3 flex items-center border-b border-double text-sm font-bold italic font-serif;
   }
   .tooltip {
-    @apply before:translate-x-[-30%] not-italic font-normal;
+    @apply static before:translate-x-0 before:max-w-[80vw] before:left-0 after:left-auto after:translate-x-[8px] not-italic font-normal;
   }
 }
 

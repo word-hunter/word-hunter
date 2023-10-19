@@ -136,8 +136,9 @@ export const Backup = () => {
   return (
     <>
       <section class="section">
-        <h2 class="h2">Backup<Note>Automatically sync between Chromes (without context data)</Note></h2>
-        <div class="divider">OR</div>
+        <h2 class="h2">
+          Backup<Note>Automatically sync between Chromes (without context data)</Note>
+        </h2>
         <dialog id="restoreDialog" ref={dialogRef!} class="modal">
           <form method="dialog" class="modal-box">
             <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
