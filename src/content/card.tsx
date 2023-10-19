@@ -542,7 +542,7 @@ function bindEvents() {
     }
   })
 
-  document.addEventListener('mousemove', cacheRangeRectsAtPointElement)
+  document.addEventListener('mouseover', cacheRangeRectsAtPointElement)
 
   // hide popup when click outside card
   document.addEventListener('click', async (e: MouseEvent) => {
