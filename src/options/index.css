@@ -7,7 +7,10 @@
     @apply border p-4 relative bg-base-100 rounded-sm shadow-sm;
   }
   .h2 {
-    @apply w-full pb-3 mb-3 border-b border-double text-sm font-bold italic font-serif;
+    @apply w-full pb-3 mb-3 flex items-center border-b border-double text-sm font-bold italic font-serif;
+  }
+  .tooltip {
+    @apply before:translate-x-[-30%] not-italic font-normal;
   }
 }
 

@@ -37,8 +37,7 @@ export const DictsSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Dicts</h2>
-      <Note>You can drag & drop to adjust the order</Note>
+      <h2 class="h2">Dicts<Note>You can drag & drop to adjust the order</Note></h2>
       <div class="flex flex-col items-end">
         <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>
           <DragDropSensors />
