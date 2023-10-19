@@ -1,6 +1,8 @@
 .word_card {
   all: initial;
   position: fixed;
+  left: 0;
+  top: 50px;
   z-index: 2000000000;
   --border-color: rgba(0, 0, 0, 0.3);
   --color-main: #759fc9;
@@ -18,18 +20,17 @@
   -webkit-font-smoothing: antialiased;
   box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
   user-select: text;
-  transform: translateY(50px);
   opacity: 0;
-  transition: left 0.1s, top 0.1s, transform 0.3s, opacity 0.3s, display 0.3s allow-discrete;
+  transition: transform 0.1s, top 0.3s, opacity 0.3s, display 0.3s allow-discrete;
   pointer-events: none;
 
   &.card_visible {
     pointer-events: auto;
     @starting-style {
-      transform: translateY(20px);
+      top: 20px;
       opacity: 0;
     }
-    transform: translateY(0);
+    top: 0;
     opacity: 1;
   }
 

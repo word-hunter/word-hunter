@@ -20,6 +20,7 @@ import {
   zenExcludeWords,
   setZenExcludeWords,
   getWordAllTenses,
+  cacheRangeRectsAtPointElement,
   getRangeAtPoint
 } from './highlight'
 import { getMessagePort } from '../lib/port'
@@ -193,7 +194,8 @@ export const WhCard = customElement('wh-card', () => {
   })
 
   return (
-    <div class="word_card" onclick={onCardClick} ondblclick={onCardDoubleClick}>
+    // @ts-ignore inert property
+    <div class="word_card" onclick={onCardClick} ondblclick={onCardDoubleClick} inert>
       <div class="toolbar">
         <div>
           <button disabled={!isWordKnownAble(curWord())} onclick={onKnown} title="known">
@@ -420,7 +422,9 @@ const runAtuoPronounce = () => {
 function hidePopupDelay(ms: number) {
   clearTimerHideRef()
   timerHideRef = window.setTimeout(() => {
-    getCardNode().classList.remove('card_visible')
+    const cardNode = getCardNode()
+    cardNode.classList.remove('card_visible')
+    cardNode.inert = true
     setDictHistory([])
   }, ms)
 }
@@ -452,6 +456,7 @@ function showPopup() {
     setTabIndex(0)
   }
   cardNode.classList.add('card_visible')
+  cardNode.inert = false
   runAtuoPronounce()
 }
 
@@ -483,11 +488,12 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
   }
 
   if (!onlyOutsideViewport || c_y < 0 || c_y + c_height > window.innerHeight) {
-    cardNode.style.top = `${top}px`
+    // cardNode.style.top = `${top}px`
+    cardNode.style.transform = `translate(${left}px, ${top}px)`
   }
 
   if (!onlyOutsideViewport || c_x < 0 || c_x + c_width > window.innerWidth) {
-    cardNode.style.left = `${left}px`
+    cardNode.style.transform = `translate(${left}px, ${top}px)`
   }
 }
 
@@ -535,6 +541,8 @@ function bindEvents() {
       }
     }
   })
+
+  document.addEventListener('mousemove', cacheRangeRectsAtPointElement)
 
   // hide popup when click outside card
   document.addEventListener('click', async (e: MouseEvent) => {
