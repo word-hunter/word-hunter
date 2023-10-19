@@ -24,14 +24,19 @@ export const getWordContext = (range: Range, originWord?: string): string => {
   while (getComputedStyle(pNode).display.startsWith('inline')) {
     pNode = pNode.parentElement as HTMLElement
   }
+  // remove all <w-mark-t> tags in context
+  const pNodeClone = pNode.cloneNode(true) as HTMLElement
+  pNodeClone.querySelectorAll('w-mark-t').forEach(t => t.remove())
 
-  const text = pNode?.textContent ?? originWord ?? ''
+  const text = pNodeClone?.textContent ?? originWord ?? ''
   const sliceStart = text.indexOf(range.commonAncestorContainer?.textContent ?? originWord ?? '') ?? 0
   let start = sliceStart + range.startOffset
   let end = sliceStart + range.endOffset
   while (start > 0 && text.at(start - 1) !== '.') start--
   while (end < text.length && text.at(end) !== '.') end++
   if (text.at(end) === '.') end++
+
+  pNodeClone.remove()
   return text.slice(start, end)
 }
 
