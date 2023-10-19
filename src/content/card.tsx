@@ -20,7 +20,6 @@ import {
   zenExcludeWords,
   setZenExcludeWords,
   getWordAllTenses,
-  cacheRangeRectsAtPointElement,
   getRangeAtPoint
 } from './highlight'
 import { getMessagePort } from '../lib/port'
@@ -448,6 +447,7 @@ function toggleZenMode() {
 window.__toggleZenMode = toggleZenMode
 
 function showPopup() {
+  if (isCardVisible()) return false
   const dictTabs = () => settings()['dictTabs']
   const availableDicts = () => settings().dictOrder.filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
   const tabCount = () => availableDicts().length
@@ -503,47 +503,44 @@ function bindEvents() {
       return false
     }
 
-    const range = getRangeAtPoint(e)
-    if (range) {
-      const word = range.toString().trim().toLowerCase()
-      // skip when redirecting in card dictionary
-      const mosueKey = settings().mosueKey
-      if (mosueKey !== 'NONE' && !e[mosueKey]) return false
+    const target = e.target as HTMLElement
+    const isInsideCard = isCardVisible() && (target.tagName === 'WH-CARD' || getCardNode().contains(target))
 
-      if (inDirecting) {
-        inDirecting = false
-        return false
-      }
-
-      rangeRect = range.getBoundingClientRect()
-      adjustCardPosition(rangeRect)
-      batch(() => {
-        setCurWord(word)
-        setCurContextText(getWordContext(range))
-        setWordContexts(getWordContexts(word))
-        setDictHistory([word])
-      })
-
+    if (isInsideCard) {
       clearTimerHideRef()
-      timerShowRef && clearTimeout(timerShowRef)
-      timerShowRef = window.setTimeout(() => {
-        showPopup()
-      }, 200)
     } else {
-      const target = e.target as HTMLElement
-      if (isCardVisible()) {
-        if (target.tagName !== 'WH-CARD' && !getCardNode().contains(target)) {
-          hidePopupDelay(500)
-        } else {
-          clearTimerHideRef()
+      const range = getRangeAtPoint(e)
+      if (range) {
+        const word = range.toString().trim().toLowerCase()
+        // skip when redirecting in card dictionary
+        const mosueKey = settings().mosueKey
+        if (mosueKey !== 'NONE' && !e[mosueKey]) return false
+
+        if (inDirecting) {
+          inDirecting = false
+          return false
         }
+
+        rangeRect = range.getBoundingClientRect()
+        adjustCardPosition(rangeRect)
+        batch(() => {
+          setCurWord(word)
+          setCurContextText(getWordContext(range))
+          setWordContexts(getWordContexts(word))
+          setDictHistory([word])
+        })
+
+        clearTimerHideRef()
+        timerShowRef && clearTimeout(timerShowRef)
+        timerShowRef = window.setTimeout(() => {
+          showPopup()
+        }, 200)
       } else {
         timerShowRef && clearTimeout(timerShowRef)
+        isCardVisible() && hidePopupDelay(500)
       }
     }
   })
-
-  document.addEventListener('mouseover', cacheRangeRectsAtPointElement)
 
   // hide popup when click outside card
   document.addEventListener('click', async (e: MouseEvent) => {

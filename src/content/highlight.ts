@@ -186,26 +186,21 @@ function autoPauseForYoutubeSubTitle(node: HTMLElement | null, toHighlightWords:
 let rangesWithRectAtMouseOverCache: { range: Range; rect: DOMRect }[] = []
 let lastMouseOverElement: Element | null = null
 
-export function cacheRangeRectsAtPointElement(e: MouseEvent) {
-  const element = document.elementFromPoint(e.clientX, e.clientY)
-  if (element?.tagName === 'WH-CARD') return
-  if (element === lastMouseOverElement) return
-  lastMouseOverElement = element
-  rangesWithRectAtMouseOverCache = [...unknownHL, ...contextHL]
-    .map(range => {
-      if (element === range.commonAncestorContainer?.parentElement) {
-        const rect = range.getBoundingClientRect()
-        return { range, rect }
-      }
-      return null
-    })
-    .filter(r => r !== null) as { range: Range; rect: DOMRect }[]
-}
-
 export function getRangeAtPoint(e: MouseEvent) {
-  if (!lastMouseOverElement) {
-    cacheRangeRectsAtPointElement(e)
+  const element = e.target as HTMLElement
+  if (element !== lastMouseOverElement) {
+    lastMouseOverElement = element
+    rangesWithRectAtMouseOverCache = [...unknownHL, ...contextHL]
+      .map(range => {
+        if (element === range.commonAncestorContainer?.parentElement) {
+          const rect = range.getBoundingClientRect()
+          return { range, rect }
+        }
+        return null
+      })
+      .filter(r => r !== null) as { range: Range; rect: DOMRect }[]
   }
+
   const rangeAtPoint = rangesWithRectAtMouseOverCache.find(
     ({ rect }) =>
       rect && rect.left <= e.clientX && rect.right >= e.clientX && rect.top <= e.clientY && rect.bottom >= e.clientY

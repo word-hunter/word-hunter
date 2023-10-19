@@ -2,7 +2,7 @@
   all: initial;
   position: fixed;
   left: 0;
-  top: 50px;
+  top: 0;
   z-index: 2000000000;
   --border-color: rgba(0, 0, 0, 0.3);
   --color-main: #759fc9;
@@ -21,16 +21,16 @@
   box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
   user-select: text;
   opacity: 0;
-  transition: transform 0.1s, top 0.3s, opacity 0.3s, display 0.3s allow-discrete;
+  transition: transform 0.1s, opacity 0.3s;
   pointer-events: none;
+  @media (prefers-reduced-motion) {
+    & {
+      transition: none;
+    }
+  }
 
   &.card_visible {
     pointer-events: auto;
-    @starting-style {
-      top: 20px;
-      opacity: 0;
-    }
-    top: 0;
     opacity: 1;
   }
 
