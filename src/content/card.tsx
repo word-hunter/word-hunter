@@ -505,9 +505,7 @@ function bindEvents() {
 
     const range = getRangeAtPoint(e)
     if (range) {
-      clearTimerHideRef()
       const word = range.toString().trim().toLowerCase()
-      if (isCardVisible() && word === curWord()) return false
       // skip when redirecting in card dictionary
       const mosueKey = settings().mosueKey
       if (mosueKey !== 'NONE' && !e[mosueKey]) return false
@@ -526,6 +524,7 @@ function bindEvents() {
         setDictHistory([word])
       })
 
+      clearTimerHideRef()
       timerShowRef && clearTimeout(timerShowRef)
       timerShowRef = window.setTimeout(() => {
         showPopup()
@@ -538,6 +537,8 @@ function bindEvents() {
         } else {
           clearTimerHideRef()
         }
+      } else {
+        timerShowRef && clearTimeout(timerShowRef)
       }
     }
   })

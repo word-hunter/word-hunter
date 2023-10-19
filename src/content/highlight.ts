@@ -188,9 +188,9 @@ let lastMouseOverElement: Element | null = null
 
 export function cacheRangeRectsAtPointElement(e: MouseEvent) {
   const element = document.elementFromPoint(e.clientX, e.clientY)
+  if (element?.tagName === 'WH-CARD') return
   if (element === lastMouseOverElement) return
   lastMouseOverElement = element
-  if (element?.tagName === 'WH-CARD') return
   rangesWithRectAtMouseOverCache = [...unknownHL, ...contextHL]
     .map(range => {
       if (element === range.commonAncestorContainer?.parentElement) {
