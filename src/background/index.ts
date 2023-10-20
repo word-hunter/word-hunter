@@ -21,7 +21,7 @@ function updateBadge(wordsKnown: WordMap) {
     badgeText = badgeText.at(0)! + badgeText.at(1) + 'k'
   }
   chrome.action.setBadgeText({ text: badgeText })
-  chrome.action.setBadgeBackgroundColor({ color: '#bbb' })
+  chrome.action.setBadgeBackgroundColor({ color: '#bbb0' })
   chrome.action.setTitle({ title: '✔ ' + String(knownWordsCount) })
 }
 
@@ -215,19 +215,21 @@ chrome.runtime.onConnect.addListener(async port => {
 })
 
 // https://developer.chrome.com/docs/extensions/reference/contextMenus/#event-onInstalled
-chrome.runtime.onInstalled.addListener(details => {
+chrome.runtime.onInstalled.addListener(async details => {
   chrome.contextMenus.create({
     id: 'word-hunter',
     title: 'Mark As Unknown',
     contexts: ['selection' as any]
   })
 
-  readDict().then(localDict => {
+  readDict().then(async localDict => {
     dict = localDict
-    chrome.storage.local.set({ dict: localDict }, () => {
+    chrome.storage.local.set({ dict: localDict }, async () => {
       console.log('[storage] dict set up when ' + details.reason)
     })
   })
+  knowns = knowns ?? (await getAllKnownSync())
+  updateBadge(knowns)
 })
 
 function setFailedBadge(message: string) {
