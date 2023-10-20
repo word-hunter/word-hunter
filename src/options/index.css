@@ -4,16 +4,41 @@
 
 @layer components {
   .section {
-    @apply border p-4 relative bg-base-100 rounded-sm shadow-sm;
+    @apply p-4 relative bg-white dark:bg-[#3C3C3C] rounded-xl;
   }
   .h2 {
-    @apply w-full pb-3 mb-3 flex items-center border-b border-double text-sm font-bold italic font-serif;
+    @apply w-full pb-3 mb-3 flex items-center border-b border-[#D3E3FD] dark:border-[#474747]  text-sm font-bold;
   }
   .tooltip {
     @apply static before:translate-x-0 before:max-w-[80vw] before:left-0 after:left-auto after:translate-x-[8px] not-italic font-normal;
   }
 }
 
+html,
+body {
+  background: none;
+}
+
 textarea {
   form-sizing: content;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: #eceff7; /* or add it to the track */
+}
+
+/* Add a thumb */
+::-webkit-scrollbar-thumb {
+  background: #a8c7fa;
+  border-radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar {
+    background-color: #282828; /* or add it to the track */
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #047db7;
+  }
 }

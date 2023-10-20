@@ -10,9 +10,8 @@ import { ColorsSetting } from './colors'
 
 export const App = () => {
   return (
-    <div class="w-full h-full bg-base-300">
-      <div class="container max-w-lg mx-auto p-4 py-10 grid gap-8 font-serif">
-        <h1 class="font-extrabold text-xl sm:text-2xl text-center text-base-content">Settings</h1>
+    <div class="w-full h-full md:py-10 bg-[#ECEFF7] dark:bg-[#282828]">
+      <div class="container max-w-lg mx-auto p-2 pr-[3px] grid gap-2 md:gap-8 font-serif">
         <ColorsSetting />
         <CnTransSetting />
         <YoutubeSetting />
