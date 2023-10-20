@@ -17,9 +17,6 @@ async function readDict(): Promise<WordInfoMap> {
 function updateBadge(wordsKnown: WordMap) {
   const knownWordsCount = Object.keys(wordsKnown).length
   let badgeText = knownWordsCount > 0 ? String(knownWordsCount) : ''
-  if (knownWordsCount >= 1000 && knownWordsCount < 10000) {
-    badgeText = badgeText.at(0) + '.' + badgeText.at(1) + 'k'
-  }
   if (knownWordsCount >= 10000) {
     badgeText = badgeText.at(0)! + badgeText.at(1) + 'k'
   }
