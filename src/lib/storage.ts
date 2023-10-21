@@ -1,4 +1,4 @@
-import { STORAGE_KEY_INDICES, StorageKey, WordMap, ContextMap } from '../constant'
+import { STORAGE_KEY_INDICES, StorageKey, WordMap, WordInfoMap, ContextMap } from '../constant'
 
 type SyncIndexKey = (typeof STORAGE_KEY_INDICES)[number]
 
@@ -99,11 +99,24 @@ export async function mergeKnowns(gDriveKnowns: WordMap) {
     Object.assign(mergedKnowns, knowns)
   })
 
-  if (Object.keys(mergedKnowns).length !== Object.keys(KnownSynced).length) {
-    syncUpKnowns(Object.keys(mergedKnowns), mergedKnowns, mergedUpdateTime)
+  // only keep origin knowns, this is a clean strategy for the old version of the extension
+  const dict = (await getLocalValue(StorageKey.dict)) as WordInfoMap
+  let mergedOriginKnowns: WordMap
+  if (dict) {
+    mergedOriginKnowns = {}
+    for (const word in mergedKnowns) {
+      const origin = dict[word].o
+      mergedOriginKnowns[origin] = 'o'
+    }
+  } else {
+    mergedOriginKnowns = mergedKnowns
   }
 
-  return [mergedKnowns, mergedUpdateTime] as const
+  if (Object.keys(mergedOriginKnowns).length !== Object.keys(KnownSynced).length) {
+    syncUpKnowns(Object.keys(mergedOriginKnowns), mergedOriginKnowns, mergedUpdateTime)
+  }
+
+  return [mergedOriginKnowns, mergedUpdateTime] as const
 }
 
 export async function mergeContexts(remoteContext?: ContextMap, remoteUpdateTime: number = 0) {
