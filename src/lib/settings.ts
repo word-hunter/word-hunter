@@ -56,7 +56,7 @@ export async function syncSettings(updateTime?: number) {
       [StorageKey.settings_update_timestamp]: updateTime ?? Date.now()
     })
   } catch (e) {
-    console.log(e)
+    console.error(e)
   }
 }
 

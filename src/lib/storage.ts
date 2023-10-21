@@ -1,8 +1,11 @@
 import { STORAGE_KEY_INDICES, StorageKey, WordMap, ContextMap } from '../constant'
 
+type SyncIndexKey = (typeof STORAGE_KEY_INDICES)[number]
+
 export async function getAllKnownSync() {
-  const record = (await chrome.storage.sync.get(STORAGE_KEY_INDICES)) as Record<string, string[]>
+  const record = (await chrome.storage.sync.get(STORAGE_KEY_INDICES)) as Record<SyncIndexKey, string[] | string>
   const wordEntries = Object.values(record)
+    .map(valueAsArray)
     .flat()
     .filter(w => !!w)
     .map(word => [word, 0])
@@ -10,8 +13,18 @@ export async function getAllKnownSync() {
   return Object.fromEntries(wordEntries) as WordMap
 }
 
+function valueAsArray(value: string[] | string) {
+  if (Array.isArray(value)) {
+    return value
+  } else if (typeof value === 'string') {
+    return value.split(' ')
+  } else {
+    return []
+  }
+}
+
 export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, updateTime: number = Date.now()) {
-  const toSyncKnowns = {} as Record<string, string[]>
+  const toSyncKnowns = {} as Record<SyncIndexKey, string[]>
 
   const localKnownsGroupByKeys = {} as Record<string, string[]>
   for (const word in knownsInMemory) {
@@ -45,19 +58,26 @@ export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, upd
 
   // do not sync the keys doesn't changed
   for (const key of STORAGE_KEY_INDICES) {
-    const remoteWordsOfkey = (await chrome.storage.sync.get(key))[key] ?? []
-    if (toSyncKnowns[key] && remoteWordsOfkey.length === toSyncKnowns[key].length) {
-      delete toSyncKnowns[key]
+    const remoteWordsOfkey = await getSyncValue(key)
+    if (toSyncKnowns[key] && valueAsArray(remoteWordsOfkey).length === toSyncKnowns[key].length) {
+      if (!Array.isArray(remoteWordsOfkey)) {
+        delete toSyncKnowns[key]
+      }
     }
   }
   if (Object.keys(toSyncKnowns).length > 0) {
+    const savedKnwons = {} as Record<SyncIndexKey, string>
+    for (const key in toSyncKnowns) {
+      // save as string to reduce the storage size
+      savedKnwons[key] = toSyncKnowns[key].join(' ')
+    }
     try {
-      await chrome.storage.sync.set(toSyncKnowns)
+      await chrome.storage.sync.set(savedKnwons)
       await chrome.storage.sync.set({
         [StorageKey.knwon_update_timestamp]: updateTime
       })
     } catch (e) {
-      console.log(e)
+      console.error(e)
     }
   }
 }
@@ -153,6 +173,6 @@ export async function getLocalValue(key: StorageKey) {
   return (await chrome.storage.local.get(key))[key]
 }
 
-export async function getSyncValue(key: StorageKey) {
+export async function getSyncValue(key: StorageKey | (typeof STORAGE_KEY_INDICES)[number]) {
   return (await chrome.storage.sync.get(key))[key]
 }
