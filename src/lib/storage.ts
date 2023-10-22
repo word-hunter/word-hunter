@@ -74,23 +74,11 @@ function valueAsArray(value: string[] | string) {
 }
 
 function bitmapAnd(bitmap1: string, bitmap2: string) {
-  const r = new Array(BUCKET_SIZE).fill('0')
-  for (let i = 0; i < BUCKET_SIZE; i++) {
-    if (bitmap1[i] === '1' && bitmap2[i] === '1') {
-      r[i] = '1'
-    }
-  }
-  return r.join('')
+  return (BigInt(`0b${bitmap1}`) & BigInt(`0b${bitmap2}`)).toString(2)
 }
 
 function bitmapOr(bitmap1: string, bitmap2: string) {
-  const r = new Array(BUCKET_SIZE).fill('0')
-  for (let i = 0; i < BUCKET_SIZE; i++) {
-    if (bitmap1[i] === '1' || bitmap2[i] === '1') {
-      r[i] = '1'
-    }
-  }
-  return r.join('')
+  return (BigInt(`0b${bitmap1}`) | BigInt(`0b${bitmap2}`)).toString(2)
 }
 
 export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, updateTime: number = Date.now()) {
@@ -228,7 +216,7 @@ export async function getLocalValue(key: StorageKey) {
   return (await chrome.storage.local.get(key))[key]
 }
 
-export async function getSyncValue(key: StorageKey | LegacySyncIndexKey | typeof BUCKET_INDICES[number]) {
+export async function getSyncValue(key: StorageKey | LegacySyncIndexKey | BucketIndex) {
   return (await chrome.storage.sync.get(key))[key]
 }
 

@@ -8,7 +8,9 @@ export const Statistics = () => {
     const res = await executeScript(() => {
       return window.__getPageStatistics?.()
     })
-    setCounts([...res[0].result])
+    if (res?.[0]?.result) {
+      setCounts([...res[0].result])
+    }
   }
 
   const unKnownPercent = () => (counts()[0] / counts()[2]) * 100
