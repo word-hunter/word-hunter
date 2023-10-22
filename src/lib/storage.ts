@@ -74,11 +74,13 @@ function valueAsArray(value: string[] | string) {
 }
 
 function bitmapAnd(bitmap1: string, bitmap2: string) {
-  return (BigInt(`0b${bitmap1}`) & BigInt(`0b${bitmap2}`)).toString(2)
+  const bits = (BigInt(`0b${bitmap1}`) & BigInt(`0b${bitmap2}`)).toString(2)
+  return bits.padStart(BUCKET_SIZE, '0')
 }
 
 function bitmapOr(bitmap1: string, bitmap2: string) {
-  return (BigInt(`0b${bitmap1}`) | BigInt(`0b${bitmap2}`)).toString(2)
+  const bits = (BigInt(`0b${bitmap1}`) | BigInt(`0b${bitmap2}`)).toString(2)
+  return bits.padStart(BUCKET_SIZE, '0')
 }
 
 export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, updateTime: number = Date.now()) {
