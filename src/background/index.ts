@@ -1,4 +1,4 @@
-import { Messages, WordMap, WordInfoMap, WordContext, StorageKey } from '../constant'
+import { Messages, WordMap, WordInfoMap, WordContext, StorageKey, LevelKey } from '../constant'
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, getLocalValue, getAllKnownSync, addLocalKnownsLogs, removeLocalKnownsLogs } from '../lib/storage'
 import { settings } from '../lib/settings'
@@ -8,10 +8,35 @@ let dict: WordInfoMap
 let knowns: WordMap
 
 async function readDict(): Promise<WordInfoMap> {
-  const url = chrome.runtime.getURL('dict.json')
+  const [dict, trans] = await Promise.all([getDictTxt(), getZhTransJson()])
+  const lines = dict.split('\n')
+  const wordInfoMap: WordInfoMap = {}
+
+  let i = 0
+  lines.forEach(line => {
+    const [word, origin, level] = line.split(/\s+/)
+    wordInfoMap[word] = { o: origin, l: level as LevelKey }
+    if (trans[origin]) {
+      wordInfoMap[word].t = trans[origin]
+    }
+    if (word === origin) {
+      wordInfoMap[word].i = i
+      i++
+    }
+  })
+  return wordInfoMap
+}
+
+async function getDictTxt() {
+  const url = chrome.runtime.getURL('eng-dict.txt')
   const res = await fetch(url)
-  const dict = await res.text()
-  return JSON.parse(dict)
+  return await res.text()
+}
+
+async function getZhTransJson() {
+  const url = chrome.runtime.getURL('zh-trans.json')
+  const res = await fetch(url)
+  return await res.json()
 }
 
 function updateBadge(wordsKnown: WordMap) {
@@ -226,10 +251,10 @@ chrome.runtime.onInstalled.addListener(async details => {
     dict = localDict
     chrome.storage.local.set({ dict: localDict }, async () => {
       console.log('[storage] dict set up when ' + details.reason)
+      knowns = knowns ?? (await getAllKnownSync())
+      updateBadge(knowns)
     })
   })
-  knowns = knowns ?? (await getAllKnownSync())
-  updateBadge(knowns)
 })
 
 function setFailedBadge(message: string) {
@@ -284,7 +309,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const originFormWord = dict[word]?.o ?? word
       knowns = knowns ?? (await getAllKnownSync())
       delete knowns[originFormWord]
-      await syncUpKnowns([word], knowns, Date.now())
+      await syncUpKnowns([originFormWord], knowns, Date.now())
       updateBadge(knowns)
       sendMessageToAllTabs({ action: Messages.set_unknown, word: originFormWord })
       triggerGoogleDriveSyncJob()

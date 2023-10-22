@@ -1,16 +1,66 @@
-import { STORAGE_KEY_INDICES, StorageKey, WordMap, WordInfoMap, ContextMap } from '../constant'
+import { StorageKey, WordMap, WordInfoMap, ContextMap } from '../constant'
 
-type SyncIndexKey = (typeof STORAGE_KEY_INDICES)[number]
+const TOTAL_INDEX = 60000
+const BUCKET_SIZE = 400
+const BUCKET_PREFIX = '_b_'
+const BUCKET_INDICES = new Array(TOTAL_INDEX / BUCKET_SIZE).fill(0).map((_, i) => BUCKET_PREFIX + i)
 
-export async function getAllKnownSync() {
-  const record = (await chrome.storage.sync.get(STORAGE_KEY_INDICES)) as Record<SyncIndexKey, string[] | string>
-  const wordEntries = Object.values(record)
-    .map(valueAsArray)
-    .flat()
-    .filter(w => !!w)
-    .map(word => [word, 0])
+type BucketIndex = typeof BUCKET_INDICES[number]
 
-  return Object.fromEntries(wordEntries) as WordMap
+function indexBitmap2Words(bucketIndex: number, bitmap: string, indexedWords: string[]) {
+  const words = [] as string[]
+  for (let i = 0; i < bitmap.length; i++) {
+    if (bitmap[i] === '1') {
+      const word = indexedWords[i + bucketIndex * BUCKET_SIZE]
+      if (word) {
+        words.push(word)
+      }
+    }
+  }
+  return words
+}
+
+function words2IndexBitmaps(words: string[], dict: WordInfoMap) {
+  const bitmapMap: Record<string, string> = {}
+  for (const word of words) {
+    const index = dict[word].i
+    if (index !== undefined) {
+      const bucket = Math.floor(index / BUCKET_SIZE)
+      const itemIndex = index % BUCKET_SIZE
+      const bitmapKey = `${BUCKET_PREFIX}${bucket}`
+      let bitmap = bitmapMap[bitmapKey] ?? '0'.repeat(BUCKET_SIZE)
+      bitmapMap[bitmapKey] = bitmap.substring(0, itemIndex) + '1' + bitmap.substring(itemIndex + 1)
+    }
+  }
+  return bitmapMap
+}
+
+function getIndexedWords(dict: WordInfoMap) {
+  const indexedWords = []
+  for (const word in dict) {
+    const index = dict[word].i
+    if (index !== undefined) {
+      indexedWords[index] = word
+    }
+  }
+  return indexedWords
+}
+
+export async function getAllKnownSync(loadedDict?: WordInfoMap) {
+  if (!(await getSyncValue(DATA_MIGRATED))) {
+    return await _getLegacyAllKnowns()
+  } else {
+    const dict = loadedDict ?? ((await getLocalValue(StorageKey.dict)) as WordInfoMap)
+    const indexedWords = getIndexedWords(dict)
+    const record = (await chrome.storage.sync.get(BUCKET_INDICES)) as Record<string, string>
+    const words = Object.entries(record)
+      .map(([bucket, bitmap]) => {
+        const bucketIndex = Number(bucket.replace(BUCKET_PREFIX, ''))
+        return indexBitmap2Words(bucketIndex, bitmap, indexedWords)
+      })
+      .flat()
+    return Object.fromEntries(words.map(word => [word, 'o'])) as WordMap
+  }
 }
 
 function valueAsArray(value: string[] | string) {
@@ -23,56 +73,48 @@ function valueAsArray(value: string[] | string) {
   }
 }
 
+function bitmapAnd(bitmap1: string, bitmap2: string) {
+  const r = new Array(BUCKET_SIZE).fill('0')
+  for (let i = 0; i < BUCKET_SIZE; i++) {
+    if (bitmap1[i] === '1' && bitmap2[i] === '1') {
+      r[i] = '1'
+    }
+  }
+  return r.join('')
+}
+
+function bitmapOr(bitmap1: string, bitmap2: string) {
+  const r = new Array(BUCKET_SIZE).fill('0')
+  for (let i = 0; i < BUCKET_SIZE; i++) {
+    if (bitmap1[i] === '1' || bitmap2[i] === '1') {
+      r[i] = '1'
+    }
+  }
+  return r.join('')
+}
+
 export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, updateTime: number = Date.now()) {
-  const toSyncKnowns = {} as Record<SyncIndexKey, string[]>
+  await migrateToBitmap()
+  const toSyncKnowns = {} as Record<BucketIndex, string>
+  const dict = (await getLocalValue(StorageKey.dict)) as WordInfoMap
+  const bitmaps = words2IndexBitmaps(words, dict)
 
-  const localKnownsGroupByKeys = {} as Record<string, string[]>
-  for (const word in knownsInMemory) {
-    for (const k of STORAGE_KEY_INDICES) {
-      if (word.startsWith(k)) {
-        localKnownsGroupByKeys[k] = localKnownsGroupByKeys[k] ?? []
-        localKnownsGroupByKeys[k].push(word)
-        break
-      }
+  const localKnownsGroupByKeys = words2IndexBitmaps(Object.keys(knownsInMemory), dict)
+
+  for (const bucket in bitmaps) {
+    const localBitmap = localKnownsGroupByKeys[bucket] ?? '0'.repeat(BUCKET_SIZE)
+    const remoteBitmap = (await getSyncValue(bucket)) ?? '0'.repeat(BUCKET_SIZE)
+    const remoteWithDeleted = bitmapAnd(remoteBitmap, localBitmap)
+    const addedWithDelete = bitmapAnd(bitmaps[bucket], localBitmap)
+    const toUploadBitmap = bitmapOr(remoteWithDeleted, addedWithDelete)
+    if (toUploadBitmap !== remoteBitmap) {
+      toSyncKnowns[bucket] = toUploadBitmap
     }
   }
 
-  for (const word of words) {
-    for (const key of STORAGE_KEY_INDICES) {
-      if (word.startsWith(key)) {
-        toSyncKnowns[key] = toSyncKnowns[key] ?? localKnownsGroupByKeys[key] ?? []
-
-        if (!toSyncKnowns[key].includes(word)) {
-          toSyncKnowns[key].push(word)
-        }
-
-        // remove the word as unknown
-        if (!(word in knownsInMemory) && toSyncKnowns[key].includes(word)) {
-          toSyncKnowns[key].splice(toSyncKnowns[key].indexOf(word), 1)
-        }
-
-        break
-      }
-    }
-  }
-
-  // do not sync the keys doesn't changed
-  for (const key of STORAGE_KEY_INDICES) {
-    const remoteWordsOfkey = await getSyncValue(key)
-    if (toSyncKnowns[key] && valueAsArray(remoteWordsOfkey).length === toSyncKnowns[key].length) {
-      if (!Array.isArray(remoteWordsOfkey)) {
-        delete toSyncKnowns[key]
-      }
-    }
-  }
   if (Object.keys(toSyncKnowns).length > 0) {
-    const savedKnwons = {} as Record<SyncIndexKey, string>
-    for (const key in toSyncKnowns) {
-      // save as string to reduce the storage size
-      savedKnwons[key] = toSyncKnowns[key].join(' ')
-    }
     try {
-      await chrome.storage.sync.set(savedKnwons)
+      await chrome.storage.sync.set(toSyncKnowns)
       await chrome.storage.sync.set({
         [StorageKey.knwon_update_timestamp]: updateTime
       })
@@ -186,6 +228,43 @@ export async function getLocalValue(key: StorageKey) {
   return (await chrome.storage.local.get(key))[key]
 }
 
-export async function getSyncValue(key: StorageKey | (typeof STORAGE_KEY_INDICES)[number]) {
+export async function getSyncValue(key: StorageKey | LegacySyncIndexKey | typeof BUCKET_INDICES[number]) {
   return (await chrome.storage.sync.get(key))[key]
+}
+
+/**
+ * group storage.sync items by word prefix, to avoid hitting the 512 items and 8kb limit per item.
+ */
+const _LEGACY_STORAGE_KEY_INDICES =
+  'prot prop pres inte disc cont cons conc uns unr uni unf und unc una tri tra sup sub str sto ste sta spi spe sho sha scr sch sca sal ret res rep ref red rec rea pro pri pre pol per pen par mon mis min met mar man int ins inf ind inc imp hea har gra for ext exp dis des dep dem def dec cra cou cor con com col chi che cha cat car can cal bra bar bac ant zy zw zu zo zl zi ze za yu yt yo yl yi ye ya xy xm xe xa wy wu wr wo wi wh we wa vy vu vr vo vi ve va ux uv ut us ur up un um ul uk ui ug ud ub ua tz ty tw tu ts tr to ti th te tc ta sy sw sv su st sq sp so sn sm sl sk si sh sg sf se sc sa ry ru ro ri rh re ra qu qo qi qa py pu pt ps pr po pn pl pi ph pf pe pa oz oy ox ow ov ou ot os or op oo on om ol ok oj oi oh og of oe od oc ob oa ny nu nt no ni ng ne na my mu mo mn mi mf me ma ly lw lu lo ll li le la ky kw kv ku kr ko kn kl ki kh ke ka jy ju jo ji je ja iz ix iv it is ir ip io in im il ik ij ig if id ic ib ia hy hu hr ho hi he ha gy gu gr go gn gl gi gh ge ga fu fr fo fl fj fi fe fa ey ex ew ev eu et es er eq ep eo en em el ek ej ei eg ef ee ed ec eb ea dz dy dw du dr do dj di dh de da cz cy cu ct cr co cn cl ci ch ce ca by bu br bo bl bi bh be bd ba az ay ax aw av au at as ar aq ap ao an am al ak aj ai ah ag af ae ad ac ab aa a'.split(
+    ' '
+  )
+
+type LegacySyncIndexKey = typeof _LEGACY_STORAGE_KEY_INDICES[number]
+const DATA_MIGRATED = 'migrated_to_bitmap'
+let migrating = false
+
+async function migrateToBitmap() {
+  if (migrating) return
+  if (!(await getSyncValue(DATA_MIGRATED))) {
+    migrating = true
+    const wordMap = await _getLegacyAllKnowns()
+    await syncUpKnowns(Object.keys(wordMap), wordMap)
+    await chrome.storage.sync.remove(_LEGACY_STORAGE_KEY_INDICES)
+    await chrome.storage.sync.set({ [DATA_MIGRATED]: true })
+    migrating = false
+  }
+}
+
+async function _getLegacyAllKnowns() {
+  const record = (await chrome.storage.sync.get(_LEGACY_STORAGE_KEY_INDICES)) as Record<
+    LegacySyncIndexKey,
+    string[] | string
+  >
+  const wordEntries = Object.values(record)
+    .map(valueAsArray)
+    .flat()
+    .filter(w => !!w)
+    .map(word => [word, 0])
+  return Object.fromEntries(wordEntries) as WordMap
 }
