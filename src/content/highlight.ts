@@ -327,7 +327,7 @@ function observeDomChange() {
         })
 
         // when remove node, remove highlight range
-        if (mutations.length > 0) {
+        if (mutation.removedNodes.length > 0) {
           ;[unknownHL, contextHL].forEach(hl => {
             hl.forEach(r => {
               if (!r.toString()) {
