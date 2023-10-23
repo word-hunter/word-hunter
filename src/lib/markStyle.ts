@@ -10,30 +10,50 @@ export function genMarkStyle() {
   const bgColor0 = settings()['colors'][0]
   const bgColor1 = settings()['colors'][1]
 
-  let style = ` `
+  const cssVars = `
+    ${unknownSelector} {
+        --wh-text-color-0: ${textColor0};
+        --wh-bg-color-0: ${bgColor0};
+    }
+    ${contextSelector} {
+        --wh-text-color-1: ${textColor1};
+        --wh-bg-color-1: ${bgColor1};
+    }
+    @media (prefers-color-scheme: dark) {
+        ${unknownSelector} {
+            --wh-bg-color-0: ${generateDarkModeColor(bgColor0)};
+        }
+        ${contextSelector} {
+            --wh-bg-color-1: ${generateDarkModeColor(bgColor1)};
+        }
+    }
+  `
+
+  let style = `
+    ${cssVars}
+  `
 
   switch (markStyle) {
     case 'text':
       style += `
         ${unknownSelector} {
-          color: ${bgColor0};
+          color: var(--wh-bg-color-0);
         }
         ${contextSelector} {
-          color: ${bgColor1};
+          color: var(--wh-bg-color-1);
         }
       `
       break
     case 'background':
       style += `
         ${unknownSelector} {
-          color: ${textColor0};
-          background-color: ${bgColor0};
-          border-radius: 0.3em;
+          color: var(--wh-text-color-0);
+          background-color: var(--wh-bg-color-0);
 
         }
         ${contextSelector} {
-          color: ${textColor1};
-          background-color: ${bgColor1};
+          color: var(--wh-text-color-1);
+          background-color: var(--wh-bg-color-1);
         }
       `
       break
@@ -42,10 +62,10 @@ export function genMarkStyle() {
         ${unknownSelector} {
           text-decoration-line: underline;
           text-decoration-style: dashed;
-          text-decoration-color: ${bgColor0};
+          text-decoration-color: var(--wh-bg-color-0);
         }
         ${contextSelector} {
-          text-decoration-color: ${bgColor1};
+          text-decoration-color: var(--wh-bg-color-1);
         }
       `
       break
@@ -54,10 +74,10 @@ export function genMarkStyle() {
         ${unknownSelector} {
           text-decoration-line: underline;
           text-decoration-style: dotted;
-          text-decoration-color: ${bgColor0};
+          text-decoration-color: var(--wh-bg-color-0);;
         }
         ${contextSelector} {
-          text-decoration-color: ${bgColor1};
+          text-decoration-color: var(--wh-bg-color-1);;
         }
       `
       break
@@ -66,10 +86,10 @@ export function genMarkStyle() {
         ${unknownSelector} {
           text-decoration-line: underline;
           text-decoration-style: solid;
-          text-decoration-color: ${bgColor0};
+          text-decoration-color: var(--wh-bg-color-0);
         }
         ${contextSelector} {
-          text-decoration-color: ${bgColor1};
+          text-decoration-color: var(--wh-bg-color-1);
         }
       `
       break
@@ -78,10 +98,10 @@ export function genMarkStyle() {
         ${unknownSelector} {
           text-decoration-line: underline;
           text-decoration-style: double;
-          text-decoration-color: ${bgColor0};
+          text-decoration-color: var(--wh-bg-color-0);
         }
         ${contextSelector} {
-          text-decoration-color: ${bgColor1};
+          text-decoration-color: var(--wh-bg-color-1);
         }
       `
       break
@@ -90,27 +110,40 @@ export function genMarkStyle() {
         ${unknownSelector} {
           text-decoration-line: underline;
           text-decoration-style: wavy;
-          text-decoration-color: ${bgColor0};
+          text-decoration-color: var(--wh-bg-color-0);
         }
         ${contextSelector} {
-          text-decoration-color: ${bgColor1};
+          text-decoration-color: var(--wh-bg-color-1);
         }
       `
       break
     default:
       style += `
-        ${unknownSelector} {
-          color: ${textColor0};
-          background-color: ${bgColor0};
-          border-radius: 0.3em;
+      ${unknownSelector} {
+          color: var(--wh-text-color-0);
+          background-color: var(--wh-bg-color-0);
 
         }
         ${contextSelector} {
-          color: ${textColor1};
-          background-color: ${bgColor1};
+          color: var(--wh-text-color-1);
+          background-color: var(--wh-bg-color-1);
         }
       `
       break
   }
   return style
+}
+
+function generateDarkModeColor(originalColor: string) {
+  let r = parseInt(originalColor.slice(1, 3), 16)
+  let g = parseInt(originalColor.slice(3, 5), 16)
+  let b = parseInt(originalColor.slice(5, 7), 16)
+
+  let darkR = Math.floor(r * 0.7)
+  let darkG = Math.floor(g * 0.7)
+  let darkB = Math.floor(b * 0.7)
+
+  let darkColor = `#${darkR.toString(16)}${darkG.toString(16)}${darkB.toString(16)}`
+
+  return darkColor
 }

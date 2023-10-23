@@ -1,9 +1,7 @@
 .__dict_container {
   line-height: 1.6em;
-  color: #000;
+  color: var(--text-color);
   --font-bold: 600;
-  --color-main: #759fc9;
-  --border-color: rgba(0, 0, 0, 0.3);
   * {
     word-wrap: break-word;
     margin: 0;
@@ -14,9 +12,9 @@
   a,
   a:link {
     cursor: pointer;
-    color: #000;
+    color: var(--link-color);
     text-decoration: none;
-    border-bottom: dashed 1px rgba(0, 0, 0, 0.6);
+    border-bottom: dashed 1px var(--link-color);
     &:hover {
       opacity: 0.8;
     }
@@ -34,9 +32,9 @@
       &::before {
         content: attr(data-type);
         font-size: 10px;
-        color: #666;
+        color: var(--gray-text-color);
         vertical-align: super;
-        border-bottom: dashed 1px rgba(0, 0, 0, 0.6);
+        border-bottom: dashed 1px var(--link-color);
       }
       img {
         display: none;
@@ -132,7 +130,7 @@
       display: none;
     }
     .level {
-      border: 1px solid rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
       border-radius: 50%;
       display: inline-block;
       background-color: #cfe8fd;
@@ -200,7 +198,7 @@
 
   .lbl.type-syntax {
     font-size: 0.8em;
-    color: #666;
+    color: var(--gray-text-color);
   }
 
   .cB h2.h2_sentences {
@@ -272,10 +270,10 @@
     padding-bottom: 5px;
   }
   .quote {
-    color: #666;
+    color: var(--gray-text-color);
     font-style: italic;
     &:has(+ .credits) {
-      color: #333;
+      color: var(--text-color);
     }
     & + .credits {
       color: #999;

@@ -1,3 +1,9 @@
+.__dict_container {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0 15px;
+}
+
 a[data-href] {
   color: #3c4043;
   text-decoration: none;
@@ -6,6 +12,20 @@ a[data-href] {
   &:hover {
     opacity: 0.8;
   }
+}
+
+.c07z9 {
+  color: var(--text-color);
+}
+
+.g1baVc {
+  background-color: var(--color-main);
+}
+
+.c07z9 a,
+.c07z9 a:active,
+.c07z9 a:link {
+  color: var(--link-color);
 }
 
 g-img img {
@@ -66,7 +86,7 @@ div[role='button'] > a {
 }
 
 [data-dobid='dfn'] {
-  color: #333;
+  color: var(--text-color);
 }
 
 .active {

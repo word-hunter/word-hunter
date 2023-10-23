@@ -3,16 +3,26 @@
 @tailwind utilities;
 
 html,
-body,
-#app {
+body {
   height: 100%;
 }
 
-@layer components {
-  .section {
-    @apply border px-4 pt-4 pb-4 rounded-xl shadow-md relative bg-base-100;
+::-webkit-scrollbar {
+  width: 5px;
+  background-color: #eceff7; /* or add it to the track */
+}
+
+/* Add a thumb */
+::-webkit-scrollbar-thumb {
+  background: #a8c7fa;
+  border-radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar {
+    background-color: #282828; /* or add it to the track */
   }
-  .h2 {
-    @apply absolute -top-3 max-w-fit rounded-xl px-2 py-1  border bg-white dark:bg-base-100 text-sm shadow-sm italic font-serif;
+  ::-webkit-scrollbar-thumb {
+    background: #047db7;
   }
 }

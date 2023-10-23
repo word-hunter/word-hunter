@@ -1,7 +1,53 @@
 .__dict_container {
-  background: #fff;
+  --yellow-b: #f1d600;
+  --white-txt: #fff;
+  --white-bg: #fff;
+  --origin-txt: #fa6360;
+  --origin-bg: #f18500;
+  --blue-b: #35a3ff;
+  --blue-c: #4693db;
+  --purple-c: #364395;
+  --purple-b: #6f469d;
+  --gray: gray;
+  --black: black;
+  --green: green;
+  --purple: purple;
+  --blue: blue;
+  --darkblue: darkblue;
+  --red: red;
+}
+
+@media (prefers-color-scheme: dark) {
+  .__dict_container {
+    --yellow-b: #d0c88e;
+    --white-txt: #fff;
+    --white-bg: #fff;
+    --origin-txt: #fa6360;
+    --origin-bg: #f18500;
+    --blue-b: #226aa6;
+    --blue-c: #4693db;
+    --purple-c: #d67ed6;
+    --purple-b: #6f469d;
+    --gray: rgb(154, 154, 154);
+    --black: #fff;
+    --green: #36b536;
+    --purple: #c871c8;
+    --blue: #8d8df2;
+    --darkblue: darkblue;
+    --red: #d63e3e;
+
+    .amefile {
+      /* color navy*/
+      filter: brightness(0.7) sepia(1) hue-rotate(180deg) saturate(5);
+    }
+  }
+
+  /* Additional dark mode styles here */
+}
+.__dict_container {
+  background: var(--bg-color);
   font-family: arial, helvetica, sans-serif;
-  color: #333333;
+  color: var(--txt-color);
   font-size: 14px;
   * {
     box-sizing: border-box;
@@ -10,19 +56,6 @@
     padding: 0;
     line-height: 1.5em;
   }
-  --txt-color: #ffffff;
-  --link-txt-color: #ff9800;
-  --section-colloc: #3599d4;
-  --section-colloc2: #0f75bc;
-  --section-phr: #9ccc52;
-  --section-phr2: #7eb341;
-  --section-prep: #c86475;
-  --section-prep2: #9e5252;
-  --section-pv: #c572ae;
-  --section-pv2: #a05193;
-  --section-syn: #8768ad;
-  --section-syn2: #734da0;
-  --longman-blue: #314089;
 }
 
 a {
@@ -36,7 +69,10 @@ a {
 
 .dictentry {
   display: block;
-  margin-bottom: 25px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
   img {
     max-width: 80%;
   }
@@ -47,16 +83,16 @@ a {
   margin-bottom: 20px;
 }
 .pagetitle {
+  display: none;
   font-size: 1.6em;
   font-weight: bold;
 }
 
 .assets_intro,
 .asset_intro {
-  border: solid 1px;
-  border-color: #f1d600;
-  background-color: #f1d600;
-  color: #fff;
+  border: solid 1px var(--yellow-b);
+  background-color: var(--yellow-b);
+  color: var(--white-txt);
   font-weight: normal;
   border-radius: 5px;
   -moz-border-radius: 5px;
@@ -66,15 +102,19 @@ a {
 }
 
 .entry_content .dictionary .defRef {
-  border-bottom: thin dotted gray;
+  border-bottom: thin dotted var(--gray);
 }
 
 /*** WORD FAMILY ***/
 .pos {
-  color: green;
+  color: var(--green);
   font-weight: normal;
 }
 .wordfams {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
   font-weight: bold;
 }
 .wordfams .crossRef,
@@ -82,7 +122,7 @@ a {
   margin: 0 6px;
 }
 .wordfams .crossRef {
-  border-bottom: thin dotted gray;
+  border-bottom: thin dotted var(--gray);
 }
 
 /***** EXAS ******/
@@ -99,7 +139,7 @@ a {
 .exaGroup .title {
   font-size: 110%;
   font-weight: bold;
-  color: black;
+  color: var(--black);
   display: block;
   margin-left: 5px;
   margin-top: 15px;
@@ -107,7 +147,7 @@ a {
 
 .exaGroup .exa {
   display: block;
-  color: gray;
+  color: var(--gray);
   margin-left: 15px;
 }
 
@@ -122,9 +162,9 @@ a {
 /***** TOPIC ******/
 .dictionary_intro,
 .topic_intro {
-  display: block;
-  background-color: #35a3ff;
-  color: #fff;
+  display: none;
+  background-color: var(--blue-b);
+  color: var(--white-txt);
   padding-left: 10px;
   margin: 5px 0 10px -7px;
 }
@@ -137,18 +177,18 @@ a {
   padding: 0 4px 1px 0;
   font-size: 16px;
   font-family: Tahoma, Arial, Helvetica;
-  color: #000;
+  color: var(--black);
 }
 
 .Entry .topic,
 .topicCloud .topic_other {
-  color: red;
+  color: var(--red);
   text-decoration: underline;
 }
 
 .Entry .topic:hover,
 .topicCloud .topic_other:hover {
-  color: #4693db;
+  color: var(--blue-c);
 }
 
 /*****  LDOCE  ***************************/
@@ -160,7 +200,7 @@ a {
 }
 
 .ldoceEntry .Thesref {
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .ldoceEntry .ABBR {
@@ -226,7 +266,7 @@ a {
 .ldoceEntry .EXAMPLE {
   display: block;
   margin-left: 20px;
-  color: gray;
+  color: var(--gray);
 }
 
 .ldoceEntry .FIELD {
@@ -235,18 +275,18 @@ a {
 
 .ldoceEntry .AC,
 .ldoceEntry .synopp {
-  color: #fff;
-  border-color: #f1d600;
-  background-color: #f1d600;
+  color: var(--white-txt);
+  border-color: var(--yellow-b);
+  background-color: var(--yellow-b);
 }
 
 .ldoceEntry .FREQ {
-  color: red;
-  border-color: red;
+  color: var(--red);
+  border-color: var(--red);
 }
 
 .ldoceEntry .LEVEL {
-  color: red;
+  color: var(--red);
   font-size: 120%;
 }
 
@@ -257,18 +297,18 @@ a {
 .ldoceEntry .GEO,
 .ldoceEntry .geo {
   font-weight: normal;
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .ldoceEntry .GLOSS {
-  color: #364395;
+  color: var(--purple-c);
   font-weight: normal;
   font-style: normal;
 }
 
 .ldoceEntry .GRAM,
 .bussdictEntry .GRAM {
-  color: green;
+  color: var(--green);
   font-weight: bold;
   margin: 0 5px 10px 3px;
 }
@@ -292,18 +332,18 @@ a {
 .ldoceEntry .frequent .HOMNUM {
   vertical-align: super;
   font-size: 12pt;
-  color: red;
+  color: var(--red);
   font-weight: bold;
 }
 
 .ldoceEntry .frequent .HYPHENATION {
-  color: red;
+  color: var(--red);
   font-size: 160%;
 }
 .ldoceEntry .HOMNUM {
   vertical-align: super;
   font-size: 12pt;
-  color: red;
+  color: var(--red);
   font-weight: bold;
 }
 
@@ -315,7 +355,7 @@ a {
 .ldoceEntry .PHRVBHWD {
   font-weight: bold;
   font-size: 160%;
-  color: red;
+  color: var(--red);
 }
 
 .ldoceEntry .LEXUNIT,
@@ -324,7 +364,7 @@ a {
 }
 
 .ldoceEntry .LINKWORD {
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .ldoceEntry .NOTE,
@@ -358,7 +398,7 @@ a {
 
 .ldoceEntry .POS,
 .bussdictEntry .POS {
-  color: green;
+  color: var(--green);
   font-weight: bold;
   margin: 0 0 0 10px;
 }
@@ -398,13 +438,13 @@ a {
 }
 
 .ldoceEntry .REGISTERLAB {
-  color: purple;
+  color: var(--purple);
   font-style: italic;
 }
 
 .ldoceEntry .RELATEDWD {
   font-weight: bold;
-  color: blue;
+  color: var(--blue);
 }
 
 .ldoceEntry .RunOn {
@@ -419,8 +459,8 @@ a {
 }
 
 .ldoceEntry .SIGNPOST {
-  background-color: #f18500;
-  color: white;
+  background-color: var(--origin-bg);
+  color: var(--white-txt);
   font-weight: bold;
   font-size: 79%;
   text-transform: uppercase;
@@ -458,12 +498,12 @@ a {
 }
 
 .ldoceEntry .GramBox .CROSS .neutral {
-  color: red;
+  color: var(--red);
   margin-right: 10px;
 }
 
 .ldoceEntry .neutral {
-  color: black;
+  color: var(--black);
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -472,7 +512,7 @@ a {
 .ldoceEntry .EXPL .cross,
 .ldoceEntry .GramBox .EXPL .dont_say,
 .ldoceEntry .BADEXA {
-  color: red;
+  color: var(--red);
 }
 
 .ldoceEntry .italic {
@@ -488,13 +528,13 @@ a {
 .ldoceEntry .warning {
   font-style: normal;
   font-weight: bold;
-  color: red;
+  color: var(--red);
 }
 
 .ldoceEntry .sensenum {
   font-style: normal;
   font-weight: bold;
-  color: black;
+  color: var(--black);
 }
 
 .ldoceEntry .synopp,
@@ -521,14 +561,14 @@ a {
   border-radius: 5px;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
-  border: solid #364395 1px;
+  border: solid var(--purple-c) 1px;
   padding: 15px;
   margin: 8px 0;
 }
 
 .GramBox {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--white-bg);
+  color: var(--black);
 }
 
 .GramBox .boxheader {
@@ -548,7 +588,7 @@ a {
 .ldoceEntry .heading {
   font-weight: bold;
   font-size: 120%;
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .ldoceEntry .HEADING.newline {
@@ -561,14 +601,14 @@ a {
   border-radius: 5px;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
-  border: solid #6f469d 2px;
+  border: solid var(--purple-b) 2px;
   padding-left: 4px;
   padding-right: 20px;
   margin: 25px 0 10px 0;
   font-weight: bold;
-  color: white;
+  color: var(--white-txt);
   text-transform: uppercase;
-  background-color: #6f469d;
+  background-color: var(--purple-b);
 }
 
 .ldoceEntry .Collocate,
@@ -589,7 +629,7 @@ a {
 
 .ldoceEntry .keycollo {
   font-weight: bold;
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .ldoceEntry .THESPROPFORM {
@@ -598,7 +638,7 @@ a {
 
 .ldoceEntry .COLLEXA,
 .ldoceEntry .THESEXA {
-  color: gray;
+  color: var(--gray);
   display: block;
 }
 
@@ -619,20 +659,20 @@ a {
 }
 
 .ldoceEntry .exafile {
-  color: gray;
+  color: var(--gray);
   font-style: normal;
   font-size: 120%;
   padding: 5px;
 }
 
 .ldoceEntry .amefile {
-  color: #4693db;
+  color: var(--blue-c);
   font-size: 130%;
   padding-left: 5px;
 }
 
 .ldoceEntry .brefile {
-  color: #fa6360;
+  color: var(--origin-txt);
   font-size: 130%;
   padding-left: 5px;
 }
@@ -691,7 +731,7 @@ h1.search_title {
 }
 
 .bussdictEntry .supp {
-  background-color: gray;
+  background-color: var(--gray);
 }
 
 .bussdictEntry .ABBR,
@@ -729,13 +769,13 @@ h1.search_title {
 .bussdictEntry .EXAMPLE {
   display: block;
   margin-left: 15px;
-  color: gray;
+  color: var(--gray);
 }
 
 .bussdictEntry .Box .EXAMPLE {
   display: inline;
   margin-left: 0px;
-  color: black;
+  color: var(--black);
   font-style: italic;
 }
 
@@ -746,7 +786,7 @@ h1.search_title {
 .bussdictEntry .FREQ,
 .bussdictEntry .LEVEL {
   font-weight: bold;
-  color: red;
+  color: var(--red);
 }
 
 .bussdictEntry .FULLFORM {
@@ -757,13 +797,13 @@ h1.search_title {
 span.geo {
   font-weight: normal;
   font-style: italic;
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .bussdictEntry .GLOSS {
   font-weight: normal;
   font-style: normal;
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .bussdictEntry .GramExa {
@@ -801,7 +841,7 @@ span.geo {
 }
 
 .bussdictEntry .LINKWORD {
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .bussdictEntry .NOTE,
@@ -826,7 +866,7 @@ span.geo {
 
 .bussdictEntry .PHRVBHWD {
   font-weight: bold;
-  color: #364395;
+  color: var(--purple-c);
   font-size: 120%;
 }
 
@@ -869,7 +909,7 @@ span.geo {
 }
 
 .bussdictEntry .REGISTERLAB {
-  color: #364395;
+  color: var(--purple-c);
   font-style: italic;
 }
 
@@ -884,8 +924,8 @@ span.geo {
 }
 
 .bussdictEntry .SIGNPOST {
-  background-color: gray;
-  color: white;
+  background-color: var(--gray);
+  color: var(--white-txt);
   font-weight: bold;
 }
 
@@ -926,7 +966,7 @@ span.infllab {
 span.warning {
   font-style: normal;
   font-weight: bold;
-  color: red;
+  color: var(--red);
 }
 
 span.sensenum {
@@ -939,7 +979,7 @@ span.sensenum {
 span.synopp {
   font-style: normal;
   font-weight: bold;
-  color: darkblue;
+  color: var(--darkblue);
 }
 
 .bussdictEntry .ColloBox,
@@ -966,7 +1006,7 @@ span.heading,
 .bussdictEntry .Gramref {
   font-weight: bold;
   font-size: 120%;
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .bussdictEntry .gramref {
@@ -1004,12 +1044,12 @@ span.subheading {
 }
 
 .bussdictEntry .COLLOC.key {
-  color: #364395;
+  color: var(--purple-c);
 }
 
 span.keycollo {
   font-weight: bold;
-  color: #364395;
+  color: var(--purple-c);
 }
 
 .bussdictEntry .THESPROPFORM {
@@ -1047,8 +1087,8 @@ span.keycollo {
 
 .bussdictEntry .boxheader {
   display: block;
-  background-color: #364395;
-  color: white;
+  background-color: var(--purple-c);
+  color: var(--white-txt);
   font-weight: bold;
 }
 
@@ -1069,5 +1109,5 @@ span.keycollo {
   display: inline;
   font-weight: bold;
   font-size: 120%;
-  color: #364395;
+  color: var(--purple-c);
 }

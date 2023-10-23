@@ -58,27 +58,29 @@ export const App = () => {
   }
 
   return (
-    <div class="w-full h-full">
-      <h1 class="font-extrabold text-xl sm:text-2xl pt-10 text-center text-neutral-content">Daily Logs</h1>
-      <div class="container max-w-lg mx-auto p-4 grid gap-10 font-serif">
-        <For each={logsGroupByDays()}>
-          {group => (
-            <div class="flex flex-col gap-4 text-center">
-              <div class="divider font-bold text-lg text-accent">{group[0]}</div>
-              <For each={group[1]}>
-                {log => (
-                  <div class="text-center">
-                    <span
-                      class="inline-block w-1 h-1 mr-1.5 rounded-full bg-[]"
-                      style={`background:  ${settings().colors[(log as any)[2] ? 1 : 0]}`}
-                    ></span>
-                    {log[0]}
-                  </div>
-                )}
-              </For>
-            </div>
-          )}
-        </For>
+    <div class="w-full h-full p-2 pr-[3px] bg-[#ECEFF7] dark:bg-[#282828]">
+      <div class="bg-white dark:bg-[#3C3C3C] rounded-xl">
+        <h1 class="font-extrabold text-xl sm:text-2xl pt-10 text-center text-neutral-content">Daily Logs</h1>
+        <div class="container max-w-lg mx-auto p-4 grid gap-10 font-serif">
+          <For each={logsGroupByDays()}>
+            {group => (
+              <div class="flex flex-col gap-4 text-center">
+                <div class="divider font-bold text-lg text-accent">{group[0]}</div>
+                <For each={group[1]}>
+                  {log => (
+                    <div class="text-center">
+                      <span
+                        class="inline-block w-1 h-1 mr-1.5 rounded-full bg-[]"
+                        style={`background:  ${settings().colors[(log as any)[2] ? 1 : 0]}`}
+                      ></span>
+                      {log[0]}
+                    </div>
+                  )}
+                </For>
+              </div>
+            )}
+          </For>
+        </div>
       </div>
     </div>
   )

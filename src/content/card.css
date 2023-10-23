@@ -1,22 +1,52 @@
 .word_card {
+  --bg-color: #fff;
+  --border-color: rgba(0, 0, 0, 0.3);
+  --color-main: #759fc9;
+  --text-color: #666;
+  --text-on-main: #fff;
+  --gray-text-color: #999;
+  --selection-color: #cfe8fd;
+  --scrollbar-track-color: #f5f5f5;
+  --scrollbar-thumb-color: rgba(0, 0, 0, 0.2);
+  --loading-svg-color: #cfe8fd;
+  --link-color: #999;
+  --tab-bar-bg-color: #ececeb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .word_card {
+    --bg-color: #2d333d;
+    --border-color: #858585;
+    --color-main: #89b2e1;
+    --text-color: #e3e3e3;
+    --text-on-main: #eaeff2;
+    --gray-text-color: #97a4b8;
+    --selection-color: #162f44;
+    --scrollbar-track-color: #282828;
+    --scrollbar-thumb-color: #757575;
+    --loading-svg-color: #5f6671;
+    --link-color: #a7b5ca;
+    --tab-bar-bg-color: #22252a;
+  }
+}
+
+.word_card {
+  --height: 600px;
+  --max-height: calc(100dvh - 120px);
   all: initial;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 2000000000;
-  --border-color: rgba(0, 0, 0, 0.3);
-  --color-main: #759fc9;
-  --height: 600px;
-  --max-height: calc(100dvh - 120px);
 
   width: 490px;
   max-width: 90%;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #fff;
+  background-color: var(--bg-color);
   font-size: 12px;
   font-family: system-ui;
-  color: rgba(7, 18, 44, 0.5);
+  color: var(--text-color);
   -webkit-font-smoothing: antialiased;
   box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
   user-select: text;
@@ -44,7 +74,7 @@
     overscroll-behavior: contain;
     font-size: 14px;
     ::selection {
-      background-color: #cfe8fd;
+      background-color: var(--selection-color);
     }
 
     &:empty {
@@ -54,14 +84,14 @@
 
     &::-webkit-scrollbar {
       width: 5px;
-      background-color: #f5f5f5;
+      background-color: var(--scrollbar-track-color);
     }
 
     &::-webkit-scrollbar-track {
-      background-color: #f5f5f5;
+      background-color: var(--scrollbar-track-color);
     }
     &::-webkit-scrollbar-thumb {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: var(--scrollbar-thumb-color);
       border-radius: 2px;
     }
 
@@ -81,7 +111,7 @@
       place-content: center;
       path {
         stroke: var(--color-main);
-        fill: #cfe8fd;
+        fill: var(--loading-svg-color);
       }
     }
   }
@@ -95,7 +125,7 @@
     gap: 10px;
     justify-content: center;
     align-items: center;
-    color: #999;
+    color: var(--gray-text-color);
     font-size: 14px;
     > img {
       width: 64px;
@@ -106,14 +136,14 @@
 
   .contexts {
     line-height: 1.6em;
-    color: #000;
+    color: var(--text-color);
     --font-bold: 600;
     > div {
       position: relative;
       padding: 15px;
       margin-bottom: 20px;
 
-      background-color: rgba(255, 255, 255, 0.2);
+      /* background-color: rgba(255, 255, 255, 0.2); */
       border: 1px solid var(--border-color);
       border-radius: 6px;
 
@@ -148,8 +178,8 @@
           font-style: italic;
           line-height: 14px;
           text-decoration: none;
-          color: #999;
-          border-bottom: dashed 1px #999;
+          color: var(--link-color);
+          border-bottom: dashed 1px var(--link-color);
           &:hover {
             opacity: 0.8;
           }
@@ -216,12 +246,11 @@
     }
     div:nth-child(2) {
       text-align: center;
-      color: #333;
       font-weight: bold;
       font-size: 16px;
       a {
         text-decoration: none;
-        color: #fff;
+        color: var(--text-on-main);
         font-family: 'Zilla Slab', system-ui;
         font-weight: 600;
       }
@@ -251,24 +280,24 @@
     z-index: 2;
     padding-bottom: 10px;
     margin-bottom: -10px;
-    background-color: #fff;
+    background-color: var(--bg-color);
     > div {
       padding: 5px 0px 0 0px;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
       gap: 1px;
-      background-color: #ececeb;
+      background-color: var(--tab-bar-bg-color);
     }
     button {
       padding: 5px 0;
       appearance: none;
       border: none;
       cursor: pointer;
-      color: #999;
+      color: var(--gray-text-color);
       background-color: transparent;
       clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
       &.selected {
-        background-color: #fff;
+        background-color: var(--bg-color);
         color: var(--color-main);
         font-weight: bold;
       }

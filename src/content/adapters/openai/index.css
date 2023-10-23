@@ -1,9 +1,11 @@
 .__dict_container {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
   line-height: 1.6em;
-  color: #000;
+  color: var(--text-color);
   --font-bold: 600;
-  --color-main: #759fc9;
-  --border-color: rgba(0, 0, 0, 0.3);
   white-space: pre-line;
   > b {
     color: var(--color-main);
