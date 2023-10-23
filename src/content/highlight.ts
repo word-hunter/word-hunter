@@ -306,6 +306,17 @@ function resetHighlight() {
   contextHL.clear()
 }
 
+let cleanRangeTaskTimer: number
+function cleanRanges() {
+  ;[unknownHL, contextHL].forEach(hl => {
+    hl.forEach(range => {
+      if (!range.toString()) {
+        hl.delete(range)
+      }
+    })
+  })
+}
+
 function observeDomChange() {
   const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
@@ -328,13 +339,8 @@ function observeDomChange() {
 
         // when remove node, remove highlight range
         if (mutation.removedNodes.length > 0) {
-          ;[unknownHL, contextHL].forEach(hl => {
-            hl.forEach(r => {
-              if (!r.toString()) {
-                hl.delete(r)
-              }
-            })
-          })
+          cleanRangeTaskTimer && clearTimeout(cleanRangeTaskTimer)
+          cleanRangeTaskTimer = setTimeout(cleanRanges, 100)
         }
       }
     })
