@@ -2,6 +2,7 @@
   --bg-color: #fff;
   --border-color: rgba(0, 0, 0, 0.3);
   --color-main: #759fc9;
+  --bg-toolbar: #759fc9;
   --text-color: #666;
   --text-on-main: #fff;
   --gray-text-color: #999;
@@ -16,17 +17,21 @@
 @media (prefers-color-scheme: dark) {
   .word_card {
     --bg-color: #2d333d;
-    --border-color: #858585;
+    --border-color: rgba(255, 255, 255, 0.2);
     --color-main: #89b2e1;
+    --bg-toolbar: #405f82;
     --text-color: #e3e3e3;
     --text-on-main: #eaeff2;
     --gray-text-color: #97a4b8;
-    --selection-color: #162f44;
+    --selection-color: #25689f;
     --scrollbar-track-color: #282828;
     --scrollbar-thumb-color: #757575;
     --loading-svg-color: #5f6671;
     --link-color: #a7b5ca;
     --tab-bar-bg-color: #22252a;
+    img {
+      filter: brightness(0.8);
+    }
   }
 }
 
@@ -219,7 +224,7 @@
     border-bottom: 0.5px solid var(--border-color);
     box-shadow: 0 1px 2px hsla(0, 10%, 94%, 0.05), 0 1px 4px hsla(0, 20%, 94%, 0.05), 0 2px 8px hsla(0, 0%, 0%, 0.05);
     border-radius: 8px 8px 0 0;
-    background-color: var(--color-main);
+    background-color: var(--bg-toolbar);
     button {
       border: none;
       background: none;

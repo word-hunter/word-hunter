@@ -47,13 +47,43 @@ body:has(.__zen_mode) {
   overflow: hidden;
 }
 
+fieldset {
+  background-color: gainsboro;
+}
+@media (prefers-color-scheme: dark) {
+  fieldset {
+    background-color: darkslategray;
+  }
+}
+
+.__zen_mode {
+  color-scheme: dark light;
+  --zen-bg-color: antiquewhite;
+  --text-color: #666;
+  --column-dot: turquoise;
+  --outline-dash: rgba(0, 0, 0, 0.1);
+  --text-outline: rgba(0, 0, 0, 0.4);
+  --text-kdb: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .__zen_mode {
+    --zen-bg-color: #3c3c3c;
+    --text-color: #aaa;
+    --column-dot: #268178;
+    --outline-dash: rgba(231, 220, 220, 0.1);
+    --text-outline: rgba(255, 255, 255, 0.4);
+    --text-kdb: #ccc;
+  }
+}
+
 .__zen_mode {
   display: block;
   position: fixed;
   z-index: 1000000000;
   inset: 0;
   padding: 40px;
-  background-color: antiquewhite;
+  background-color: var(--zen-bg-color);
   overflow: auto;
 
   font-family: BlinkMacSystemFont, sans-serif;
@@ -82,11 +112,21 @@ body:has(.__zen_mode) {
     justify-content: center;
     margin-bottom: 40px;
     button {
-      padding: 5px 10px;
-      font-size: 14px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      padding: revert;
+      margin: revert;
+      -webkit-appearance: revert;
+      appearance: revert;
+      background: revert;
+      border: revert;
+
       img {
+        width: 14px;
+        height: 14px;
         vertical-align: middle;
-        margin-right: 10px;
+        margin-right: 5px;
       }
     }
     label {
@@ -94,10 +134,11 @@ body:has(.__zen_mode) {
       align-items: center;
       gap: 5px;
       cursor: pointer;
-      color: #666;
+      color: var(--text-color);
       font-size: 14px;
       input {
         cursor: pointer;
+        accent-color: #98ccfd;
       }
     }
   }
@@ -105,7 +146,7 @@ body:has(.__zen_mode) {
   .zen_words {
     columns: 10rem;
     column-gap: 7rem;
-    column-rule: 4px dotted turquoise;
+    column-rule: 4px dotted var(--column-dot);
     word-break: break-all;
     span {
       display: inline-block;
@@ -127,32 +168,21 @@ body:has(.__zen_mode) {
 
   p {
     width: max-content;
-    margin: 0 auto 40px auto;
+    margin: 10px auto 40px auto;
     padding: 10px;
-    outline: 5px dashed rgba(0, 0, 0, 0.1);
+    outline: 5px dashed var(--outline-dash);
     font-size: 10px;
     font-weight: bold;
-    color: rgba(0, 0, 0, 0.4);
+    color: var(--text-outline);
     text-align: center;
   }
 
-  kbd,
-  button {
-    display: inline-flex;
-    margin: 0px 0.1em;
-    padding: 0.1em 0.6em;
-    border-radius: 3px;
-    border: 1px solid rgb(204, 204, 204);
-    color: rgba(0, 0, 0, 0.5);
-    line-height: 1.4;
-    font-family: Arial, Helvetica, sans-serif;
-    -webkit-font-smoothing: unset;
-    background-color: rgb(247, 247, 247);
-    box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #ffffff inset;
-    border-radius: 3px;
-    text-shadow: 0 1px 0 #fff;
-    &:hover {
-      background-color: rgb(238, 238, 238);
-    }
+  kbd {
+    all: revert;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: var(--text-kdb);
+    background-color: #333;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
   }
 }

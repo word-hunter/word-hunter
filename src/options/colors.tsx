@@ -1,4 +1,4 @@
-import { settings, setSetting, MarkStyles, genMarkStyle } from '../lib'
+import { settings, setSetting, MarkStyles } from '../lib'
 import { For } from 'solid-js'
 
 export const ColorsSetting = () => {
@@ -11,7 +11,7 @@ export const ColorsSetting = () => {
 
   const onMarkStyleChanged = (e: Event) => {
     const target = e.target as HTMLSelectElement
-    setSetting('markStyle', target.value as (typeof MarkStyles)[number])
+    setSetting('markStyle', target.value as typeof MarkStyles[number])
   }
 
   // for the breaking change of removing depleted markStyles
@@ -66,11 +66,6 @@ export const ColorsSetting = () => {
             </For>
           </select>
         </div>
-        <style>
-          {`
-          ${genMarkStyle()}
-        `}
-        </style>
       </section>
     </>
   )

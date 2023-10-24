@@ -134,16 +134,41 @@ export function genMarkStyle() {
   return style
 }
 
-function generateDarkModeColor(originalColor: string) {
-  let r = parseInt(originalColor.slice(1, 3), 16)
-  let g = parseInt(originalColor.slice(3, 5), 16)
-  let b = parseInt(originalColor.slice(5, 7), 16)
+function generateDarkModeColor(originalColor: string, brightnessFactor: number = 0.85): string {
+  // Convert the original color to HSL format
+  const originalHSL = hexToHSL(originalColor)
 
-  let darkR = Math.floor(r * 0.7)
-  let darkG = Math.floor(g * 0.7)
-  let darkB = Math.floor(b * 0.7)
-
-  let darkColor = `#${darkR.toString(16)}${darkG.toString(16)}${darkB.toString(16)}`
+  // Convert HSL value back to RGB format
+  const darkColor = `hsl(${Math.round(originalHSL.h)}, ${Math.round(originalHSL.s * 100)}%, ${Math.round(
+    originalHSL.l * brightnessFactor * 100
+  )}%)`
 
   return darkColor
+}
+
+function hexToHSL(hex: string): { h: number; s: number; l: number } {
+  // Remove the leading hash and parse the RGB values
+  const r = parseInt(hex.slice(1, 3), 16) / 255
+  const g = parseInt(hex.slice(3, 5), 16) / 255
+  const b = parseInt(hex.slice(5, 7), 16) / 255
+
+  // Calculate maximum and minimum values
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  let h = 0,
+    s = 0,
+    l = (min + max) / 2
+  const diff = max - min
+
+  if (diff !== 0) {
+    s = l < 0.5 ? diff / (max + min) : diff / (2 - max - min)
+
+    h = (r == max ? (g - b) / diff : g == max ? 2 + (b - r) / diff : 4 + (r - g) / diff) * 60
+  }
+
+  return {
+    h,
+    s,
+    l
+  }
 }

@@ -9,12 +9,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-color: #1d232a;
+    --bg-color: #525151;
     --text-color: #8b919d;
     --border-color: #666;
-    --btn-text-color: #8b919d;
-    --btn-bg-color: #2a323c;
-    --shadow-color: rgba(255, 255, 255, 0.25);
+    --btn-text-color: #c1c1c1;
+    --btn-bg-color: #6b6b6b;
+    --shadow-color: rgba(67, 65, 199, 0.25);
   }
   img {
     filter: contrast(0.75);
