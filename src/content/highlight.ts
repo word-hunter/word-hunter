@@ -357,11 +357,11 @@ function getHighlightCount() {
   const contextWordsSet = new Set()
   const unknownWordSet = new Set()
   unknownHL.forEach((range: Range) => {
-    const word = getRangeWord(range)
+    const word = getOriginForm(getRangeWord(range))
     unknownWordSet.add(word)
   })
   contextHL.forEach((range: Range) => {
-    const word = getRangeWord(range)
+    const word = getOriginForm(getRangeWord(range))
     contextWordsSet.add(word)
   })
   return [unknownWordSet.size, contextWordsSet.size]
@@ -371,6 +371,7 @@ function getPageStatistics() {
   const words = [...(document.body.textContent ?? '').matchAll(/[a-z]+/gi)]
     .map(w => w[0].toLowerCase())
     .filter(w => w in dict)
+    .map(w => getOriginForm(w))
   const wordCount = new Set(words).size
   const [unknownCount, haveContextCount] = getHighlightCount()
   return [unknownCount, haveContextCount, wordCount] as const
