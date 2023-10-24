@@ -85,6 +85,9 @@ fieldset {
   padding: 40px;
   background-color: var(--zen-bg-color);
   overflow: auto;
+  * {
+    all: revert;
+  }
 
   font-family: BlinkMacSystemFont, sans-serif;
 
@@ -104,6 +107,10 @@ fieldset {
     :hover {
       opacity: 0.8;
     }
+    img {
+      width: 30px;
+      height: 30px;
+    }
   }
 
   .zen_buttons {
@@ -112,15 +119,10 @@ fieldset {
     justify-content: center;
     margin-bottom: 40px;
     button {
+      all: revert;
       display: flex;
       align-items: center;
       font-size: 12px;
-      padding: revert;
-      margin: revert;
-      -webkit-appearance: revert;
-      appearance: revert;
-      background: revert;
-      border: revert;
 
       img {
         width: 14px;
