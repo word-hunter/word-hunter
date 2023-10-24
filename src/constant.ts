@@ -50,7 +50,8 @@ export enum StorageKey {
   'latest_sync_time' = 'latest_sync_time',
   'sync_failed_message' = 'sync_failed_message',
   'mobile_auth_token' = 'mobile_auth_token',
-  'local_knowns_log' = 'local_knowns_log'
+  'local_knowns_log' = 'local_knowns_log',
+  'version' = 'version'
 }
 
 export enum Messages {

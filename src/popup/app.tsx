@@ -1,7 +1,9 @@
 import styles from './app.module.css'
 import { Statistics } from './statistics'
-import { createSignal } from 'solid-js'
-import { settings, setSetting, executeScript } from '../lib'
+import { Show, createSignal, onMount } from 'solid-js'
+import { settings, setSetting, executeScript, getLocalValue } from '../lib'
+import manifest from '../../manifest.json'
+import { StorageKey } from '../constant'
 
 const onFastModeToggle = () => {
   executeScript(() => window.__toggleZenMode())
@@ -28,6 +30,7 @@ const onDirectToOption = async () => {
 
 export const App = () => {
   const [isBanned, setIsBanned] = createSignal(false)
+  const [showVersionTip, setShowVersionTip] = createSignal(false)
 
   const onToggleBlacklist = async () => {
     const [inBlocklist, host, blacklist] = await getBannedState()
@@ -62,6 +65,19 @@ export const App = () => {
     setIsBanned(inBlocklist)
   })
 
+  onMount(async () => {
+    const curVersion = manifest.version
+    const lastVersion = await getLocalValue(StorageKey.version)
+    if (curVersion !== lastVersion) {
+      setShowVersionTip(true)
+    }
+  })
+
+  const onVersionTipClose = () => {
+    setShowVersionTip(false)
+    chrome.storage.local.set({ [StorageKey.version]: manifest.version })
+  }
+
   return (
     <div class={styles.page}>
       <div>
@@ -91,6 +107,13 @@ export const App = () => {
       <a class={styles.preference} onclick={onDirectToOption} href="#" title="settings">
         ⛭️
       </a>
+      <Show when={showVersionTip()}>
+        <div class={styles.newRelease}>
+          <a href="https://github.com/sapjax/word-hunter/releases" target="_blank" onclick={onVersionTipClose}>
+            🥳<span>What's new ↗</span>
+          </a>
+        </div>
+      </Show>
     </div>
   )
 }
