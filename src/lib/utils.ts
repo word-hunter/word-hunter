@@ -83,3 +83,14 @@ export function uuidv4() {
     (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
   )
 }
+
+export function debounce<T extends (...args: any[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
+  let timer: number
+
+  return function (...args: Parameters<T>) {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      func(args)
+    }, delay)
+  }
+}

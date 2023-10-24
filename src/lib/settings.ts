@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js'
 import { getSyncValue } from './storage'
 import { StorageKey, LevelKey, WordInfoMap } from '../constant'
+import { debounce } from '../lib/utils'
 import { triggerGoogleDriveSyncJob } from './backup/sync'
 
 const DEFAULT_DICTS = {
@@ -17,7 +18,7 @@ export const MarkStyles = ['background', 'text', 'underline', 'double-underline'
 
 export const DEFAULT_SETTINGS = {
   colors: ['#9FB0EF', '#C175D8'],
-  markStyle: 'background' as (typeof MarkStyles)[number],
+  markStyle: 'background' as typeof MarkStyles[number],
   blacklist: [] as string[],
   dictTabs: DEFAULT_DICTS,
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
@@ -41,10 +42,15 @@ const isSettingsEqual = (newSettings: SettingType, oldSettings: SettingType) =>
 
 export const [settings, setSettings] = createSignal({ ...DEFAULT_SETTINGS }, { equals: isSettingsEqual })
 
+// MAX_WRITE_OPERATIONS_PER_MINUTE: 120
+const syncSettingsDebounce = debounce(() => {
+  syncSettings()
+  triggerGoogleDriveSyncJob()
+}, 100)
+
 export async function setSetting<T extends keyof SettingType>(key: T, value: SettingType[T]) {
   setSettings({ ...settings(), [key]: value })
-  await syncSettings()
-  triggerGoogleDriveSyncJob()
+  syncSettingsDebounce()
 }
 
 export async function syncSettings(updateTime?: number) {
