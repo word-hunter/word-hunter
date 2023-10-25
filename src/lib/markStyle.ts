@@ -57,63 +57,68 @@ export function genMarkStyle() {
         }
       `
       break
+    case 'background-underline':
+      style += `
+        ${unknownSelector} {
+          color: var(--wh-text-color-0);
+          background-color: var(--wh-bg-color-0);
+          text-decoration: underline solid #fff 0.1em;
+
+        }
+        ${contextSelector} {
+          color: var(--wh-text-color-1);
+          background-color: var(--wh-bg-color-1);
+          text-decoration: underline solid #fff 0.1em;
+        }
+      `
+      break
     case 'dashed':
       style += `
         ${unknownSelector} {
-          text-decoration-line: underline;
-          text-decoration-style: dashed;
-          text-decoration-color: var(--wh-bg-color-0);
+          text-decoration: underline dashed var(--wh-bg-color-0);
         }
         ${contextSelector} {
-          text-decoration-color: var(--wh-bg-color-1);
+          text-decoration: underline dashed var(--wh-bg-color-1);
         }
       `
       break
     case 'dotted':
       style += `
         ${unknownSelector} {
-          text-decoration-line: underline;
-          text-decoration-style: dotted;
-          text-decoration-color: var(--wh-bg-color-0);;
+          text-decoration: underline dotted var(--wh-bg-color-0) 0.2em;
         }
         ${contextSelector} {
-          text-decoration-color: var(--wh-bg-color-1);;
+          text-decoration: underline dotted var(--wh-bg-color-1) 0.2em;
         }
       `
       break
     case 'underline':
       style += `
         ${unknownSelector} {
-          text-decoration-line: underline;
-          text-decoration-style: solid;
-          text-decoration-color: var(--wh-bg-color-0);
+          text-decoration: underline solid var(--wh-bg-color-0) 0.15em;
         }
         ${contextSelector} {
-          text-decoration-color: var(--wh-bg-color-1);
+          text-decoration: underline solid var(--wh-bg-color-1) 0.15em;
         }
       `
       break
     case 'double-underline':
       style += `
         ${unknownSelector} {
-          text-decoration-line: underline;
-          text-decoration-style: double;
-          text-decoration-color: var(--wh-bg-color-0);
+          text-decoration: underline double var(--wh-bg-color-0) 0.13em;
         }
         ${contextSelector} {
-          text-decoration-color: var(--wh-bg-color-1);
+          text-decoration: underline double var(--wh-bg-color-1) 0.13em;
         }
       `
       break
     case 'wavy':
       style += `
         ${unknownSelector} {
-          text-decoration-line: underline;
-          text-decoration-style: wavy;
-          text-decoration-color: var(--wh-bg-color-0);
+          text-decoration: underline wavy var(--wh-bg-color-0);
         }
         ${contextSelector} {
-          text-decoration-color: var(--wh-bg-color-1);
+          text-decoration: underline wavy var(--wh-bg-color-1);
         }
       `
       break

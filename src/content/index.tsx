@@ -21,7 +21,7 @@ const App = () => {
           ${genMarkStyle()}
         `}
         {`
-          ${!settings().showCnTrans && 'w-mark-t { display:none }'}
+          ${!settings().showCnTrans ? 'w-mark-t { display:none }' : ''}
         `}
       </style>
     </>
