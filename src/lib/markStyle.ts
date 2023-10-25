@@ -62,13 +62,13 @@ export function genMarkStyle() {
         ${unknownSelector} {
           color: var(--wh-text-color-0);
           background-color: var(--wh-bg-color-0);
-          text-decoration: underline solid #fff 0.1em;
+          text-decoration: underline solid var(--wh-text-color-0) 0.1em;
 
         }
         ${contextSelector} {
           color: var(--wh-text-color-1);
           background-color: var(--wh-bg-color-1);
-          text-decoration: underline solid #fff 0.1em;
+          text-decoration: underline solid var(--wh-text-color-1) 0.1em;
         }
       `
       break
