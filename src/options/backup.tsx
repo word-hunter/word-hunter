@@ -162,11 +162,11 @@ export const Backup = () => {
         </dialog>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-          <button onclick={showModal} class="btn btn-block btn-lg capitalize text-sm">
+          <button onclick={showModal} class="btn btn-block btn-lg capitalize text-xs">
             ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
             restore
           </button>
-          <button onclick={onBackup} class="btn btn-block btn-lg capitalize text-sm">
+          <button onclick={onBackup} class="btn btn-block btn-lg capitalize text-xs">
             ️<img src={chrome.runtime.getURL('icons/download.png')} class="w-8 h-8" alt="backup" />
             backup
           </button>
@@ -184,7 +184,7 @@ export const Backup = () => {
               oninput={onAuthTokenInput}
             />
           </Show>
-          <button onclick={onDriveSync} class="btn btn-block btn-lg capitalize text-sm">
+          <button onclick={onDriveSync} class="btn btn-block btn-lg capitalize text-xs">
             <img
               src={chrome.runtime.getURL('icons/gdrive.png')}
               classList={{ 'animate-spin': syning() }}

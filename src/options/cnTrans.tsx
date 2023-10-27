@@ -8,12 +8,11 @@ export const CnTransSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Chinese Translation</h2>
       <div class="flex justify-end">
         <label for="showCnTrans" class="label gap-4 cursor-pointer ">
-          <span class="label-text">show Chinese translation</span>
+          <span class="text-xs">show Chinese translation</span>
           <input
-            class="toggle dark:toggle-info"
+            class="toggle dark:toggle-info toggle-sm"
             type="checkbox"
             name="showCnTrans"
             id="showCnTrans"

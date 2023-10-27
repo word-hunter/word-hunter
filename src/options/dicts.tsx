@@ -37,7 +37,9 @@ export const DictsSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Dicts<Note>You can drag & drop to adjust the order</Note></h2>
+      <h2 class="h2">
+        Dicts<Note>You can drag & drop to adjust the order</Note>
+      </h2>
       <div class="flex flex-col items-end">
         <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>
           <DragDropSensors />
@@ -48,10 +50,10 @@ export const DictsSetting = () => {
                   return (
                     <Sortable item={item}>
                       <label for={item} class="label cursor-pointer gap-4 max-w-fit">
-                        <span class="label-text"> {item}</span>
+                        <span class="text-xs"> {item}</span>
                         <input
                           type="checkbox"
-                          class="toggle dark:toggle-info"
+                          class="toggle dark:toggle-info toggle-sm"
                           name="dicts"
                           id={item}
                           value={item}

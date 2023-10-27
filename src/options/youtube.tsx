@@ -8,12 +8,11 @@ export const YoutubeSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Youtube SubTitle</h2>
       <div class="flex justify-end">
         <label for="pause" class="label gap-4 cursor-pointer ">
-          <span class="label-text">auto pause youtube video</span>
+          <span class="text-xs">auto pause youtube video</span>
           <input
-            class="toggle dark:toggle-info"
+            class="toggle dark:toggle-info toggle-sm"
             type="checkbox"
             name="pause"
             id="pause"

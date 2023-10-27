@@ -26,12 +26,12 @@ export const ColorsSetting = () => {
   return (
     <>
       <section class="section">
-        <h2 class="h2">Colors</h2>
-        <div class="flex flex-col items-end gap-4">
+        <h2 class="h2">Highlights</h2>
+        <div class="flex flex-col items-end gap-2">
           <div class="flex items-center gap-2">
             <label>Unknown:</label>
             <input
-              class="rounded-sm"
+              class="rounded-sm w-8 h-8"
               type="color"
               data-index="0"
               value={settings()['colors'][0]}
@@ -41,30 +41,29 @@ export const ColorsSetting = () => {
           <div class="flex items-center gap-2">
             <label>Have context:</label>
             <input
-              class="rounded-sm"
+              class="rounded-sm w-8 h-8"
               type="color"
               data-index="1"
               value={settings()['colors'][1]}
               oninput={onColorChange}
             />
           </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <h2 class="h2">
-          <span class="z-0">Mark</span> style:
-        </h2>
-        <div class="flex flex-col items-end gap-4 mt-4">
-          <select class="select select-bordered max-w-xs" value={resolvedMarkStyle()} onChange={onMarkStyleChanged}>
-            <For each={MarkStyles}>
-              {item => (
-                <option id={item} value={item}>
-                  {item}
-                </option>
-              )}
-            </For>
-          </select>
+          <div class="flex items-center gap-2">
+            <label>Style:</label>
+            <select
+              class="select select-bordered select-sm max-w-xs text-xs"
+              value={resolvedMarkStyle()}
+              onChange={onMarkStyleChanged}
+            >
+              <For each={MarkStyles}>
+                {item => (
+                  <option id={item} value={item}>
+                    {item}
+                  </option>
+                )}
+              </For>
+            </select>
+          </div>
         </div>
       </section>
     </>

@@ -19,18 +19,20 @@ export const LevelSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Levels<Note>Select the Dicts used for highlight</Note></h2>
+      <h2 class="h2">
+        Levels<Note>Select the Dicts used for highlight</Note>
+      </h2>
       <div>
         <div class="form-control flex flex-col items-end">
           <For each={Levels}>
             {item => {
               return (
                 <label class="label cursor-pointer gap-4 max-w-fit">
-                  <span class="label-text">{item[1]}</span>
+                  <span class="text-xs">{item[1]}</span>
                   <input
                     id={item[0]}
                     type="checkbox"
-                    class="toggle dark:toggle-info"
+                    class="toggle dark:toggle-info toggle-sm"
                     checked={settings().levels.includes(item[0])}
                     value={item[0].toString()}
                     oninput={onInput}

@@ -3,7 +3,7 @@ import { ParentComponent } from 'solid-js'
 export const Note: ParentComponent = props => {
   return (
     <div class="tooltip ml-2" data-tip={props?.children}>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-4 h-4">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"

@@ -13,12 +13,11 @@ export const PronounceSetting = () => {
 
   return (
     <section class="section">
-      <h2 class="h2">Pronounce</h2>
       <div class="flex justify-end">
         <label for="pronounce" class="label gap-4 cursor-pointer ">
-          <span class="label-text">auto pronounce</span>
+          <span class="text-xs">auto pronounce</span>
           <input
-            class="toggle dark:toggle-info"
+            class="toggle dark:toggle-info toggle-sm"
             type="checkbox"
             name="pronounce"
             id="pronounce"
@@ -28,7 +27,7 @@ export const PronounceSetting = () => {
         </label>
       </div>
       <div>
-        <label class="block pt-8 pb-4 text-right">volume ({settings().volume})</label>
+        <label class="block pt-4 pb-4 text-right">pronounce volume ({settings().volume})</label>
         <input
           type="range"
           min="0"

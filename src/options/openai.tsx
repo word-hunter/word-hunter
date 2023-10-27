@@ -25,7 +25,7 @@ export const OpenAISetting = () => {
       <div class="flex flex-col items-end gap-4 mt-4">
         <div>
           <select
-            class="select select-bordered w-full max-w-xs"
+            class="select select-bordered select-sm w-full max-w-xs text-xs"
             oninput={onModelChange}
             value={settings().openai.model}
             aria-placeholder="select model"
@@ -38,13 +38,13 @@ export const OpenAISetting = () => {
         </div>
         <textarea
           placeholder="input your openai apikey"
-          class="textarea textarea-bordered textarea-lg w-full h-28 md:h-24 max-w-xs text-sm leading-5"
+          class="textarea textarea-bordered textarea-lg w-full h-24 max-w-xs text-xs leading-5"
           value={settings().openai.apiKey}
           oninput={onApiKeyChange}
         />
         <textarea
           placeholder="custom your prompt"
-          class="textarea textarea-bordered textarea-lg w-full h-28 md:h-24 max-w-xs text-sm leading-5"
+          class="textarea textarea-bordered textarea-lg w-full h-24 max-w-xs text-xs leading-5"
           value={settings().openai.prompt}
           oninput={onPromptChange}
         />
