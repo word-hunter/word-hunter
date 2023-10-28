@@ -341,6 +341,17 @@ function observeDomChange() {
         if (mutation.removedNodes.length > 0) {
           cleanRangeTaskTimer && clearTimeout(cleanRangeTaskTimer)
           cleanRangeTaskTimer = setTimeout(cleanRanges, 100)
+
+          // for some sites like calibre reader server
+          // it uses `document.body.innerHTML` when page changes between book thumb and book contents
+          // which will cause word-hunter card node removed
+          // we need to clone the removed wh-root node and append to body, to make card work again
+          if (mutation.removedNodes[0].nodeName === 'WH-ROOT') {
+            const oldWhRoot = mutation.removedNodes[0] as HTMLElement
+            const whRoot = oldWhRoot.cloneNode(true)
+            oldWhRoot.remove()
+            document.body.appendChild(whRoot)
+          }
         }
       }
     })
@@ -438,8 +449,11 @@ export function getWordContexts(word: string) {
   return contexts[originFormWord] ?? []
 }
 
+let isInited = false
 export async function init() {
+  if (isInited) return
   await readStorageAndHighlight()
   observeDomChange()
   listenBackgroundMessage()
+  isInited = true
 }

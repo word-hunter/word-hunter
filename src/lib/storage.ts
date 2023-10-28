@@ -137,8 +137,10 @@ export async function mergeKnowns(gDriveKnowns: WordMap) {
   if (dict) {
     mergedOriginKnowns = {}
     for (const word in mergedKnowns) {
-      const origin = dict[word].o
-      mergedOriginKnowns[origin] = 'o'
+      const origin = dict[word]?.o
+      if (origin) {
+        mergedOriginKnowns[origin] = 'o'
+      }
     }
   } else {
     mergedOriginKnowns = mergedKnowns

@@ -1,6 +1,6 @@
 import './index.css'
 import cardStyles from './card.css?inline'
-import { createSignal, Show, For, Switch, Match, batch, onMount } from 'solid-js'
+import { createSignal, Show, For, Switch, Match, batch, onMount, onCleanup } from 'solid-js'
 import { customElement } from 'solid-element'
 import { classes, Messages, WordContext } from '../constant'
 import {
@@ -146,7 +146,7 @@ export const WhCard = customElement('wh-card', () => {
     e.stopImmediatePropagation()
   }
 
-  document.addEventListener('keydown', (e: KeyboardEvent) => {
+  const onKeydown = (e: KeyboardEvent) => {
     const cardNode = getCardNode()
     const container = cardNode.querySelector('.dict_container')!
     if (isCardVisible()) {
@@ -190,6 +190,13 @@ export const WhCard = customElement('wh-card', () => {
         e.preventDefault()
       }
     }
+  }
+
+  document.addEventListener('keydown', onKeydown)
+
+  onCleanup(() => {
+    document.removeEventListener('keydown', onKeydown)
+    unbindEvents()
   })
 
   return (
@@ -267,10 +274,15 @@ export function ZenMode() {
     setCardDisabledInZenMode((e.target as HTMLInputElement).checked)
   }
 
-  document.addEventListener('keydown', e => {
+  const _toggleZenMode = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && zenMode() && !isCardVisible()) {
       toggleZenMode()
     }
+  }
+
+  document.addEventListener('keydown', _toggleZenMode)
+  onCleanup(() => {
+    document.removeEventListener('keydown', _toggleZenMode)
   })
 
   const onWordClick = (e: MouseEvent) => {
@@ -388,11 +400,6 @@ const isCardVisible = () => {
   return getCardNode().classList.contains('card_visible')
 }
 
-function getNodeWord(node: HTMLElement | Node | undefined) {
-  if (!node) return ''
-  return (node.textContent ?? '').toLowerCase()
-}
-
 const playAudio = (node: HTMLElement, e?: MouseEvent) => {
   const audioSrc = node?.getAttribute('data-src-mp3') || node?.parentElement?.getAttribute('data-src-mp3')
   if (audioSrc) {
@@ -497,56 +504,64 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
   }
 }
 
-function bindEvents() {
-  document.addEventListener('mousemove', async (e: MouseEvent) => {
-    if (zenMode() && cardDisabledInZenMode()) {
-      return false
-    }
+function onMouseMove(e: MouseEvent) {
+  if (zenMode() && cardDisabledInZenMode()) {
+    return false
+  }
 
-    const target = e.target as HTMLElement
-    const isInsideCard = isCardVisible() && (target.tagName === 'WH-CARD' || getCardNode().contains(target))
+  const target = e.target as HTMLElement
+  const isInsideCard = isCardVisible() && (target.tagName === 'WH-CARD' || getCardNode().contains(target))
 
-    if (isInsideCard) {
-      clearTimerHideRef()
-    } else {
-      const range = getRangeAtPoint(e)
-      if (range) {
-        const word = range.toString().trim().toLowerCase()
-        // skip when redirecting in card dictionary
-        const mosueKey = settings().mosueKey
-        if (mosueKey !== 'NONE' && !e[mosueKey]) return false
+  if (isInsideCard) {
+    clearTimerHideRef()
+  } else {
+    const range = getRangeAtPoint(e)
+    if (range) {
+      const word = range.toString().trim().toLowerCase()
+      // skip when redirecting in card dictionary
+      const mosueKey = settings().mosueKey
+      if (mosueKey !== 'NONE' && !e[mosueKey]) return false
 
-        if (inDirecting) {
-          inDirecting = false
-          return false
-        }
-
-        rangeRect = range.getBoundingClientRect()
-        adjustCardPosition(rangeRect)
-        batch(() => {
-          setCurWord(word)
-          setCurContextText(getWordContext(range))
-          setWordContexts(getWordContexts(word))
-          setDictHistory([word])
-        })
-
-        clearTimerHideRef()
-        timerShowRef && clearTimeout(timerShowRef)
-        timerShowRef = window.setTimeout(() => {
-          showPopup()
-        }, 200)
-      } else {
-        timerShowRef && clearTimeout(timerShowRef)
-        isCardVisible() && hidePopupDelay(500)
+      if (inDirecting) {
+        inDirecting = false
+        return false
       }
-    }
-  })
 
-  // hide popup when click outside card
-  document.addEventListener('click', async (e: MouseEvent) => {
-    const target = e.target as HTMLElement
-    if (isCardVisible() && !getCardNode().contains(target)) {
-      hidePopupDelay(0)
+      rangeRect = range.getBoundingClientRect()
+      adjustCardPosition(rangeRect)
+      batch(() => {
+        setCurWord(word)
+        setCurContextText(getWordContext(range))
+        setWordContexts(getWordContexts(word))
+        setDictHistory([word])
+      })
+
+      clearTimerHideRef()
+      timerShowRef && clearTimeout(timerShowRef)
+      timerShowRef = window.setTimeout(() => {
+        showPopup()
+      }, 200)
+    } else {
+      timerShowRef && clearTimeout(timerShowRef)
+      isCardVisible() && hidePopupDelay(500)
     }
-  })
+  }
+}
+
+function onMouseClick(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (isCardVisible() && !getCardNode().contains(target)) {
+    hidePopupDelay(0)
+  }
+}
+
+function bindEvents() {
+  document.addEventListener('mousemove', onMouseMove)
+  // hide popup when click outside card
+  document.addEventListener('click', onMouseClick)
+}
+
+function unbindEvents() {
+  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('click', onMouseClick)
 }
