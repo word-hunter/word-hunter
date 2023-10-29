@@ -124,10 +124,12 @@ export const WhCard = customElement('wh-card', () => {
     }
   }
 
-  const onDictSettle = () => {
-    adjustCardPosition(rangeRect, inDirecting)
-    inDirecting = false
-    runAtuoPronounce()
+  const onDictSettle = (index: number) => {
+    if (tabIndex() === index) {
+      adjustCardPosition(rangeRect, inDirecting)
+      inDirecting = false
+      runAtuoPronounce()
+    }
   }
 
   const inWordContexts = () => {
@@ -255,7 +257,7 @@ export const WhCard = customElement('wh-card', () => {
                     word={curWord()}
                     contextText={curContextText()}
                     dictAdapter={getDictAdapter()}
-                    onSettle={onDictSettle}
+                    onSettle={() => onDictSettle(i())}
                   />
                 </Match>
               )}
