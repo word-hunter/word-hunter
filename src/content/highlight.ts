@@ -117,13 +117,15 @@ function _deleteContext(context: WordContext) {
     contexts[word].splice(index, 1)
 
     setWordContexts([...contexts[word]])
-    contextHL.forEach(range => {
-      const rangeWord = getRangeWord(range)
-      if (isOriginFormSame(rangeWord, word)) {
-        contextHL.delete(range)
-        unknownHL.add(range)
-      }
-    })
+    if (contexts[word].length === 0) {
+      contextHL.forEach(range => {
+        const rangeWord = getRangeWord(range)
+        if (isOriginFormSame(rangeWord, word)) {
+          contextHL.delete(range)
+          unknownHL.add(range)
+        }
+      })
+    }
   }
 }
 
@@ -308,11 +310,13 @@ function resetHighlight() {
 
 let cleanRangeTaskTimer: number
 function cleanRanges() {
-  ;[unknownHL, contextHL].forEach(hl => {
-    hl.forEach(range => {
-      if (!range.toString()) {
-        hl.delete(range)
-      }
+  window.requestIdleCallback(() => {
+    ;[unknownHL, contextHL].forEach(hl => {
+      hl.forEach(range => {
+        if (!range.toString()) {
+          hl.delete(range)
+        }
+      })
     })
   })
 }

@@ -96,17 +96,27 @@ body {
       }
     }
   }
+}
 
+.newRelease {
+  margin-top: 30px;
+  text-align: center;
+  a {
+    color: var(--text-color);
+    text-decoration: none;
+    span {
+      margin-left: 5px;
+      text-decoration: underline;
+      color: rgba(255, 0, 0, 0.508);
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
   .newRelease {
-    margin-top: 30px;
-    text-align: center;
     a {
-      color: var(--text-color);
-      text-decoration: none;
       span {
-        margin-left: 5px;
-        text-decoration: underline;
-        color: rgba(255, 0, 0, 0.508);
+        color: rgb(255 71 71);
       }
     }
   }
