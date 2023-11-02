@@ -5,6 +5,7 @@
   --btn-text-color: #777;
   --btn-bg-color: #efefef;
   --shadow-color: rgba(0, 0, 0, 0.25);
+  --version-color: rgba(255, 0, 0, 0.508);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,6 +16,7 @@
     --btn-text-color: #c1c1c1;
     --btn-bg-color: #6b6b6b;
     --shadow-color: rgba(67, 65, 199, 0.25);
+    --version-color: rgb(255 71 71);
   }
   img {
     filter: contrast(0.75);
@@ -107,17 +109,7 @@ body {
     span {
       margin-left: 5px;
       text-decoration: underline;
-      color: rgba(255, 0, 0, 0.508);
-    }
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .newRelease {
-    a {
-      span {
-        color: rgb(255 71 71);
-      }
+      color: var(--version-color);
     }
   }
 }
