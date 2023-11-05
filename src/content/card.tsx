@@ -201,6 +201,11 @@ export const WhCard = customElement('wh-card', () => {
     unbindEvents()
   })
 
+  const extenalLink = () => {
+    if (tabIndex() == tabCount()) return null
+    return getDictAdapter().getPageUrl(curWord())
+  }
+
   return (
     // @ts-ignore inert property
     <div class="word_card" onclick={onCardClick} ondblclick={onCardDoubleClick} inert>
@@ -217,7 +222,7 @@ export const WhCard = customElement('wh-card', () => {
           </button>
         </div>
         <div>
-          <a target="_blank" href={getDictAdapter().getPageUrl(curWord())}>
+          <a target={extenalLink() ? '_blank' : '_self'} href={extenalLink() || 'javascript:void(0)'}>
             {curWord()}
           </a>
         </div>
