@@ -550,7 +550,7 @@ function onMouseMove(e: MouseEvent) {
       }, 200)
     } else {
       timerShowRef && clearTimeout(timerShowRef)
-      isCardVisible() && hidePopupDelay(500)
+      isCardVisible() && hidePopupDelay(settings().mouseHideDelay ?? 500)
     }
   }
 }

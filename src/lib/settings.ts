@@ -34,6 +34,7 @@ export const DEFAULT_SETTINGS = {
   showCnTrans: false,
   atuoPronounce: false,
   mosueKey: 'NONE' as MouseKey,
+  mouseHideDelay: 500,
   volume: 95,
   autoPauseYoutubeVideo: false,
   levels: ['4', '6', 'g', 'o'] as LevelKey[],

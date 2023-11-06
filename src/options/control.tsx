@@ -7,6 +7,11 @@ export const ControlSetting = () => {
     setSetting('mosueKey', target.value as any)
   }
 
+  const onVolumeChange = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    setSetting('mouseHideDelay', target.valueAsNumber)
+  }
+
   return (
     <section class="section">
       <h2 class="h2">
@@ -28,6 +33,18 @@ export const ControlSetting = () => {
             <option value="shiftKey">⇧ Shift</option>
           </select>
         </div>
+      </div>
+      <div>
+        <label class="block pt-4 pb-4 text-right">card hide delay ({settings().mouseHideDelay}ms)</label>
+        <input
+          type="range"
+          min="0"
+          max="1000"
+          value={settings().mouseHideDelay}
+          step="1"
+          class="range dark:range-info range-xs"
+          oninput={onVolumeChange}
+        />
       </div>
     </section>
   )
