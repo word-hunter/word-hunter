@@ -43,6 +43,13 @@ w-mark-t {
   }
 }
 
+code,
+.monaco-editor {
+  w-mark-t {
+    display: none;
+  }
+}
+
 body:has(.__zen_mode) {
   overflow: hidden;
 }
