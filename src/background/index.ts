@@ -262,7 +262,7 @@ function setFailedBadge(message: string) {
   chrome.action.setTitle({ title: 'Google drive sync failed: ' + message })
 }
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
+chrome.storage.onChanged.addListener(async (changes, namespace) => {
   if (namespace === 'local' && changes[StorageKey.sync_failed_message]) {
     const { newValue } = changes[StorageKey.sync_failed_message]
     if (!!newValue) {
@@ -270,6 +270,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     } else {
       updateBadge(knowns)
     }
+  }
+  if (namespace === 'sync' && changes[StorageKey.knwon_update_timestamp]) {
+    knowns = await getAllKnownSync()
+    updateBadge(knowns)
   }
 })
 
