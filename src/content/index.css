@@ -43,6 +43,14 @@ w-mark-t {
   }
 }
 
+/* for pdf.js viewer */
+.textLayer {
+  opacity: unset;
+  ::selection {
+    background-color: rgba(0, 0, 255, 0.25);
+  }
+}
+
 code,
 .monaco-editor {
   w-mark-t {
