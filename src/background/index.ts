@@ -46,7 +46,7 @@ function updateBadge(wordsKnown: WordMap) {
     badgeText = badgeText.at(0)! + badgeText.at(1) + 'k'
   }
   chrome.action.setBadgeText({ text: badgeText })
-  chrome.action.setBadgeBackgroundColor({ color: '#bbb0' })
+  chrome.action.setBadgeBackgroundColor({ color: '#666' })
   chrome.action.setTitle({ title: '✔ ' + String(knownWordsCount) })
 }
 
