@@ -12,42 +12,26 @@ export async function explainWord(word: string, context: string, model: string) 
   const prompt = promptTemplate.replace('${word}', word).replace('${context}', context)
 
   // replace old model with new ones
-  if (model === 'text-davinci-003') {
-    model = 'gpt-3.5-turbo-instruct'
+  // https://platform.openai.com/docs/guides/text-generation
+  if (model === 'text-davinci-003' || model === 'gpt-3.5-turbo-instruct') {
+    model = 'gpt-3.5-turbo'
   }
 
-  const isLegacyApi = model === 'gpt-3.5-turbo-instruct'
-  let res: Awaited<ReturnType<typeof fetch>>
   try {
-    if (!isLegacyApi) {
-      res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ]
-        })
+    const url = settings().openai.apiProxy || DEFAULT_SETTINGS.openai.apiProxy
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: model || DEFAULT_SETTINGS.openai.model,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ]
       })
-    } else {
-      res = await fetch('https://api.openai.com/v1/completions', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          model,
-          prompt: prompt,
-          temperature: 0.8,
-          max_tokens: 200,
-          top_p: 1.0,
-          frequency_penalty: 0.5,
-          presence_penalty: 0.0
-        })
-      })
-    }
+    })
 
     const json = await res.json()
     if (res.status === 401) {
@@ -55,7 +39,7 @@ export async function explainWord(word: string, context: string, model: string) 
     } else if (res.status !== 200) {
       throw json.error
     }
-    const text = (!isLegacyApi ? json.choices[0].message.content : json.choices?.[0]?.text) ?? ''
+    const text = json.choices[0].message.content ?? ''
     return safeEmphasizeWordInText(text.replace('\n\n', '\n').replaceAll('. ', '. \n\n'), word)
   } catch (e: any) {
     return e.message

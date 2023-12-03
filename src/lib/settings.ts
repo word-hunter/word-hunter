@@ -27,7 +27,7 @@ export const MarkStyles = [
 
 export const DEFAULT_SETTINGS = {
   colors: ['#9FB0EF', '#C175D8'],
-  markStyle: 'background' as typeof MarkStyles[number],
+  markStyle: 'background' as (typeof MarkStyles)[number],
   blacklist: [] as string[],
   dictTabs: DEFAULT_DICTS,
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
@@ -40,7 +40,8 @@ export const DEFAULT_SETTINGS = {
   levels: ['4', '6', 'g', 'o'] as LevelKey[],
   openai: {
     apiKey: '',
-    model: 'gpt-3.5-turbo-instruct',
+    apiProxy: 'https://api.openai.com/v1/chat/completions',
+    model: 'gpt-3.5-turbo',
     prompt: 'explain the word ${word} in the sentence "${context}" with grade 2 English words'
   }
 }
