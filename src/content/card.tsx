@@ -525,9 +525,6 @@ function onMouseMove(e: MouseEvent) {
     const range = getRangeAtPoint(e)
     if (range) {
       const word = range.toString().trim().toLowerCase()
-      // skip when redirecting in card dictionary
-      const mosueKey = settings().mosueKey
-      if (mosueKey !== 'NONE' && !e[mosueKey]) return false
 
       if (inDirecting) {
         inDirecting = false
@@ -562,13 +559,37 @@ function onMouseClick(e: MouseEvent) {
   }
 }
 
+let waitMouseKeyTask: Function | null
+
+function preMouseMove(e: MouseEvent) {
+  // skip when redirecting in card dictionary
+  waitMouseKeyTask = null
+  const mouseKey = settings().mosueKey
+  if (mouseKey !== 'NONE' && !e[mouseKey]) {
+    waitMouseKeyTask = () => {
+      console.log('onMouseMove')
+      onMouseMove(e)
+    }
+  } else {
+    onMouseMove(e)
+  }
+}
+
+function onKeyDown(e: KeyboardEvent) {
+  if (e[settings().mosueKey]) {
+    waitMouseKeyTask && waitMouseKeyTask()
+  }
+}
+
 function bindEvents() {
-  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mousemove', preMouseMove)
+  document.addEventListener('keydown', onKeyDown)
   // hide popup when click outside card
   document.addEventListener('click', onMouseClick)
 }
 
 function unbindEvents() {
-  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('mousemove', preMouseMove)
+  document.removeEventListener('keydown', onKeyDown)
   document.removeEventListener('click', onMouseClick)
 }
