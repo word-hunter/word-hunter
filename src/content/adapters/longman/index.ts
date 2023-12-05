@@ -5,7 +5,7 @@ import { fetchText } from '../fetch'
 const cache: Record<string, string> = {}
 
 export class LongManDict implements Adapter {
-  readonly name = 'collins'
+  readonly name = 'longman'
   readonly host = 'https://www.ldoceonline.com'
   readonly apiBase = `${this.host}/search/english/direct/`
   readonly sectionSelector = 'span.dictentry'

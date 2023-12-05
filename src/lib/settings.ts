@@ -8,6 +8,7 @@ const DEFAULT_DICTS = {
   collins: true,
   longman: true,
   google: false,
+  haici: false,
   openai: false
 }
 
@@ -37,7 +38,7 @@ export const DEFAULT_SETTINGS = {
   mouseHideDelay: 500,
   volume: 95,
   autoPauseYoutubeVideo: false,
-  levels: ['4', '6', 'g', 'o'] as LevelKey[],
+  levels: ['p', 'm', 'h', '4', '6', 'g', 'o'] as LevelKey[],
   openai: {
     apiKey: '',
     apiProxy: 'https://api.openai.com/v1/chat/completions',
@@ -110,6 +111,18 @@ function fillUpNewDefaultSettingFiled(target: Record<string, any>, source: Recor
     } else {
       if (typeof source[key] === 'object' && !Array.isArray(source[key])) {
         fillUpNewDefaultSettingFiled(target[key], source[key])
+      }
+      if (Array.isArray(source[key]) && key === 'dictOrder') {
+        source[key].forEach((sk: string) => {
+          if (!target[key].includes(sk)) {
+            target[key].push(sk)
+          }
+        })
+        target[key].forEach((tk: string) => {
+          if (!source[key].includes(tk)) {
+            target.splice(target.indexOf(tk), 1)
+          }
+        })
       }
     }
   }

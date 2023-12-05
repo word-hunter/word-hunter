@@ -1,0 +1,785 @@
+.__dict_container {
+  --txt-color: #333;
+  --border-color: #cccccc;
+  --primary-color: #094;
+  --secondary-color: #666;
+  --hover-color: #f5f7f4;
+  --tab-color: #007f91;
+}
+
+@media (prefers-color-scheme: dark) {
+  .__dict_container {
+    --border-color: rgba(255, 255, 255, 0.2);
+    --txt-color: #eee;
+    --secondary-color: #aaa;
+    --hover-color: rgba(200, 200, 200, 0.264);
+    --tab-color: #6ecedb;
+  }
+
+  /* Additional dark mode styles here */
+}
+.__dict_container {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0 15px;
+  background: var(--bg-color);
+  font:
+    10pt/1.75 Arial,
+    Helvetica,
+    sans-serif;
+  color: var(--txt-color);
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  -webkit-transition:
+    color 0.5s,
+    background-color 0.5s;
+  transition:
+    color 0.5s,
+    background-color 0.5s;
+}
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.word h1,
+.wordbook {
+  float: left;
+}
+
+.word {
+  padding-top: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.word-cont {
+  overflow: hidden;
+}
+
+.word h1 {
+  line-height: 1.25em;
+  padding-right: 20px;
+  font-size: 30px;
+  color: var(--primary-color);
+  font-family: Verdana, Geneva, sans-serif;
+  word-wrap: break-word;
+}
+.yinjie {
+  float: left;
+  color: var(--secondary-color);
+  font-size: 12px;
+  margin: 10px 13px 0 -8px;
+}
+
+.yinjie bdo {
+  font-size: 14px;
+  color: #999;
+}
+
+.createword {
+  height: 2em;
+  line-height: 2em;
+  margin: 0.5em 0 0 0.5em;
+  padding: 0 0.5em;
+  float: right;
+  display: block;
+  cursor: pointer;
+  font-size: 12px;
+  color: dimgray;
+  border: 1px solid #69b2bb;
+  background: #c3edf3;
+  border-radius: 5px;
+}
+
+.createword:hover {
+  text-decoration: none;
+  background: #a8dee6;
+}
+
+.wordbook {
+  display: none;
+}
+
+.hasadd {
+  background-position: -54px 0;
+}
+
+.phonetic {
+  padding-top: 6px;
+  clear: left;
+  height: 28px;
+}
+
+.phonetic span {
+  padding-right: 20px;
+  display: inline-block;
+  overflow: hidden;
+  color: var(--secondary-color);
+}
+
+.sound {
+  width: 16px;
+  height: 16px;
+  margin-left: 0.5em;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+  overflow: hidden;
+  background-position: -17px 0;
+}
+
+.sound {
+  background-image: url('https://dict.cn/v/1493890305/i1/images/icon-new.png');
+  background-repeat: no-repeat;
+}
+
+.phonetic bdo,
+.phonetic .sound {
+  display: inline-block;
+  color: #aaa;
+}
+
+.sound.fsound {
+  background-position: -17px -152px;
+}
+
+.playing,
+.sound:hover,
+.sound.active {
+  text-decoration: none;
+  background-position: 0 0;
+}
+
+.playing,
+.sound.fsound:hover {
+  text-decoration: none;
+  background-position: 0 -152px;
+}
+
+.phonetic bdo {
+  font-family: 'lucida sans unicode', arial, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.shape {
+  clear: both;
+  margin: 20px 0 10px;
+  overflow: hidden;
+}
+
+.shape span {
+  margin: 0 10px 0 0;
+  float: left;
+  display: block;
+  height: 24px;
+}
+
+.shape label {
+  font-size: 12px;
+}
+
+.shape label,
+.shape a {
+  display: inline-block;
+}
+
+.shape label {
+  font-size: 12px;
+  color: gray;
+}
+
+.shape a:not(:last-child) {
+  padding-right: 10px;
+}
+
+.shape a {
+  color: #32a9ba;
+}
+
+.shape a:hover {
+  text-decoration: underline;
+}
+
+.morpho {
+  color: #999;
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+.morpho a {
+  padding: 0 4px;
+  color: #999;
+}
+
+.unword {
+  padding-top: 20px;
+}
+
+.level-title {
+  float: left;
+  color: var(--secondary-color);
+  font-size: 12px;
+  margin: 10px -15px 0 15px;
+}
+
+.level_1,
+.level_2,
+.level_3,
+.level_4,
+.level_5 {
+  height: 12px;
+  float: left;
+  margin-left: 20px;
+  overflow: hidden;
+  vertical-align: top;
+  top: 15px;
+  position: relative;
+  display: inline-block;
+  background: url('https://dict.cn/v/1493890305/i1/images/icon-new.png') 0 -309px no-repeat;
+}
+
+.level_1:hover,
+.level_2:hover,
+.level_3:hover,
+.level_4:hover,
+.level_5:hover {
+  text-decoration: none;
+}
+
+.level_1 {
+  width: 13px;
+}
+
+.level_2 {
+  width: 26px;
+}
+
+.level_3 {
+  width: 39px;
+}
+
+.level_4 {
+  width: 52px;
+}
+
+.level_5 {
+  width: 65px;
+}
+
+.section {
+  line-height: 30px;
+  margin: 1.5em 0 1em;
+  position: relative;
+  _zoom: 1;
+}
+
+.section h2 {
+  display: none;
+}
+.newflag {
+  display: none;
+}
+
+.section .ifufind {
+  font-weight: bold;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section .wtip,
+.section .wtip a {
+  font-size: 12px;
+}
+
+.section .wtip {
+  color: #aaa;
+}
+
+.section .wtip a {
+  color: #32a9ba;
+}
+
+.section .wtip a:hover {
+  text-decoration: underline;
+}
+
+.section h2 .slot {
+  line-height: 30px;
+  top: 3px;
+  right: 0;
+  z-index: 1;
+  position: absolute;
+}
+
+.section a.link {
+  top: 0;
+  right: 0;
+  z-index: 1;
+  position: absolute;
+}
+
+.section h3 {
+  width: 80px;
+  height: 29px;
+  line-height: 29px;
+  text-align: center;
+  display: block;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--tab-color);
+  border: 1px solid var(--border-color);
+  border-bottom: 0;
+  background: var(--bg-color);
+  &:not(:has(+ div)) {
+    display: none;
+    background-color: #f00;
+  }
+}
+
+.section h3.cur {
+  font-weight: bold;
+  border-top: 2px solid #2fb8cb;
+  background: white;
+  color: #444;
+}
+
+.section .layout {
+  min-height: 0;
+  padding: 1.5em 0 1em;
+  border-top: 1px solid var(--border-color);
+  left: 0;
+  top: 0;
+  position: relative;
+}
+
+.section ul,
+.section ol {
+  margin-bottom: 0;
+}
+
+.section ol {
+  padding-left: 3em;
+}
+
+.section li {
+  vertical-align: top;
+  border-radius: 5px;
+}
+
+.section li a {
+  font-weight: bold;
+  color: #32a9ba;
+}
+
+.section span {
+  line-height: 30px;
+  padding-right: 0.5em;
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.section bdo {
+  padding: 0 0.25em;
+  font-size: 12px;
+  font-weight: normal;
+  color: #ccc;
+}
+
+.section em {
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.section p {
+  color: #888;
+}
+
+.section dt {
+  cursor: pointer;
+}
+
+.section dt.on {
+  background-position: -180px -235px;
+}
+
+.section dt.off {
+  background-position: -180px -270px;
+}
+
+.def h2 i {
+  background-position: 0 -321px;
+}
+
+.sent h2 i {
+  background-position: 0 -353px;
+}
+
+.learn h2 i {
+  background-position: 0 -385px;
+}
+
+.ask h2 i {
+  background-position: 0 -417px;
+}
+
+.rel h2 i {
+  background-position: 0 -449px;
+}
+
+.history h2 i {
+  background-position: 0 -321px;
+}
+
+.notice {
+  float: right;
+  height: 40px;
+  font-size: 12px;
+}
+
+.notice em {
+  margin: 0 0.5em 0 0.5em;
+}
+
+.sort li:hover,
+.auth li:hover,
+.struc li:hover,
+.crim dl:hover {
+  border-radius: 5px;
+  background: var(--hover-color);
+}
+
+.basic {
+  margin-top: 15px;
+}
+
+.basic li {
+  line-height: 30px;
+}
+
+.basic span {
+  min-width: 2em;
+  display: inline-block;
+  padding-right: 0.5em;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.dual ul {
+  padding-left: 3em;
+}
+
+.dual strong {
+  padding-right: 0.5em;
+  font-weight: normal;
+}
+
+.cn li a {
+  font-weight: bold;
+  color: #32a9ba;
+  line-height: 30px;
+}
+
+.ref dt bdo {
+  padding: 0 1em;
+  font-size: 14px;
+  color: #969;
+}
+
+.ref dd p {
+  width: 40%;
+  padding-left: 5%;
+  float: left;
+  color: inherit;
+}
+
+.ref dd b,
+.ref dd strong {
+  display: block;
+  font-weight: normal;
+}
+
+.ref dd b {
+  color: #2aa5b7;
+}
+
+.ref li {
+  overflow: hidden;
+}
+
+.ref div b {
+  font-weight: bold;
+  color: inherit;
+}
+
+.ref div a {
+  padding-left: 0.5em;
+}
+
+.satis {
+  float: left;
+  color: #999;
+}
+
+.satis span,
+.satis font,
+.satis a {
+  line-height: 20px;
+  display: inline-block;
+  font-size: 12px;
+  color: #999;
+}
+
+.satis span {
+  font-weight: normal;
+}
+
+.satis a {
+  height: 22px;
+  line-height: 20px;
+  padding: 0 0.5em 0 0;
+  cursor: pointer;
+  color: #366;
+  border-radius: 5px;
+}
+
+.satis a:hover {
+  text-decoration: none;
+}
+
+.satis font {
+  color: #444;
+}
+
+.sort div {
+  color: var(--secondary-color);
+}
+
+.sort b {
+  padding-left: 1em;
+}
+
+.sort div.more {
+  margin-left: 15px;
+  margin-top: 10px;
+}
+
+.patt b {
+  padding-left: 1em;
+  display: block;
+}
+
+.patt div {
+  color: var(--secondary-color);
+}
+
+.phrase div {
+  color: var(--secondary-color);
+}
+
+.phrase b {
+  padding-left: 1em;
+}
+
+.phrase strong {
+  display: block;
+  font-style: normal;
+  color: #888;
+}
+
+.coll div {
+  color: var(--secondary-color);
+}
+
+.coll b,
+.coll ul {
+  padding-left: 1em;
+}
+
+.coll ul {
+  overflow: hidden;
+  _zoom: 1;
+}
+
+.coll li {
+  width: 48%;
+  float: left;
+}
+
+.anno li {
+  display: block;
+  padding-left: 2em;
+}
+
+.anno a {
+  padding-right: 1em;
+}
+
+.auth b {
+  display: block;
+  text-align: right;
+  font-weight: normal;
+  color: #888;
+}
+
+.discrim div,
+.discrim b {
+  padding-left: 1em;
+}
+
+.discrim ul {
+  padding-left: 3em;
+}
+
+.discrim strong {
+  padding-right: 0.5em;
+  color: #32a8ba;
+}
+
+.comn b {
+  line-height: 24px;
+  margin-right: 0.25em;
+  padding: 0 1px;
+  font-size: 12px;
+  font-weight: normal;
+  color: white;
+  border-radius: 3px;
+  background: #c8c8c8;
+}
+
+.comn ul {
+  padding-left: 3em;
+}
+
+.abbr em {
+  padding-right: 0.5em;
+}
+
+.abbr bdo {
+  font-size: inherit;
+  color: #ff7800;
+}
+
+.abbr a {
+  padding-right: 0.5em;
+}
+
+.nwd a {
+  width: 42%;
+  padding-left: 5%;
+  vertical-align: top;
+  display: inline-block;
+  border-radius: 5px;
+  color: #32a9ba;
+}
+
+.nwd a:hover {
+  text-decoration: none;
+  background: #f2f5f5;
+}
+
+.nfw ul {
+  padding-left: 3em;
+}
+
+.nfw strong {
+  color: #32a8ba;
+}
+
+.nfo ul {
+  padding-left: 3em;
+}
+
+.nfo li {
+  width: 48%;
+  display: inline-block;
+}
+
+.nfo a {
+  padding-right: 1em;
+}
+
+.nfo .fold,
+.nfo .unfold {
+  margin-left: 42px;
+}
+
+.derive a {
+  padding-right: 0.5em;
+}
+
+.derive ul {
+  padding-left: 3em;
+}
+
+.relat li {
+  padding-bottom: 10px;
+  overflow: hidden;
+}
+
+.relat li a {
+  font-weight: bold;
+  float: left;
+}
+
+.relat div {
+  padding-left: 130px;
+  color: gray;
+}
+
+.relat span {
+  font-size: 14px;
+}
+
+.relat span a {
+  float: none;
+  color: #4d7aa6;
+}
+
+.relat p {
+  line-height: 24px;
+}
+
+.relat em {
+  padding: 0 0.25em;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.unfind ul {
+  padding-top: 20px;
+}
+
+.unfind a {
+  padding-right: 1em;
+}
+
+.dict-chart {
+  svg {
+    text {
+      fill: var(--txt-color);
+    }
+  }
+}
