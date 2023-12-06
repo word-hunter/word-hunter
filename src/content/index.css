@@ -32,7 +32,10 @@ w-mark-t {
       border-radius: 0.3em;
       content: attr(data-trans);
       color: #fff;
-      box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255), 0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+      box-shadow:
+        inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+        0 0 0 2px rgb(255, 255, 255),
+        0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
       transition: background-color 0.3s;
       background-color: #666;
 
@@ -90,7 +93,7 @@ body:has(.__zen_mode) {
   padding: 40px;
   background-color: var(--zen-bg-color);
   overflow: auto;
-  * {
+  *:not(w-mark-t) {
     all: revert;
   }
 
