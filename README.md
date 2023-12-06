@@ -45,8 +45,9 @@ This will make all "unknown" words as "known", except the words you excluded in 
 - <kbd>↓</kbd> scroll down dict section
 - <kbd>↑</kbd> scroll up dict section
 - <kbd>ESC</kbd> close dict panel / close zen mode
-- <kbd>a</kbd> mark as known
-- <kbd>s</kbd> save context
+- <kbd>a</kbd> mark as known when card window is shown
+- <kbd>s</kbd> save context when card window is shown
+- <kbd>z</kbd> hold `z` key and press mouse middle button to mark as known without showing card window
 
 ## Similar projects
 

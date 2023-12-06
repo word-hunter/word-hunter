@@ -511,8 +511,11 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
   }
 }
 
-function onMouseMove(e: MouseEvent) {
-  if (zenMode() && cardDisabledInZenMode()) {
+let toQuickMarkWord: string
+let holdKey: string | null = null
+
+function onMouseMove(e: MouseEvent, slient = false) {
+  if (!slient && zenMode() && cardDisabledInZenMode()) {
     return false
   }
 
@@ -525,6 +528,12 @@ function onMouseMove(e: MouseEvent) {
     const range = getRangeAtPoint(e)
     if (range) {
       const word = range.toString().trim().toLowerCase()
+
+      // for quick mark as known, don't show card
+      if (!isCardVisible() && slient) {
+        toQuickMarkWord = word
+        return false
+      }
 
       if (inDirecting) {
         inDirecting = false
@@ -559,37 +568,65 @@ function onMouseClick(e: MouseEvent) {
   }
 }
 
+function onAuxclick(e: MouseEvent) {
+  console.log(e)
+  e.preventDefault()
+  if (toQuickMarkWord) {
+    console.log('quick mark as known', toQuickMarkWord)
+    e.stopImmediatePropagation()
+    e.preventDefault()
+    markAsKnown(toQuickMarkWord)
+    setCurWord('')
+    hidePopupDelay(0)
+    explode(e.pageX, e.pageY)
+    toQuickMarkWord = ''
+    return false
+  }
+}
+
 let waitMouseKeyTask: Function | null
 
 function preMouseMove(e: MouseEvent) {
-  // skip when redirecting in card dictionary
   waitMouseKeyTask = null
+  toQuickMarkWord = ''
+
   const mouseKey = settings().mosueKey
   if (mouseKey !== 'NONE' && !e[mouseKey]) {
     waitMouseKeyTask = () => {
-      console.log('onMouseMove')
       onMouseMove(e)
     }
   } else {
-    onMouseMove(e)
+    onMouseMove(e, holdKey === 'z')
   }
 }
 
 function onKeyDown(e: KeyboardEvent) {
+  holdKey = e.key
   if (e[settings().mosueKey]) {
     waitMouseKeyTask && waitMouseKeyTask()
+  }
+}
+
+function onKeyUp(e: KeyboardEvent) {
+  holdKey = null
+  if (e[settings().mosueKey]) {
+    waitMouseKeyTask = null
   }
 }
 
 function bindEvents() {
   document.addEventListener('mousemove', preMouseMove)
   document.addEventListener('keydown', onKeyDown)
+  document.addEventListener('keyup', onKeyUp)
   // hide popup when click outside card
   document.addEventListener('click', onMouseClick)
+  document.addEventListener('auxclick', onAuxclick)
 }
 
 function unbindEvents() {
   document.removeEventListener('mousemove', preMouseMove)
   document.removeEventListener('keydown', onKeyDown)
+  document.removeEventListener('keyup', onKeyUp)
   document.removeEventListener('click', onMouseClick)
+  document.removeEventListener('auxclick', onAuxclick)
 }
