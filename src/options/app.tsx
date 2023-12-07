@@ -17,9 +17,9 @@ export const App = () => {
         <YoutubeSetting />
         <PronounceSetting />
         <DictsSetting />
+        <OpenAISetting />
         <LevelSetting />
         <ControlSetting />
-        <OpenAISetting />
         <Backup />
       </div>
     </div>

@@ -240,7 +240,7 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
           const newRange = range.cloneRange()
           newRange.collapse(false)
           const transNode = document.createElement('w-mark-t')
-          transNode.textContent = `(${cnRegex.exec(trans)?.[0]})`
+          transNode.textContent = `(${cnRegex.exec(trans)?.[0] ?? trans})`
           transNode.dataset.trans = `(${trans})`
           // TODO: insertNode performance is terrible, need to optimize
           newRange.insertNode(transNode)

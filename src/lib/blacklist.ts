@@ -1,8 +1,9 @@
 import { Messages, StorageKey } from '../constant'
 import { getSyncValue, getLocalValue } from './storage'
+import { DEFAULT_SETTINGS } from './settings'
 
 export const readBlacklist = async () => {
-  const settings = await getSyncValue(StorageKey.settings)
+  const settings = (await getSyncValue(StorageKey.settings)) ?? DEFAULT_SETTINGS
   const blacklist = settings.blacklist ?? []
   return Array.isArray(blacklist) ? blacklist : []
 }

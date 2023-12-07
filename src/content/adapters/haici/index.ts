@@ -51,7 +51,7 @@ export class HaiCiDict implements Adapter {
       '.sidenav',
       '.copyright',
       '.auth',
-      '.dual',
+      // '.dual',
       '.layout.en'
     ]
 
@@ -101,14 +101,19 @@ export class HaiCiDict implements Adapter {
   }
 }
 
-type ChartData = { percent: number; sense: string }[]
+type ChartData = Record<number, { percent: number; sense: string }>
 
 function genSvgPieChart(container: Element | null) {
   if (container) {
     const dataString = container.getAttribute('data')
-    let data: ChartData = []
+    let data: ChartData = {}
     try {
       data = JSON.parse(decodeURIComponent(dataString || ''))
+      const keys = Object.keys(data)
+      if (!(keys.length > 1)) {
+        container.remove()
+        return false
+      }
     } catch (e) {
       console.warn(e)
       return false

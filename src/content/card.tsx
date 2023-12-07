@@ -569,9 +569,8 @@ function onMouseClick(e: MouseEvent) {
 }
 
 function onAuxclick(e: MouseEvent) {
-  console.log(e)
-  e.preventDefault()
-  if (toQuickMarkWord) {
+  if (holdKey === 'z' && toQuickMarkWord) {
+    e.preventDefault()
     console.log('quick mark as known', toQuickMarkWord)
     e.stopImmediatePropagation()
     e.preventDefault()
