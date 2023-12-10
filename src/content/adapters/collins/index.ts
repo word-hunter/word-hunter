@@ -75,7 +75,11 @@ export class CollinsDict implements Adapter {
       '.homnum',
       '.suggest_new_word_wrapper',
       '.miniWordle',
-      '#videos'
+      '#videos',
+      '.dictionary ~ .dictionary',
+      '.dictionary ~ .assets',
+      '.cB-n-w',
+      '.cB-o'
     ]
 
     toRemoveSelectors.forEach(selector => {
