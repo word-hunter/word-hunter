@@ -412,7 +412,7 @@ const playAudio = (node: HTMLElement, e?: MouseEvent) => {
   if (audioSrc) {
     getMessagePort().postMessage({ action: Messages.play_audio, audio: audioSrc })
     e && e.stopImmediatePropagation()
-    node.classList.add('active')
+    node?.classList.add('active')
     setTimeout(() => {
       node?.classList.remove('active')
     }, 1000)
@@ -466,7 +466,13 @@ function showPopup() {
   const availableDicts = () => settings().dictOrder.filter(key => dictTabs()[key as AdapterKey]) as AdapterKey[]
   const tabCount = () => availableDicts().length
   const cardNode = getCardNode()
-  if (tabIndex() === tabCount()) {
+  if (wordContexts().length > 0) {
+    setTabIndex(tabCount())
+    // use chrome.tts to pronounce the word in context
+    requestIdleCallback(() => {
+      getMessagePort().postMessage({ action: Messages.play_audio, audio: null, word: curWord() })
+    })
+  } else if (tabIndex() === tabCount()) {
     setTabIndex(0)
   }
   cardNode.classList.add('card_visible')

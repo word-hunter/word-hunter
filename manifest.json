@@ -42,6 +42,7 @@
   },
   "host_permissions": ["*://*.youglish.com/"],
   "permissions": [
+    "tts",
     "storage",
     "activeTab",
     "scripting",

@@ -50,7 +50,11 @@ function updateBadge(wordsKnown: WordMap) {
   chrome.action.setTitle({ title: '✔ ' + String(knownWordsCount) })
 }
 
-const playAudio = async (audio: string) => {
+const playAudio = async (audio: string, word: string) => {
+  if (!audio) {
+    chrome.tts.speak(word, { lang: 'en-US', rate: 0.7 })
+    return
+  }
   const autioPageUrl = chrome.runtime.getURL('audio.html')
   const volume = settings().volume ?? 100
 
@@ -213,7 +217,7 @@ chrome.runtime.onConnect.addListener(async port => {
           break
         }
         case Messages.play_audio:
-          playAudio(msg.audio)
+          playAudio(msg.audio, word)
           break
         case Messages.open_youglish:
           chrome.tabs.create({
