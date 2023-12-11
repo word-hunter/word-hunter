@@ -475,6 +475,9 @@ a {
 
 .basic li {
   line-height: 30px;
+  &:last-child {
+    padding-top: 0 !important;
+  }
 }
 
 .basic span {

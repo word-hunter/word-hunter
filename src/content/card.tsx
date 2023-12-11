@@ -1,6 +1,6 @@
 import './index.css'
 import cardStyles from './card.css?inline'
-import { createSignal, Show, For, Switch, Match, batch, onMount, onCleanup } from 'solid-js'
+import { createSignal, createEffect, Show, For, Switch, Match, batch, onMount, onCleanup } from 'solid-js'
 import { customElement } from 'solid-element'
 import { classes, Messages, WordContext } from '../constant'
 import {
@@ -201,6 +201,15 @@ export const WhCard = customElement('wh-card', () => {
     unbindEvents()
   })
 
+  // auto switch to first tab when context tab is selected and no contexts
+  createEffect((prev?: number) => {
+    const contexts = wordContexts()
+    if (contexts.length === 0 && tabIndex() === tabCount() && prev === tabCount()) {
+      setTabIndex(0)
+    }
+    return tabIndex()
+  })
+
   const extenalLink = () => {
     if (tabIndex() == tabCount()) return null
     return getDictAdapter().getPageUrl(curWord())
@@ -244,7 +253,10 @@ export const WhCard = customElement('wh-card', () => {
               </button>
             )}
           </For>
-          <button onclick={() => setTabIndex(tabCount())} classList={{ selected: tabIndex() === tabCount() }}>
+          <button
+            onclick={() => setTabIndex(tabCount())}
+            classList={{ selected: tabIndex() === tabCount(), hidden: !wordContexts().length }}
+          >
             Contexts
           </button>
         </div>

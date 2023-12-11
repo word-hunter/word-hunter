@@ -56,7 +56,9 @@
   box-shadow: rgb(0 0 0 / 80%) 0 4px 23px -6px;
   user-select: text;
   opacity: 0;
-  transition: transform 0.1s, opacity 0.3s;
+  transition:
+    transform 0.1s,
+    opacity 0.3s;
   pointer-events: none;
   @media (prefers-reduced-motion) {
     & {
@@ -222,7 +224,10 @@
     padding: 6px 15px;
     align-items: center;
     border-bottom: 0.5px solid var(--border-color);
-    box-shadow: 0 1px 2px hsla(0, 10%, 94%, 0.05), 0 1px 4px hsla(0, 20%, 94%, 0.05), 0 2px 8px hsla(0, 0%, 0%, 0.05);
+    box-shadow:
+      0 1px 2px hsla(0, 10%, 94%, 0.05),
+      0 1px 4px hsla(0, 20%, 94%, 0.05),
+      0 2px 8px hsla(0, 0%, 0%, 0.05);
     border-radius: 8px 8px 0 0;
     background-color: var(--bg-toolbar);
     button {
@@ -305,6 +310,9 @@
         background-color: var(--bg-color);
         color: var(--color-main);
         font-weight: bold;
+      }
+      &.hidden {
+        display: none;
       }
     }
   }
