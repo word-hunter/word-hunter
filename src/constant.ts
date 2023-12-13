@@ -94,4 +94,4 @@ export const invalidTags = [
 
 export const wordRegex = /^[a-z]+$/i
 // match Chinese characters but not in brackets
-export const cnRegex = /[\u4E00-\u9FA5…]+(?![^(]*\))/
+export const cnRegex = /[\u4E00-\u9FA5…]+(?![^(]*(\)|\）))/
