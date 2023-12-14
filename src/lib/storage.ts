@@ -5,7 +5,7 @@ const BUCKET_SIZE = 400
 const BUCKET_PREFIX = '_b_'
 const BUCKET_INDICES = new Array(TOTAL_INDEX / BUCKET_SIZE).fill(0).map((_, i) => BUCKET_PREFIX + i)
 
-type BucketIndex = typeof BUCKET_INDICES[number]
+type BucketIndex = (typeof BUCKET_INDICES)[number]
 
 function indexBitmap2Words(bucketIndex: number, bitmap: string, indexedWords: string[]) {
   const words = [] as string[]
@@ -114,22 +114,36 @@ export async function syncUpKnowns(words: string[], knownsInMemory: WordMap, upd
   }
 }
 
-export async function mergeKnowns(gDriveKnowns: WordMap) {
+export async function mergeKnowns(gDriveKnowns: WordMap, gDriveUpdateTime: number = 0) {
   const KnownSynced = await getAllKnownSync()
+  const syncUpdateTime = (await getSyncValue(StorageKey.knwon_update_timestamp)) ?? 0
   const mergedUpdateTime = Date.now()
 
-  if (!gDriveKnowns) return [KnownSynced, mergedUpdateTime] as const
+  if (!gDriveKnowns) return [KnownSynced, syncUpdateTime] as const
 
-  // sort by length
-  const knownsList = [KnownSynced, gDriveKnowns].sort((a, b) => {
-    return Object.keys(a).length - Object.keys(b).length
-  })
-
-  // current just merge all knowns to one object, keep words from all soruce
   const mergedKnowns = {}
-  knownsList.forEach(knowns => {
-    Object.assign(mergedKnowns, knowns)
-  })
+
+  const lengthDiff = Math.abs(Object.keys(gDriveKnowns).length - Object.keys(KnownSynced).length)
+
+  // if the difference is less than 10, just use the newer one
+  if (lengthDiff < 10) {
+    if (gDriveUpdateTime > syncUpdateTime) {
+      // gdrive is newer
+      Object.assign(mergedKnowns, gDriveKnowns)
+    } else if (syncUpdateTime > gDriveUpdateTime) {
+      // chrome.storage.sync is newer
+      Object.assign(mergedKnowns, KnownSynced)
+    }
+  } else {
+    // if the difference is more than 10, use the longer one
+    const knownsList = [KnownSynced, gDriveKnowns].sort((a, b) => {
+      return Object.keys(a).length - Object.keys(b).length
+    })
+
+    knownsList.forEach(knowns => {
+      Object.assign(mergedKnowns, knowns)
+    })
+  }
 
   // only keep origin knowns, this is a clean strategy for the old version of the extension
   const dict = (await getLocalValue(StorageKey.dict)) as WordInfoMap
@@ -232,7 +246,7 @@ const _LEGACY_STORAGE_KEY_INDICES =
     ' '
   )
 
-type LegacySyncIndexKey = typeof _LEGACY_STORAGE_KEY_INDICES[number]
+type LegacySyncIndexKey = (typeof _LEGACY_STORAGE_KEY_INDICES)[number]
 const DATA_MIGRATED = 'migrated_to_bitmap'
 let migrating = false
 

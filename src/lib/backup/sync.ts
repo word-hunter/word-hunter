@@ -51,7 +51,10 @@ export async function _syncWithDrive(interactive: boolean = true) {
       appData[StorageKey.settings_update_timestamp],
       gdriveData[StorageKey.settings_update_timestamp]
     )
-    const [mergedKnowns, knwon_update_timestamp] = await mergeKnowns(gdriveData[StorageKey.known])
+    const [mergedKnowns, knwon_update_timestamp] = await mergeKnowns(
+      gdriveData[StorageKey.known],
+      gdriveData[StorageKey.knwon_update_timestamp]
+    )
     const [mergedContexts, context_update_timestamp] = await mergeContexts(
       gdriveData[StorageKey.context],
       gdriveData[StorageKey.context_update_timestamp]
