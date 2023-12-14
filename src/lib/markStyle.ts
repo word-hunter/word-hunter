@@ -34,6 +34,8 @@ export function genMarkStyle() {
   `
 
   switch (markStyle) {
+    case 'none':
+      return ''
     case 'text':
       style += `
         ${unknownSelector} {

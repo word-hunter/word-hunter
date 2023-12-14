@@ -16,6 +16,7 @@ export type DictName = keyof typeof DEFAULT_DICTS
 export type MouseKey = 'NONE' | 'ctrlKey' | 'altKey' | 'shiftKey' | 'metaKey'
 
 export const MarkStyles = [
+  'none',
   'background',
   'background-underline',
   'text',
