@@ -70,7 +70,6 @@ export enum Messages {
 export const invalidTags = [
   'SCRIPT',
   'STYLE',
-  'BUTTON',
   'VIDEO',
   'SVG',
   'CODE',
