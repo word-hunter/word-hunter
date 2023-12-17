@@ -324,8 +324,16 @@ function cleanRanges() {
 function observeDomChange() {
   const observer = new MutationObserver(mutations => {
     mutations.forEach(mutation => {
+      if (mutation.type === 'characterData') {
+        if (mutation.target.nodeType === Node.TEXT_NODE) {
+          if (isTextNodeValid(mutation.target as Text)) {
+            highlightTextNode(mutation.target as Text, dict, wordsKnown)
+          }
+        }
+      }
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
+          console.log('added node', node)
           if (!node.isConnected || !node.parentNode?.isConnected) {
             return false
           }
@@ -364,6 +372,8 @@ function observeDomChange() {
   observer.observe(document.body, {
     childList: true,
     subtree: true,
+    characterData: true,
+    characterDataOldValue: false,
     attributes: false
   })
 }
