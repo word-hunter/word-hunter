@@ -333,7 +333,6 @@ function observeDomChange() {
       }
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach(node => {
-          console.log('added node', node)
           if (!node.isConnected || !node.parentNode?.isConnected) {
             return false
           }
