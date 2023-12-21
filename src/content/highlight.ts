@@ -212,6 +212,7 @@ export function getRangeAtPoint(e: MouseEvent) {
 
 const segmenterEn = new Intl.Segmenter('en-US', { granularity: 'word' })
 function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, word?: string) {
+  if (node.parentElement?.tagName === 'W-MARK-T') return
   const text = node.nodeValue || ''
   let toHighlightWords = []
   const segments = segmenterEn.segment(text)
