@@ -51,12 +51,12 @@ function updateBadge(wordsKnown: WordMap) {
 }
 
 const playAudio = async (audio: string, word: string) => {
+  const volume = settings().volume ?? 100
   if (!audio) {
-    chrome.tts.speak(word, { lang: 'en-US', rate: 0.7 })
+    chrome.tts.speak(word, { lang: 'en-US', rate: 0.7, volume: volume / 100 })
     return
   }
   const autioPageUrl = chrome.runtime.getURL('audio.html')
-  const volume = settings().volume ?? 100
 
   if (!chrome.offscreen) {
     return createAudioWindow(`${autioPageUrl}?audio=${encodeURIComponent(audio)}&?volume=${volume}`)
