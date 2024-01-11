@@ -82,7 +82,6 @@ export class HaiCiDict implements Adapter {
       .replaceAll(`href="${this.host}`, `data-href="${this.host}`)
       .replaceAll(`href="/text`, `data-href="/text`)
       .replaceAll('<a href="">', '<a href="#">')
-      .replaceAll('<a ', '<a target="_blank" ')
       .replaceAll('src="/', `src="${this.host}/`)
       .replaceAll('href="/', `href="${this.host}/`)
   }
