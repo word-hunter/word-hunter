@@ -121,7 +121,7 @@ function fillUpNewDefaultSettingFiled(target: Record<string, any>, source: Recor
         })
         target[key].forEach((tk: string) => {
           if (!source[key].includes(tk)) {
-            target.splice(target.indexOf(tk), 1)
+            target[key].splice(target[key].indexOf(tk), 1)
           }
         })
       }
