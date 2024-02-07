@@ -7,9 +7,6 @@ import { syncWithDrive, getBackupData } from '../lib/backup/sync'
 import { isMobile, isValidAuthToken } from '../lib/backup/drive'
 
 export const Backup = () => {
-  let dialogRef: HTMLDialogElement
-  let fileRef: HTMLInputElement
-
   const timeFormatter = new Intl.DateTimeFormat('en-US')
   const timeLongFormatter = new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
@@ -56,10 +53,6 @@ export const Backup = () => {
     }
   })
 
-  const showModal = () => {
-    dialogRef.showModal()
-  }
-
   const toastS = (message: string) => {
     setToastSuccess('✅ ' + message)
     setTimeout(() => {
@@ -75,23 +68,29 @@ export const Backup = () => {
   }
 
   const onRestore = () => {
-    const fileList = fileRef.files
-    if (!fileList?.length) {
-      toastE('no files')
-      return false
-    }
-
-    const reader = new FileReader()
-    reader.onload = async () => {
-      const data = reader.result
-      try {
-        await restoreData(data as string)
-        toastS('restore success')
-      } catch (e) {
-        toastE('invalid file')
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async e => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) {
+        toastE('no files')
+        return false
       }
+
+      const reader = new FileReader()
+      reader.onload = async () => {
+        const data = reader.result
+        try {
+          await restoreData(data as string)
+          toastS('restore success')
+        } catch (e) {
+          toastE('invalid file')
+        }
+      }
+      reader.readAsText(file)
     }
-    reader.readAsText(fileList[0])
+    input.click()
   }
 
   const restoreData = async (data: string) => {
@@ -139,30 +138,8 @@ export const Backup = () => {
         <h2 class="h2">
           Backup<Note>Automatically sync between Chromes (without context data)</Note>
         </h2>
-        <dialog id="restoreDialog" ref={dialogRef!} class="modal">
-          <form method="dialog" class="modal-box">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            <div class="pt-10">
-              <input
-                type="file"
-                accept=".json"
-                ref={fileRef!}
-                class="file-input file-input-bordered file-input-xs sm:file-input-sm w-full"
-              />
-            </div>
-            <div class="modal-action">
-              <button class="btn btn-outline" onclick={onRestore}>
-                confirm
-              </button>
-            </div>
-          </form>
-          <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-          </form>
-        </dialog>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-          <button onclick={showModal} class="btn btn-block btn-lg capitalize text-xs">
+          <button onclick={onRestore} class="btn btn-block btn-lg capitalize text-xs">
             ️<img src={chrome.runtime.getURL('icons/upload.png')} class="w-8 h-8" alt="upload" />
             restore
           </button>

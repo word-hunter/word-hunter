@@ -21,7 +21,7 @@ const onDirectToOption = async () => {
     const win = await chrome.windows.getCurrent()
     window.close()
     chrome.sidePanel.setOptions({ path: 'src/options.html' })
-    chrome.sidePanel.open({ windowId: win.id })
+    chrome.sidePanel.open({ windowId: win.id! })
   } else {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/options.html') })
   }
@@ -45,7 +45,7 @@ export const App = () => {
       const win = await chrome.windows.getCurrent()
       window.close()
       chrome.sidePanel.setOptions({ path: 'src/logs.html' })
-      chrome.sidePanel.open({ windowId: win.id })
+      chrome.sidePanel.open({ windowId: win.id! })
     } else {
       chrome.tabs.create({
         url: chrome.runtime.getURL('src/logs.html')
