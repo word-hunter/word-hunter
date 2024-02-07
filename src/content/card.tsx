@@ -389,12 +389,14 @@ function ContextList(props: { contexts: WordContext[] }) {
         <For each={props.contexts.reverse()}>
           {(context: WordContext) => {
             const highlightedContext = safeEmphasizeWordInText(context.text, allTenstionWords().join('|'))
+            const link =
+              context.url + '#:~:text=' + encodeURIComponent(context.text?.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim())
             return (
               <div>
                 <pre innerHTML={highlightedContext}></pre>
                 <p>
                   <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
-                  <a href={context.url} target="_blank">
+                  <a href={link} target="_blank">
                     {context.title}
                   </a>
                 </p>
