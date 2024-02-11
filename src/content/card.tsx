@@ -389,8 +389,9 @@ function ContextList(props: { contexts: WordContext[] }) {
         <For each={props.contexts.reverse()}>
           {(context: WordContext) => {
             const highlightedContext = safeEmphasizeWordInText(context.text, allTenstionWords().join('|'))
-            const link =
+            let link =
               context.url + '#:~:text=' + encodeURIComponent(context.text?.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim())
+            link = link.replaceAll('-', '%2D')
             return (
               <div>
                 <pre innerHTML={highlightedContext}></pre>
