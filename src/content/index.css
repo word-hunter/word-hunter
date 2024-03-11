@@ -16,6 +16,9 @@ w-mark-t {
   font-style: italic;
   font-weight: normal;
   user-select: none;
+  &:not(:defined) {
+    visibility: visible; /* for reddit */
+  }
   &:hover {
     opacity: 1;
     overflow: visible;

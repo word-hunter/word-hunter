@@ -3,7 +3,7 @@ import { StorageKey, WordMap, WordInfoMap, ContextMap } from '../constant'
 const TOTAL_INDEX = 60000
 const BUCKET_SIZE = 400
 const BUCKET_PREFIX = '_b_'
-const BUCKET_INDICES = new Array(TOTAL_INDEX / BUCKET_SIZE).fill(0).map((_, i) => BUCKET_PREFIX + i)
+const BUCKET_INDICES = Array.from({ length: TOTAL_INDEX / BUCKET_SIZE }, (_, i) => BUCKET_PREFIX + i)
 
 type BucketIndex = (typeof BUCKET_INDICES)[number]
 
