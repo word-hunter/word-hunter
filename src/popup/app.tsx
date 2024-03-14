@@ -16,6 +16,13 @@ const onPdfViewer = () => {
   return false
 }
 
+const onEpubViewer = () => {
+  chrome.tabs.create({
+    url: 'https://sapjax.github.io/espacio/'
+  })
+  return false
+}
+
 const onDirectToOption = async () => {
   if (chrome.sidePanel?.open) {
     const win = await chrome.windows.getCurrent()
@@ -84,10 +91,13 @@ export const App = () => {
         <Statistics />
         <div class={styles.buttons}>
           <button onclick={onFastModeToggle}>
-            ️<img src={chrome.runtime.getURL('icons/zen.png')} width="20" height="20" /> Toggle zen mode
+            ️<img src={chrome.runtime.getURL('icons/zen.png')} width="20" height="20" /> Zen mode
           </button>
           <button onclick={onPdfViewer}>
-            ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> Open PDF reader
+            ️<img src={chrome.runtime.getURL('icons/pdf.png')} width="20" height="20" /> PDF reader
+          </button>
+          <button onclick={onEpubViewer}>
+            ️<img src={chrome.runtime.getURL('icons/epub.png')} width="20" height="20" /> ePUB reader
           </button>
           <button onclick={onKnownLogs}>
             ️<img src={chrome.runtime.getURL('icons/logs.png')} width="20" height="20" />
