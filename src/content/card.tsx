@@ -504,12 +504,31 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
 
   let left = x + m_width + MARGIN_X
   let top = y - 20
+  let viewportWidth = window.innerWidth
+
+  // handle iframe overflow
+  try {
+    if (parent !== self) {
+      if (self.top?.innerWidth! < viewportWidth) {
+        viewportWidth = self.top?.innerWidth ?? viewportWidth
+        parent.document.querySelectorAll('iframe').forEach(iframe => {
+          if (iframe.contentWindow === self) {
+            const iframeRect = iframe.getBoundingClientRect()
+            viewportWidth = viewportWidth - iframeRect.left
+          }
+        })
+      }
+    }
+  } catch (e) {
+    // do nothing
+  }
+
   // if overflow right viewport
-  if (left + c_width > window.innerWidth) {
+  if (left + c_width > viewportWidth) {
     if (x > c_width) {
       left = x - c_width - MARGIN_X
     } else {
-      left = window.innerWidth - c_width - 30
+      left = viewportWidth - c_width - 30
       top = y + m_height + MARGIN_X
     }
   }
@@ -527,7 +546,7 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
     cardNode.style.transform = `translate(${left}px, ${top}px)`
   }
 
-  if (!onlyOutsideViewport || c_x < 0 || c_x + c_width > window.innerWidth) {
+  if (!onlyOutsideViewport || c_x < 0 || c_x + c_width > viewportWidth) {
     cardNode.style.transform = `translate(${left}px, ${top}px)`
   }
 }

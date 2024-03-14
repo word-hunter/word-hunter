@@ -18,7 +18,7 @@ const onPdfViewer = () => {
 
 const onEpubViewer = () => {
   chrome.tabs.create({
-    url: 'https://sapjax.github.io/espacio/'
+    url: 'https://app.flowoss.com/'
   })
   return false
 }
