@@ -150,16 +150,10 @@ function _makeAsAllKnown(words: string[]) {
 
 function getTextNodes(node: Node): Text[] {
   const textNodes = []
-  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, (node: Node) => {
-    if (invalidTags.includes(node.parentElement?.tagName ?? '')) {
-      return NodeFilter.FILTER_REJECT
-    } else {
-      return NodeFilter.FILTER_ACCEPT
-    }
-  })
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
 
   while (walker.nextNode()) {
-    textNodes.push(walker.currentNode as Text)
+    !invalidTags.includes(walker.currentNode.parentElement?.tagName ?? '') && textNodes.push(walker.currentNode as Text)
   }
 
   return textNodes
