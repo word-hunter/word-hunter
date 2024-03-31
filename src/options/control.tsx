@@ -4,7 +4,7 @@ import { Note } from './note'
 export const ControlSetting = () => {
   const onKeyChange = (e: Event) => {
     const target = e.target as HTMLSelectElement
-    setSetting('mosueKey', target.value as any)
+    setSetting('mouseKey', target.value as any)
   }
 
   const onVolumeChange = (e: Event) => {
@@ -22,7 +22,7 @@ export const ControlSetting = () => {
           <select
             class="select select-bordered select-sm w-full max-w-xs text-xs"
             oninput={onKeyChange}
-            value={settings().mosueKey}
+            value={settings().mouseKey}
             aria-placeholder="select key"
           >
             <option disabled>Select Key</option>

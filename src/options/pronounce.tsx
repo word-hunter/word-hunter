@@ -3,7 +3,7 @@ import { settings, setSetting } from '../lib'
 export const PronounceSetting = () => {
   const onInput = (e: Event) => {
     const target = e.target as HTMLInputElement
-    setSetting('atuoPronounce', target.checked)
+    setSetting('autoPronounce', target.checked)
   }
 
   const onVolumeChange = (e: Event) => {
@@ -21,7 +21,7 @@ export const PronounceSetting = () => {
             type="checkbox"
             name="pronounce"
             id="pronounce"
-            checked={settings().atuoPronounce}
+            checked={settings().autoPronounce}
             oninput={onInput}
           />
         </label>

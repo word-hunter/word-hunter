@@ -56,13 +56,13 @@ const playAudio = async (audio: string, word: string) => {
     chrome.tts.speak(word, { lang: 'en-US', rate: 0.7, volume: volume / 100 })
     return
   }
-  const autioPageUrl = chrome.runtime.getURL('audio.html')
+  const audioPageUrl = chrome.runtime.getURL('audio.html')
 
   if (!chrome.offscreen) {
-    return createAudioWindow(`${autioPageUrl}?audio=${encodeURIComponent(audio)}&?volume=${volume}`)
+    return createAudioWindow(`${audioPageUrl}?audio=${encodeURIComponent(audio)}&?volume=${volume}`)
   }
 
-  await setupOffscreenDocument(autioPageUrl)
+  await setupOffscreenDocument(audioPageUrl)
   chrome.runtime.sendMessage({
     type: 'play-audio',
     target: 'offscreen',

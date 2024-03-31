@@ -14,7 +14,7 @@ export const Statistics = () => {
   }
 
   const unKnownPercent = () => (counts()[0] / counts()[2]) * 100
-  const contextPrecent = () => (counts()[1] / counts()[2]) * 100
+  const contextPercent = () => (counts()[1] / counts()[2]) * 100
 
   getStatistics()
 
@@ -38,7 +38,7 @@ export const Statistics = () => {
           cx="50%"
           cy="50%"
           style={{
-            'stroke-dasharray': `${contextPrecent()} 100`,
+            'stroke-dasharray': `${contextPercent()} 100`,
             'stroke-dashoffset': `-${unKnownPercent()}`,
             stroke: settings()['colors'][1]
           }}
