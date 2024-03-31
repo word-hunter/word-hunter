@@ -152,8 +152,8 @@ function getTextNodes(node: Node): Text[] {
   const textNodes = []
   const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
 
-  while (walker.nextNode() && !invalidTags.includes(walker.currentNode.parentElement?.tagName ?? '')) {
-    textNodes.push(walker.currentNode as Text)
+  while (walker.nextNode()) {
+    !invalidTags.includes(walker.currentNode.parentElement?.tagName ?? '') && textNodes.push(walker.currentNode as Text)
   }
 
   return textNodes
