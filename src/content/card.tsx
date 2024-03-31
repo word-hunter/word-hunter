@@ -128,7 +128,7 @@ export const WhCard = customElement('wh-card', () => {
     if (tabIndex() === index) {
       adjustCardPosition(rangeRect, inDirecting)
       inDirecting = false
-      runAtuoPronounce()
+      runAutoPronounce()
     }
   }
 
@@ -210,7 +210,7 @@ export const WhCard = customElement('wh-card', () => {
     return tabIndex()
   })
 
-  const extenalLink = () => {
+  const externalLink = () => {
     if (tabIndex() == tabCount()) return null
     return getDictAdapter().getPageUrl(curWord())
   }
@@ -231,7 +231,7 @@ export const WhCard = customElement('wh-card', () => {
           </button>
         </div>
         <div>
-          <a target={extenalLink() ? '_blank' : '_self'} href={extenalLink() || 'javascript:void(0)'}>
+          <a target={externalLink() ? '_blank' : '_self'} href={externalLink() || 'javascript:void(0)'}>
             {curWord()}
           </a>
         </div>
@@ -374,7 +374,7 @@ export function ZenMode() {
 }
 
 function ContextList(props: { contexts: WordContext[] }) {
-  const allTenstionWords = () => getWordAllTenses(curWord()).reverse()
+  const allTensionWords = () => getWordAllTenses(curWord()).reverse()
   return (
     <Show
       when={props.contexts.length > 0}
@@ -388,7 +388,7 @@ function ContextList(props: { contexts: WordContext[] }) {
       <div class="contexts">
         <For each={props.contexts.reverse()}>
           {(context: WordContext) => {
-            const highlightedContext = safeEmphasizeWordInText(context.text, allTenstionWords().join('|'))
+            const highlightedContext = safeEmphasizeWordInText(context.text, allTensionWords().join('|'))
             let link =
               context.url + '#:~:text=' + encodeURIComponent(context.text?.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim())
             link = link.replaceAll('-', '%2D')
@@ -435,9 +435,9 @@ const playAudio = (node: HTMLElement, e?: MouseEvent) => {
   }
 }
 
-const runAtuoPronounce = () => {
-  if (isCardVisible() && settings().atuoPronounce) {
-    // play amarican english audio first
+const runAutoPronounce = () => {
+  if (isCardVisible() && settings().autoPronounce) {
+    // play american english audio first
     let ameNode = getCardNode().querySelector('.amefile[data-src-mp3]')
     if (ameNode) {
       playAudio(ameNode as HTMLElement)
@@ -492,7 +492,7 @@ function showPopup() {
   }
   cardNode.classList.add('card_visible')
   cardNode.inert = false
-  runAtuoPronounce()
+  runAutoPronounce()
 }
 
 function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
@@ -554,8 +554,8 @@ function adjustCardPosition(rect: DOMRect, onlyOutsideViewport = false) {
 let toQuickMarkWord: string
 let holdKey: string | null = null
 
-function onMouseMove(e: MouseEvent, slient = false) {
-  if (!slient && zenMode() && cardDisabledInZenMode()) {
+function onMouseMove(e: MouseEvent, silent = false) {
+  if (!silent && zenMode() && cardDisabledInZenMode()) {
     return false
   }
 
@@ -570,7 +570,7 @@ function onMouseMove(e: MouseEvent, slient = false) {
       const word = range.toString().trim().toLowerCase()
 
       // for quick mark as known, don't show card
-      if (!isCardVisible() && slient) {
+      if (!isCardVisible() && silent) {
         toQuickMarkWord = word
         return false
       }
@@ -628,7 +628,7 @@ function preMouseMove(e: MouseEvent) {
   waitMouseKeyTask = null
   toQuickMarkWord = ''
 
-  const mouseKey = settings().mosueKey
+  const mouseKey = settings().mouseKey
   if (mouseKey !== 'NONE' && !e[mouseKey]) {
     waitMouseKeyTask = () => {
       onMouseMove(e)
@@ -640,14 +640,14 @@ function preMouseMove(e: MouseEvent) {
 
 function onKeyDown(e: KeyboardEvent) {
   holdKey = e.key
-  if (e[settings().mosueKey]) {
+  if (e[settings().mouseKey]) {
     waitMouseKeyTask && waitMouseKeyTask()
   }
 }
 
 function onKeyUp(e: KeyboardEvent) {
   holdKey = null
-  if (e[settings().mosueKey]) {
+  if (e[settings().mouseKey]) {
     waitMouseKeyTask = null
   }
 }
