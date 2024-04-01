@@ -88,7 +88,8 @@ export const invalidTags = [
   'MAP',
   'META',
   'OBJECT',
-  'WH-ROOT'
+  'WH-ROOT',
+  'W-MARK-T'
 ]
 
 export const wordRegex = /^[a-z]+$/i

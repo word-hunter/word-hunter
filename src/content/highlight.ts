@@ -10,7 +10,7 @@ import {
   cnRegex
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync } from '../lib'
+import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync, debounce } from '../lib'
 import { getMessagePort } from '../lib/port'
 
 declare global {
@@ -204,6 +204,40 @@ export function getRangeAtPoint(e: MouseEvent) {
   return rangeAtPoint?.range ?? null
 }
 
+let transObjects: {
+  range: Range
+  pNode: Element
+  trans: string
+  inserted?: boolean
+}[] = []
+
+const intersectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(
+    entry => {
+      const el = entry.target as HTMLElement
+
+      if (entry.isIntersecting || entry.intersectionRatio > 0) {
+        transObjects.forEach(obj => {
+          const { range, pNode, trans } = obj
+          if (!obj.inserted && pNode === el) {
+            const transNode = document.createElement('w-mark-t')
+            transNode.textContent = `(${cnRegex.exec(trans)?.[0] ?? trans})`
+            transNode.dataset.trans = `(${trans})`
+            range.insertNode(transNode)
+            range.detach()
+            obj.inserted = true
+            intersectionObserver.unobserve(pNode)
+          }
+        })
+        debounce(() => {
+          transObjects = transObjects.filter(obj => !obj.inserted)
+        }, 200)
+      }
+    },
+    { rootMargin: '50vh 0 50vh 0', threshold: 0 }
+  )
+})
+
 const segmenterEn = new Intl.Segmenter('en-US', { granularity: 'word' })
 function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: WordMap, word?: string) {
   if (node.parentElement?.tagName === 'W-MARK-T') return
@@ -213,8 +247,6 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
   let toHighlightWords = []
   const segments = segmenterEn.segment(text)
 
-  const totalLength = node.length
-  let preEnd = 0
   let curNode = node
 
   for (const segment of segments) {
@@ -224,8 +256,9 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
       if (!(originFormWord in wordsKnown)) {
         if (word && word !== originFormWord) continue
         const range = new Range()
-        range.setStart(curNode, segment.index - preEnd)
-        range.setEnd(curNode, segment.index - preEnd + w.length)
+        range.setStart(curNode, segment.index)
+        let endOffset = segment.index + w.length
+        range.setEnd(curNode, endOffset)
 
         const trans = settings().showCnTrans && fullDict[originFormWord]?.t
         if (trans) {
@@ -233,20 +266,18 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
           if (range.endContainer.nextSibling?.nodeName === 'W-MARK-T') {
             continue
           }
-          // insert trans tag after range
-          const newRange = range.cloneRange()
+
+          const newRange = new Range()
+          newRange.setStart(curNode, endOffset)
           newRange.collapse(false)
-          const transNode = document.createElement('w-mark-t')
-          transNode.textContent = `(${cnRegex.exec(trans)?.[0] ?? trans})`
-          transNode.dataset.trans = `(${trans})`
-          // TODO: insertNode performance is terrible, need to optimize
-          newRange.insertNode(transNode)
-          newRange.detach()
-          // if transNode is not the last node, move cursor to next text node
-          preEnd = segment.index + w.length
-          if (preEnd < totalLength) {
-            curNode = transNode.nextSibling as Text
-          }
+
+          transObjects.push({
+            range: newRange,
+            pNode: curNode.parentElement!,
+            trans
+          })
+
+          intersectionObserver.observe(curNode.parentElement!)
         }
 
         const contextLength = getWordContexts(w)?.length ?? 0
@@ -334,11 +365,15 @@ function observeDomChange() {
             return false
           }
           if (node.nodeType === Node.TEXT_NODE) {
-            if (isTextNodeValid(node as Text)) {
+            if (isTextNodeValid(node as Text) && node.nodeValue) {
               highlightTextNode(node as Text, dict, wordsKnown)
             }
           } else {
-            if ((node as HTMLElement).isContentEditable || node.parentElement?.isContentEditable) {
+            if (
+              (node as HTMLElement).isContentEditable ||
+              node.parentElement?.isContentEditable ||
+              node.nodeName?.toUpperCase() === 'W-MARK-T'
+            ) {
               return false
             }
             highlight(node)
@@ -404,6 +439,7 @@ window.__getPageStatistics = getPageStatistics
 window.__updateDicts = () => {
   document.querySelectorAll('w-mark-t').forEach(node => {
     node.remove()
+    transObjects = []
   })
   resetHighlight()
   readStorageAndHighlight()
