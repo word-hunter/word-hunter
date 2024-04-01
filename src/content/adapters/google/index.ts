@@ -95,7 +95,7 @@ export class GoogleDict implements Adapter {
         (el as HTMLSourceElement).src ??
         'https://www.google.com/speech-api/v1/synthesize?enc=mpeg&lang=zh-cn&speed=0.4&client=lr-language-tts&use_google_only_voices=1&text=' +
           encodeURIComponent(word)
-      el.closest('.brWULd')?.setAttribute('data-src-mp3', src)
+      el.closest('.brWULd')?.setAttribute('data-src-mp3', src.replace(/^file/, 'https'))
       el.parentElement?.remove()
     })
 
