@@ -1,37 +1,39 @@
 import {
+  cnRegex,
+  ContextMap,
   invalidTags,
   Messages,
-  WordContext,
-  ContextMap,
-  WordMap,
-  WordInfoMap,
-  wordRegex,
   StorageKey,
-  cnRegex
+  WordContext,
+  WordInfoMap,
+  WordMap,
+  wordRegex
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync, debounce } from '../lib'
+import { debounce, getAllKnownSync, getDocumentTitle, getFaviconUrl, getSelectedDicts, settings } from '../lib'
 import { getMessagePort } from '../lib/port'
 
-declare global {
-  interface Highlight extends Set<Range> {
-    readonly priority: number
-  }
-
-  const Highlight: {
-    prototype: Highlight
-    new (...initialRanges: Array<Range>): Highlight
-  }
-
-  type HighlightRegistry = Map<string, Highlight>
-
-  namespace CSS {
-    const highlights: HighlightRegistry
-  }
+declare interface Highlight extends Set<Range> {
+  readonly priority: number
 }
 
-export const unknownHL = new Highlight()
-export const contextHL = new Highlight()
+type HighlightRegistry = Map<string, Highlight>
+
+declare namespace CSS {
+  const highlights: HighlightRegistry
+}
+
+type RangeHighlight = {
+  prototype: Highlight
+  new (...initialRanges: Range[]): Highlight
+}
+
+function createHighlight() {
+  return new (Highlight as unknown as RangeHighlight)()
+}
+
+export const unknownHL = createHighlight()
+export const contextHL = createHighlight()
 CSS.highlights.set('wh-unknown', unknownHL)
 CSS.highlights.set('wh-context', contextHL)
 
@@ -383,7 +385,7 @@ function observeDomChange() {
         // when remove node, remove highlight range
         if (mutation.removedNodes.length > 0) {
           cleanRangeTaskTimer && clearTimeout(cleanRangeTaskTimer)
-          cleanRangeTaskTimer = setTimeout(cleanRanges, 100)
+          cleanRangeTaskTimer = window.setTimeout(cleanRanges, 100)
 
           // for some sites like calibre reader server
           // it uses `document.body.innerHTML` when page changes between book thumb and book contents
