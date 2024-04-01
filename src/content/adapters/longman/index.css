@@ -994,7 +994,7 @@ span.synopp {
 .bussdictEntry .GramBox.nobox {
   display: inline;
   border-style: none;
-  background-color: none;
+  background-color: transparent;
 }
 
 .bussdictEntry .GramBox.nobox .EXPL {
