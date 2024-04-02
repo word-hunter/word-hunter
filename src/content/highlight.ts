@@ -13,23 +13,6 @@ import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync, debounce } from '../lib'
 import { getMessagePort } from '../lib/port'
 
-declare global {
-  interface Highlight extends Set<Range> {
-    readonly priority: number
-  }
-
-  const Highlight: {
-    prototype: Highlight
-    new (...initialRanges: Array<Range>): Highlight
-  }
-
-  type HighlightRegistry = Map<string, Highlight>
-
-  namespace CSS {
-    const highlights: HighlightRegistry
-  }
-}
-
 export const unknownHL = new Highlight()
 export const contextHL = new Highlight()
 CSS.highlights.set('wh-unknown', unknownHL)
@@ -43,7 +26,7 @@ let contexts: ContextMap = {}
 export const [zenExcludeWords, setZenExcludeWords] = createSignal<string[]>([])
 export const [wordContexts, setWordContexts] = createSignal<WordContext[]>([])
 
-export function getRangeWord(range: Range) {
+export function getRangeWord(range: AbstractRange) {
   return range.toString().toLowerCase()
 }
 
@@ -188,7 +171,7 @@ export function getRangeAtPoint(e: MouseEvent) {
     lastMouseOverElement = element
     rangesWithRectAtMouseOverCache = [...unknownHL, ...contextHL]
       .map(range => {
-        if (element === range.commonAncestorContainer?.parentElement) {
+        if (range instanceof Range && element === range.commonAncestorContainer?.parentElement) {
           const rect = range.getBoundingClientRect()
           return { range, rect }
         }
@@ -412,11 +395,11 @@ function observeDomChange() {
 function getHighlightCount() {
   const contextWordsSet = new Set()
   const unknownWordSet = new Set()
-  unknownHL.forEach((range: Range) => {
+  unknownHL.forEach(range => {
     const word = getOriginForm(getRangeWord(range))
     unknownWordSet.add(word)
   })
-  contextHL.forEach((range: Range) => {
+  contextHL.forEach(range => {
     const word = getOriginForm(getRangeWord(range))
     contextWordsSet.add(word)
   })
