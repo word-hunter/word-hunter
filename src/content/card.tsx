@@ -216,7 +216,6 @@ export const WhCard = customElement('wh-card', () => {
   }
 
   return (
-    // @ts-ignore inert property
     <div class="word_card" onclick={onCardClick} ondblclick={onCardDoubleClick} inert>
       <div class="toolbar">
         <div>

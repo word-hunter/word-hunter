@@ -206,7 +206,9 @@ const intersectionObserver = new IntersectionObserver(entries => {
             const transNode = document.createElement('w-mark-t')
             transNode.textContent = `(${cnRegex.exec(trans)?.[0] ?? trans})`
             transNode.dataset.trans = `(${trans})`
-            range.insertNode(transNode)
+            if (range.endContainer.nextSibling?.nodeName !== 'W-MARK-T') {
+              range.insertNode(transNode)
+            }
             range.detach()
             obj.inserted = true
             intersectionObserver.unobserve(pNode)
