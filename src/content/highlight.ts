@@ -22,6 +22,7 @@ let wordsKnown: WordMap = {}
 let fullDict: WordInfoMap = {}
 let dict: WordInfoMap = {}
 let contexts: ContextMap = {}
+let highlightContainerMap = new WeakMap<Node, Set<Range>>()
 
 export const [zenExcludeWords, setZenExcludeWords] = createSignal<string[]>([])
 export const [wordContexts, setWordContexts] = createSignal<WordContext[]>([])
@@ -169,15 +170,9 @@ export function getRangeAtPoint(e: MouseEvent) {
   const element = e.target as HTMLElement
   if (element !== lastMouseOverElement) {
     lastMouseOverElement = element
-    rangesWithRectAtMouseOverCache = [...unknownHL, ...contextHL]
-      .map(range => {
-        if (range instanceof Range && element === range.commonAncestorContainer?.parentElement) {
-          const rect = range.getBoundingClientRect()
-          return { range, rect }
-        }
-        return null
-      })
-      .filter(r => r !== null) as { range: Range; rect: DOMRect }[]
+    rangesWithRectAtMouseOverCache = Array.from(highlightContainerMap.get(element) ?? []).map(range => {
+      return { range, rect: range.getBoundingClientRect() }
+    })
   }
 
   const rangeAtPoint = rangesWithRectAtMouseOverCache.find(
@@ -265,6 +260,9 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
           intersectionObserver.observe(curNode.parentElement!)
         }
 
+        let sameContainerRanges = highlightContainerMap.get(node.parentElement!) ?? new Set()
+        highlightContainerMap.set(node.parentElement!, sameContainerRanges.add(range))
+
         const contextLength = getWordContexts(w)?.length ?? 0
         if (contextLength > 0) {
           contextHL.add(range)
@@ -319,19 +317,7 @@ function resetHighlight() {
   dict = {}
   unknownHL.clear()
   contextHL.clear()
-}
-
-let cleanRangeTaskTimer: number
-function cleanRanges() {
-  window.requestIdleCallback(() => {
-    ;[unknownHL, contextHL].forEach(hl => {
-      hl.forEach(range => {
-        if (!range.toString()) {
-          hl.delete(range)
-        }
-      })
-    })
-  })
+  highlightContainerMap = new WeakMap()
 }
 
 function observeDomChange() {
@@ -367,8 +353,16 @@ function observeDomChange() {
 
         // when remove node, remove highlight range
         if (mutation.removedNodes.length > 0) {
-          cleanRangeTaskTimer && clearTimeout(cleanRangeTaskTimer)
-          cleanRangeTaskTimer = setTimeout(cleanRanges, 100)
+          mutation.removedNodes.forEach(node => {
+            if (highlightContainerMap.has(node)) {
+              const ranges = highlightContainerMap.get(node)!
+              ranges.forEach(r => {
+                unknownHL.delete(r)
+                contextHL.delete(r)
+              })
+              highlightContainerMap.delete(node)
+            }
+          })
 
           // for some sites like calibre reader server
           // it uses `document.body.innerHTML` when page changes between book thumb and book contents
