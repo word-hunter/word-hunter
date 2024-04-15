@@ -22,13 +22,13 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.23",
-    "@types/chrome": "^0.0.263",
-    "daisyui": "^4.9.0",
+    "@types/chrome": "^0.0.266",
+    "daisyui": "^4.10.1",
     "postcss-import": "^16.1.0",
-    "postcss-nesting": "^12.1.0",
+    "postcss-nesting": "^12.1.1",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.3",
-    "vite": "^5.2.7",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.8",
     "vite-plugin-solid": "^2.10.2"
   },
   "dependencies": {
