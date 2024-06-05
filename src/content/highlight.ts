@@ -49,6 +49,7 @@ function _makeAsKnown(word: string) {
       const rangeWord = getRangeWord(range)
       if (isOriginFormSame(rangeWord, word)) {
         hl.delete(range)
+        detachRange(range as Range)
       }
     })
   })
@@ -127,9 +128,15 @@ function _makeAsAllKnown(words: string[]) {
       const rangeWord = getRangeWord(range)
       if (words.includes(rangeWord)) {
         hl.delete(range)
+        detachRange(range as Range)
       }
     })
   })
+}
+
+function detachRange(range: Range) {
+  highlightContainerMap.get(range.startContainer.parentNode!)?.delete(range)
+  range.detach()
 }
 
 function getTextNodes(node: Node): Text[] {
