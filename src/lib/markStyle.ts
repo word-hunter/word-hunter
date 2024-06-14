@@ -11,19 +11,15 @@ export function genMarkStyle() {
   const bgColor1 = settings()['colors'][1]
 
   const cssVars = `
-    ${unknownSelector} {
+    :root {
         --wh-text-color-0: ${textColor0};
         --wh-bg-color-0: ${bgColor0};
-    }
-    ${contextSelector} {
         --wh-text-color-1: ${textColor1};
         --wh-bg-color-1: ${bgColor1};
     }
     @media (prefers-color-scheme: dark) {
-        ${unknownSelector} {
+        :root {
             --wh-bg-color-0: ${generateDarkModeColor(bgColor0)};
-        }
-        ${contextSelector} {
             --wh-bg-color-1: ${generateDarkModeColor(bgColor1)};
         }
     }
