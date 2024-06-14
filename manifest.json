@@ -1,7 +1,7 @@
 {
   "name": "Word Hunter",
   "description": "Discover new words you don't know on any web page",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "manifest_version": 3,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA37Tu6LgsThnqIusXCvgDP+kzjHmJgwehDp01nEvTCH3N19Qpe3+q6o20yjMfyT1681f3mzugV4scpjSsYH7ixO8wZHDNBwJlPPLV8jjpwRd/rBiXLYw7sSSHsX1dN7mQuKdua7WrsN+CUc7s8acq0F9lAXGtsk/BA3tNSidB5kVmog1iLf3m6wbbYK9wKmlgIjw8OkAxOs4YnZ/Z5Dfj4lPZ0aYxUmQkXSZgc3Jj0IUiQBfY3+RsJw0u7M2njPlU6AQ8pPET3BHY86ee0xSksINMrVYYMjAmHv+05RzIF+rANlHGqHYoPaD3z/rxkeki4uXXkVEi4Yv+AhdKxGUwYwIDAQAB",
   "icons": {
