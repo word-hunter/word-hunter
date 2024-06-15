@@ -119,7 +119,7 @@ export const App = () => {
       </a>
       <Show when={showVersionTip()}>
         <div class={styles.newRelease}>
-          <a href="https://github.com/sapjax/word-hunter/releases" target="_blank" onclick={onVersionTipClose}>
+          <a href="https://github.com/word-hunter/word-hunter/releases" target="_blank" onclick={onVersionTipClose}>
             🥳<span>What's new ↗</span>
           </a>
         </div>
