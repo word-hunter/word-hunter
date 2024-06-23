@@ -94,3 +94,65 @@ export function debounce<T extends (...args: any[]) => void>(func: T, delay: num
     }, delay)
   }
 }
+
+const timeFormatter = new Intl.DateTimeFormat('zh-CN', {
+  dateStyle: 'short',
+  timeStyle: 'short',
+  hour12: false
+})
+
+export function formatTime(time: number) {
+  return timeFormatter.format(time)
+}
+
+/**
+ * create by chatGPT4
+ */
+export function getRelativeTimeString(date1: number, date2: number, locale = 'en-US') {
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+
+  const startDate = new Date(date1)
+  const endDate = new Date(date2)
+  const diffInMs = endDate.getTime() - startDate.getTime()
+
+  const seconds = Math.floor(diffInMs / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  let months
+  let years
+
+  // Calculate difference in years.
+  years = endDate.getFullYear() - startDate.getFullYear()
+  const deltaMonths = endDate.getMonth() - startDate.getMonth()
+  if (deltaMonths < 0 || (deltaMonths === 0 && endDate.getDate() < startDate.getDate())) {
+    years--
+  }
+
+  // Calculate difference in months.
+  if (years > 0) {
+    startDate.setFullYear(startDate.getFullYear() + years)
+  }
+  months = endDate.getMonth() - startDate.getMonth()
+  if (endDate.getDate() < startDate.getDate()) {
+    months--
+  }
+  if (months < 0) {
+    months += 12
+  }
+
+  if (years !== 0) {
+    return formatTime(date1)
+  } else if (months !== 0) {
+    return formatTime(date1)
+  } else if (days !== 0) {
+    return rtf.format(-days, 'day')
+  } else if (hours !== 0) {
+    return rtf.format(-hours, 'hour')
+  } else if (minutes !== 0) {
+    return rtf.format(-minutes, 'minute')
+  } else {
+    return rtf.format(-seconds, 'second')
+  }
+}

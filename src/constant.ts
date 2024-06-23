@@ -62,7 +62,6 @@ export enum Messages {
   'delete_context' = 'delete_context',
   'app_available' = 'app_available',
   'play_audio' = 'play_audio',
-  'open_youglish' = 'open_youglish',
   'fetch_html' = 'fetch_html',
   'ai_explain' = 'ai_explain'
 }

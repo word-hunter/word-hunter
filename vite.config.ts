@@ -9,7 +9,7 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       input: {
-        logs: 'src/logs.html'
+        review: 'src/review.html'
       }
     },
     sourcemap: false

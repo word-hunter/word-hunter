@@ -40,7 +40,6 @@
     "client_id": "718785835689-d2lqmos8aa7kfgtq6mplp7v2hb83eahh.apps.googleusercontent.com",
     "scopes": ["https://www.googleapis.com/auth/drive.file"]
   },
-  "host_permissions": ["*://*.youglish.com/"],
   "permissions": [
     "tts",
     "storage",
@@ -51,7 +50,6 @@
     "identity",
     "contextMenus",
     "sidePanel",
-    "alarms",
-    "cookies"
+    "alarms"
   ]
 }
