@@ -1,7 +1,8 @@
-import { ContextMap, StorageKey, WordContext } from '../constant'
+import { ContextMap, StorageKey, WordContext, Messages } from '../constant'
 import { createSignal, For, Show } from 'solid-js'
 import { getLocalValue } from '../lib/storage'
 import { getFaviconByDomain, getRelativeTimeString, formatTime } from '../lib/utils'
+import { getMessagePort } from '../lib/port'
 
 export const App = () => {
   const [contexts, setContexts] = createSignal<ContextMap>({})
@@ -85,6 +86,13 @@ export const App = () => {
     }
   }
 
+  const markAsKnown = (word: string) => {
+    getMessagePort().postMessage({ action: Messages.set_known, word })
+    const newContexts = { ...contexts() }
+    delete newContexts[word]
+    chrome.storage.local.set({ [StorageKey.context]: newContexts })
+  }
+
   chrome.storage.onChanged.addListener(
     (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
       if (namespace === 'local') {
@@ -134,24 +142,32 @@ export const App = () => {
 
           <For each={sortedContexts()}>
             {contexts => (
-              <div class="card bg-white dark:bg-[#3C3C3C] shadow-xs font-serif">
+              <div class="group card bg-white dark:bg-[#3C3C3C] shadow-xs font-serif">
                 <div class="card-body">
                   <h2 class="card-title">
                     {contexts[0].word}{' '}
-                    <button class="group inline-block" onclick={() => playPhrase(contexts[0].word)}>
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="group-hover:fill-red-500"
-                      >
+                    <button class="group/btn inline-block" onclick={() => playPhrase(contexts[0].word)}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="2" fill="none" />
-                        <polygon points="9,6 18,12 9,18" class="group-hover:fill-red-500" fill="currentColor" />
+                        <polygon points="9,6 18,12 9,18" class="group-hover/btn:fill-red-500" fill="currentColor" />
                       </svg>
                     </button>
+                    <div>
+                      <button class="tooltip" data-tip="Mark as known" onclick={() => markAsKnown(contexts[0].word)}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-6 w-6 hover:text-green-500 hidden group-hover:inline-block"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                    </div>
                   </h2>
-                  <For each={contexts}>
+                  <For each={contexts.reverse()}>
                     {(context, i) => (
                       <div>
                         {i() !== 0 && <div class="divider my-0"></div>}
