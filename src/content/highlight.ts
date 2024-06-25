@@ -63,9 +63,19 @@ function _makeAsUnknown(word: string) {
 export function addContext(word: string, text: string) {
   if (!wordRegex.test(word)) return
   const originFormWord = getOriginForm(word)
+  let url = location.href
+  if (url.startsWith('https://www.youtube.com/watch')) {
+    const videoPlayer = document.querySelector('.video-stream.html5-main-video') as HTMLVideoElement
+    if (videoPlayer) {
+      const time = Math.floor(videoPlayer.currentTime)
+      const _url = new URL(url)
+      _url.searchParams.set('t', time.toString())
+      url = _url.toString()
+    }
+  }
 
   const context: WordContext = {
-    url: location.href,
+    url,
     title: getDocumentTitle(),
     text: text,
     word: originFormWord,

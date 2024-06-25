@@ -136,13 +136,6 @@ export const WhCard = customElement('wh-card', () => {
     return !!wordContexts().find(c => c.text === curContextText())
   }
 
-  const goYouGlish = () => {
-    const word = curWord()
-    if (word) {
-      getMessagePort().postMessage({ action: Messages.open_youglish, word })
-    }
-  }
-
   // for page like calibre, stop the document scroll when mouse wheel on card
   const onWheel = (e: WheelEvent) => {
     e.stopImmediatePropagation()
@@ -235,9 +228,9 @@ export const WhCard = customElement('wh-card', () => {
           </a>
         </div>
         <div>
-          <button onClick={goYouGlish} title="youglish">
-            <img src={chrome.runtime.getURL('icons/cinema.png')} alt="youglish" />
-          </button>
+          <a href={`https://www.playphrase.me/#/search?q=${curWord()}&language=en`} title="playphrase" target="_blank">
+            <img src={chrome.runtime.getURL('icons/cinema.png')} alt="playphrase" />
+          </a>
           <button class="history_back" disabled={dictHistory().length < 2} title="back">
             <img src={chrome.runtime.getURL('icons/undo.png')} alt="back" />
           </button>

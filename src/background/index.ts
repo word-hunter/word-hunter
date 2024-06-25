@@ -1,6 +1,6 @@
 import { Messages, WordMap, WordInfoMap, WordContext, StorageKey, LevelKey } from '../constant'
 import { explainWord } from '../lib/openai'
-import { syncUpKnowns, getLocalValue, getAllKnownSync, addLocalKnownsLogs, removeLocalKnownsLogs } from '../lib/storage'
+import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
 import { triggerGoogleDriveSyncJob, syncWithDrive } from '../lib/backup/sync'
 
@@ -98,9 +98,11 @@ const checkOffscreenDocumentExist = async (offscreenUrl: string) => {
   if (chrome.runtime.getContexts) {
     // @ts-ignore
     const existingContexts = await chrome.runtime.getContexts({
+      // @ts-ignore
       contextTypes: ['OFFSCREEN_DOCUMENT'],
       documentUrls: [offscreenUrl]
     })
+    // @ts-ignore
     return existingContexts.length > 0
     // @ts-ignore
   } else if (globalThis.clients) {
@@ -173,7 +175,6 @@ chrome.runtime.onConnect.addListener(async port => {
           updateBadge(knowns)
           sendMessageToAllTabs({ action, word })
           triggerGoogleDriveSyncJob()
-          addLocalKnownsLogs([word])
           break
         case Messages.set_all_known:
           const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
@@ -182,7 +183,6 @@ chrome.runtime.onConnect.addListener(async port => {
           updateBadge(knowns)
           sendMessageToAllTabs({ action, words })
           triggerGoogleDriveSyncJob()
-          addLocalKnownsLogs(words)
           break
         case Messages.add_context: {
           const contexts = (await getLocalValue(StorageKey.context)) ?? {}
@@ -218,11 +218,6 @@ chrome.runtime.onConnect.addListener(async port => {
         }
         case Messages.play_audio:
           playAudio(msg.audio, word)
-          break
-        case Messages.open_youglish:
-          chrome.tabs.create({
-            url: chrome.runtime.getURL('youglish.html') + `?word=${encodeURIComponent(word)}`
-          })
           break
         case Messages.fetch_html: {
           const { url, uuid } = msg
@@ -321,7 +316,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       updateBadge(knowns)
       sendMessageToAllTabs({ action: Messages.set_unknown, word: originFormWord })
       triggerGoogleDriveSyncJob()
-      removeLocalKnownsLogs(originFormWord)
     }
   }
 })

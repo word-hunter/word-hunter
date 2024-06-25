@@ -4,16 +4,10 @@ import { downloadAsJsonFile, resotreSettings } from '../lib'
 import { syncUpKnowns, getLocalValue } from '../lib/storage'
 import { Note } from './note'
 import { syncWithDrive, getBackupData } from '../lib/backup/sync'
+import { formatTime } from '../lib/utils'
 import { isMobile, isValidAuthToken } from '../lib/backup/drive'
 
 export const Backup = () => {
-  const timeFormatter = new Intl.DateTimeFormat('en-US')
-  const timeLongFormatter = new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'long',
-    hour12: false
-  })
-
   const [toastSuccess, setToastSuccess] = createSignal('')
   const [toastError, setToastError] = createSignal('')
   const [syning, setSyning] = createSignal(false)
@@ -111,7 +105,7 @@ export const Backup = () => {
 
   const onBackup = async () => {
     const now = Date.now()
-    const fileName = `word_hunter_backup_${timeFormatter.format(now)}_${now}.json`
+    const fileName = `word_hunter_backup_${formatTime(now).replaceAll('/', '_')}_${now}.json`
     const backupData = await getBackupData()
     downloadAsJsonFile(JSON.stringify(backupData), fileName)
   }
@@ -172,7 +166,7 @@ export const Backup = () => {
           </button>
 
           <Show when={latestSyncTime() > 0 && !syncFailedMessage()}>
-            <div class="text-center text-accent">Latest sync: {timeLongFormatter.format(latestSyncTime())}</div>
+            <div class="text-center text-accent">Latest sync: {formatTime(latestSyncTime())}</div>
           </Show>
           <Show when={!!syncFailedMessage()}>
             <div class="text-center text-error">❌ Sync Failed: {syncFailedMessage()}</div>
