@@ -143,9 +143,9 @@ export function getRelativeTimeString(date1: number, date2: number, locale = 'en
   }
 
   if (years !== 0) {
-    return formatTime(date1)
+    return formatTime(date1).split(' ')[0]
   } else if (months !== 0) {
-    return formatTime(date1)
+    return formatTime(date1).split(' ')[0]
   } else if (days !== 0) {
     return rtf.format(-days, 'day')
   } else if (hours !== 0) {
