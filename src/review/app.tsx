@@ -1,8 +1,7 @@
-import { ContextMap, StorageKey, WordContext, Messages } from '../constant'
-import { createSignal, For, Show } from 'solid-js'
+import { ContextMap, StorageKey, WordContext } from '../constant'
+import { createEffect, createSignal, For, Show } from 'solid-js'
 import { getLocalValue } from '../lib/storage'
 import { getFaviconByDomain, getRelativeTimeString, formatTime } from '../lib/utils'
-import { getMessagePort } from '../lib/port'
 
 export const App = () => {
   const [contexts, setContexts] = createSignal<ContextMap>({})
@@ -13,6 +12,18 @@ export const App = () => {
   const [showVideoWindow, setShowVideoWindow] = createSignal<boolean>(false)
   const [videoSrc, setVideoSrc] = createSignal<string>('')
   const [miniWindow, setMiniWindow] = createSignal<boolean>(false)
+  const [isSessionRunning, setIsSessionRunning] = createSignal<boolean>(false)
+  const [aiSession, setAiSession] = createSignal<AITextSession>()
+
+  createEffect(() => {
+    if (!window.ai) return false
+    window.ai.canCreateTextSession().then(async status => {
+      if (status === 'readily') {
+        const session = await window.ai.createTextSession()
+        setAiSession(session)
+      }
+    })
+  })
 
   getLocalValue(StorageKey.context).then(contexts => {
     // delete legacy log data
@@ -86,11 +97,28 @@ export const App = () => {
     }
   }
 
-  const markAsKnown = (word: string) => {
-    getMessagePort().postMessage({ action: Messages.set_known, word })
-    const newContexts = { ...contexts() }
-    delete newContexts[word]
-    chrome.storage.local.set({ [StorageKey.context]: newContexts })
+  const makeSentenceByAI = async (el: HTMLElement, context: WordContext) => {
+    let block = el.closest('blockquote')
+    try {
+      block?.classList.add('loading-stripes')
+      if (isSessionRunning()) {
+        await aiSession()?.destroy()
+        const session = await window.ai.createTextSession()
+        setAiSession(session)
+      }
+      const p = block?.querySelector('p')!
+      const originText = p.textContent
+      setIsSessionRunning(true)
+      const stream = await aiSession()!.promptStreaming(`Make a simple sentence with the word ${context.word}.`)
+      for await (const chunk of stream) {
+        p.textContent = chunk
+      }
+    } catch (e: any) {
+      console.error(e)
+    } finally {
+      block?.classList.remove('loading-stripes')
+      setIsSessionRunning(false)
+    }
   }
 
   chrome.storage.onChanged.addListener(
@@ -149,32 +177,85 @@ export const App = () => {
                     <button class="group/btn inline-block" onclick={() => playPhrase(contexts[0].word)}>
                       <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="2" fill="none" />
-                        <polygon points="9,6 18,12 9,18" class="group-hover/btn:fill-red-500" fill="currentColor" />
+                        <polygon points="9,6 18,12 9,18" fill="currentColor" />
                       </svg>
                     </button>
-                    <div>
-                      <button class="tooltip" data-tip="Mark as known" onclick={() => markAsKnown(contexts[0].word)}>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          class="h-6 w-6 hover:text-green-500 hidden group-hover:inline-block"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        >
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </button>
-                    </div>
                   </h2>
                   <For each={contexts.reverse()}>
                     {(context, i) => (
                       <div>
                         {i() !== 0 && <div class="divider my-0"></div>}
-                        <blockquote class="p-4 pb-3 my-4 bg-gray-50 border-l-4 border-gray-300 dark:border-gray-500 dark:bg-gray-800">
+                        <blockquote class="relative flex flex-row items-center p-4 pr-10 pb-3 my-4 bg-gray-50 border-l-4 border-gray-300 dark:border-gray-500 dark:bg-gray-800">
                           <p class="text-xl italic font-medium leading-relaxed text-gray-900 dark:text-white">
                             {context.text}
                           </p>
+                          <Show when={!!aiSession()}>
+                            <button
+                              class="absolute right-3 hidden group-hover:block hover:text-red-500"
+                              title="Make sentence by AI"
+                              onclick={e => makeSentenceByAI(e.target as HTMLElement, context)}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                width="24"
+                                height="24"
+                                color=""
+                                fill="none"
+                              >
+                                <path
+                                  d="M19 16V14C19 11.1716 19 9.75736 18.1213 8.87868C17.2426 8 15.8284 8 13 8H11C8.17157 8 6.75736 8 5.87868 8.87868C5 9.75736 5 11.1716 5 14V16C5 18.8284 5 20.2426 5.87868 21.1213C6.75736 22 8.17157 22 11 22H13C15.8284 22 17.2426 22 18.1213 21.1213C19 20.2426 19 18.8284 19 16Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M19 18C20.4142 18 21.1213 18 21.5607 17.5607C22 17.1213 22 16.4142 22 15C22 13.5858 22 12.8787 21.5607 12.4393C21.1213 12 20.4142 12 19 12"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M5 18C3.58579 18 2.87868 18 2.43934 17.5607C2 17.1213 2 16.4142 2 15C2 13.5858 2 12.8787 2.43934 12.4393C2.87868 12 3.58579 12 5 12"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M13.5 3.5C13.5 4.32843 12.8284 5 12 5C11.1716 5 10.5 4.32843 10.5 3.5C10.5 2.67157 11.1716 2 12 2C12.8284 2 13.5 2.67157 13.5 3.5Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                />
+                                <path
+                                  d="M12 5V8"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M9 13V14"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M15 13V14"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M10 17.5C10 17.5 10.6667 18 12 18C13.3333 18 14 17.5 14 17.5"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linecap="round"
+                                />
+                              </svg>
+                            </button>
+                          </Show>
                         </blockquote>
                         <div class="flex flex-row items-center justify-end gap-2 text-gray-400 font-sans">
                           <a

@@ -26,3 +26,30 @@ body {
     background: #047db7;
   }
 }
+
+@keyframes stripeMove {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 100% 0;
+  }
+}
+
+.loading-stripes {
+  background: linear-gradient(135deg,
+      rgba(243, 243, 243, 0.5) 25%,
+      rgba(224, 224, 224, 0.5) 25%,
+      rgba(224, 224, 224, 0.5) 50%,
+      rgba(243, 243, 243, 0.5) 50%,
+      rgba(243, 243, 243, 0.5) 75%,
+      rgba(224, 224, 224, 0.5) 75%,
+      rgba(224, 224, 224, 0.5));
+  background-size: 50px 50px;
+  animation: stripeMove 30s linear infinite;
+}
+
+.loading-stripes button {
+  display: block !important;
+}
