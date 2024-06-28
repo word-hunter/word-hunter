@@ -12,14 +12,15 @@ export const App = () => {
   const [showVideoWindow, setShowVideoWindow] = createSignal<boolean>(false)
   const [videoSrc, setVideoSrc] = createSignal<string>('')
   const [miniWindow, setMiniWindow] = createSignal<boolean>(false)
-
-  const [canUseAI, setCanUseAI] = createSignal<boolean>()
+  const [isSessionRunning, setIsSessionRunning] = createSignal<boolean>(false)
+  const [aiSession, setAiSession] = createSignal<AITextSession>()
 
   createEffect(() => {
     if (!window.ai) return false
     window.ai.canCreateTextSession().then(async status => {
       if (status === 'readily') {
-        setCanUseAI(true)
+        const session = await window.ai.createTextSession()
+        setAiSession(session)
       }
     })
   })
@@ -97,23 +98,26 @@ export const App = () => {
   }
 
   const makeSentenceByAI = async (el: HTMLElement, context: WordContext) => {
+    let block = el.closest('blockquote')
     try {
-      if (!canUseAI()) throw new Error('AI not ready')
-      let block = el.closest('blockquote')
       block?.classList.add('loading-stripes')
-      const session = await window.ai.createTextSession()
+      if (isSessionRunning()) {
+        await aiSession()?.destroy()
+        const session = await window.ai.createTextSession()
+        setAiSession(session)
+      }
       const p = block?.querySelector('p')!
       const originText = p.textContent
-      const stream = await session.promptStreaming(
-        `here is a sentence "${originText}", Make another simple sentence with the word ${context.word}.`
-      )
+      setIsSessionRunning(true)
+      const stream = await aiSession()!.promptStreaming(`Make a simple sentence with the word ${context.word}.`)
       for await (const chunk of stream) {
         p.textContent = chunk
       }
+    } catch (e: any) {
+      console.error(e)
+    } finally {
       block?.classList.remove('loading-stripes')
-      session.destroy()
-    } catch (e) {
-      alert('Failed to generate sentence: ' + e)
+      setIsSessionRunning(false)
     }
   }
 
@@ -185,7 +189,7 @@ export const App = () => {
                           <p class="text-xl italic font-medium leading-relaxed text-gray-900 dark:text-white">
                             {context.text}
                           </p>
-                          <Show when={canUseAI()}>
+                          <Show when={!!aiSession()}>
                             <button
                               class="absolute right-3 hidden group-hover:block hover:text-red-500"
                               title="Make sentence by AI"
