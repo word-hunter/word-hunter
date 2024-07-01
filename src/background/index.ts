@@ -172,6 +172,7 @@ chrome.runtime.onConnect.addListener(async port => {
         case Messages.set_known:
           knowns[word] = 'o'
           await syncUpKnowns([word], knowns, Date.now())
+          deleteContextWords([word])
           updateBadge(knowns)
           sendMessageToAllTabs({ action, word })
           triggerGoogleDriveSyncJob()
@@ -180,6 +181,7 @@ chrome.runtime.onConnect.addListener(async port => {
           const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
           Object.assign(knowns, addedWords)
           await syncUpKnowns(words, knowns, Date.now())
+          deleteContextWords(words)
           updateBadge(knowns)
           sendMessageToAllTabs({ action, words })
           triggerGoogleDriveSyncJob()
@@ -237,6 +239,21 @@ chrome.runtime.onConnect.addListener(async port => {
     })
   }
 })
+
+async function deleteContextWords(words: string[]) {
+  const contexts = (await getLocalValue(StorageKey.context)) ?? {}
+  let isChanged = false
+  words.forEach(word => {
+    delete contexts[word]
+    isChanged = true
+  })
+  if (isChanged) {
+    await chrome.storage.local.set({
+      [StorageKey.context]: contexts,
+      [StorageKey.context_update_timestamp]: Date.now()
+    })
+  }
+}
 
 // https://developer.chrome.com/docs/extensions/reference/contextMenus/#event-onInstalled
 chrome.runtime.onInstalled.addListener(async details => {
