@@ -244,8 +244,10 @@ async function deleteContextWords(words: string[]) {
   const contexts = (await getLocalValue(StorageKey.context)) ?? {}
   let isChanged = false
   words.forEach(word => {
-    delete contexts[word]
-    isChanged = true
+    if (contexts.hasOwnProperty(word)) {
+      delete contexts[word]
+      isChanged = true
+    }
   })
   if (isChanged) {
     await chrome.storage.local.set({
