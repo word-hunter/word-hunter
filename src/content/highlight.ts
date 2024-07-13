@@ -180,23 +180,16 @@ function autoPauseForYoutubeSubTitle(node: HTMLElement | null, toHighlightWords:
   }
 }
 
-let rangesWithRectAtMouseOverCache: { range: Range; rect: DOMRect }[] = []
-let lastMouseOverElement: Element | null = null
-
 export function getRangeAtPoint(e: MouseEvent) {
   const element = e.target as HTMLElement
-  if (element !== lastMouseOverElement) {
-    lastMouseOverElement = element
-    rangesWithRectAtMouseOverCache = Array.from(highlightContainerMap.get(element) ?? []).map(range => {
-      return { range, rect: range.getBoundingClientRect() }
-    })
-  }
 
-  const rangeAtPoint = rangesWithRectAtMouseOverCache.find(
-    ({ rect }) =>
+  const rangeAtPoint = Array.from(highlightContainerMap.get(element) ?? []).find(range => {
+    const rect = range.getBoundingClientRect()
+    return (
       rect && rect.left <= e.clientX && rect.right >= e.clientX && rect.top <= e.clientY && rect.bottom >= e.clientY
-  )
-  return rangeAtPoint?.range ?? null
+    )
+  })
+  return rangeAtPoint ?? null
 }
 
 let transObjects: {
