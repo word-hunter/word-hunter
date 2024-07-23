@@ -1,7 +1,7 @@
 import styles from './app.module.css'
 import { Statistics } from './statistics'
 import { Show, createSignal, onMount } from 'solid-js'
-import { settings, setSetting, executeScript, getLocalValue } from '../lib'
+import { settings, setSetting, executeScript, getLocalValue, isMatchURLPattern } from '../lib'
 import manifest from '../../manifest.json'
 import { StorageKey } from '../constant'
 
@@ -40,8 +40,8 @@ export const App = () => {
   const [showVersionTip, setShowVersionTip] = createSignal(false)
 
   const onToggleBlacklist = async () => {
-    const [inBlocklist, host, blacklist] = await getBannedState()
-    const newBlacklist = inBlocklist ? blacklist.filter(h => h !== host) : [...blacklist, host]
+    const [inBlocklist, host, blacklist, matchedRule] = await getBannedState()
+    const newBlacklist = inBlocklist ? blacklist.filter(h => h !== matchedRule) : [...blacklist, host]
     setIsBanned(!inBlocklist)
     await setSetting('blacklist', newBlacklist)
     executeScript(() => window.__updateAppIcon())
@@ -53,22 +53,12 @@ export const App = () => {
     })
   }
 
-  function isInBlackList(blackList: string[], url: string) {
-    return blackList.some(item =>
-      new URLPattern({
-        hostname: `{*.}?${item}`
-      }).test({
-        hostname: url
-      })
-    )
-  }
-
   const getBannedState = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
     const host = new URL(tabs[0].url!).host
     const blacklist = settings()['blacklist']
-    const inBlocklist = isInBlackList(blacklist, host)
-    return [inBlocklist, host, blacklist] as const
+    const [inBlocklist, matchedRule] = isMatchURLPattern(blacklist, host)
+    return [inBlocklist, host, blacklist, matchedRule] as const
   }
 
   getBannedState().then(([inBlocklist]) => {

@@ -25,7 +25,14 @@ import {
 import { getMessagePort } from '../lib/port'
 import { Dict } from './dict'
 import { adapters, AdapterKey } from './adapters'
-import { getWordContext, safeEmphasizeWordInText, getFaviconByDomain, settings, explode } from '../lib'
+import {
+  getWordContext,
+  safeEmphasizeWordInText,
+  getFaviconByDomain,
+  settings,
+  explode,
+  isMatchURLPattern
+} from '../lib'
 import { readBlacklist } from '../lib/blacklist'
 
 let timerShowRef: number
@@ -51,7 +58,8 @@ export const WhCard = customElement('wh-card', () => {
   onMount(() => {
     readBlacklist().then(async blacklist => {
       try {
-        if (blacklist.includes(location.host) || blacklist.includes(top?.location.host)) return
+        if (isMatchURLPattern(blacklist, location.host)[0] || isMatchURLPattern(blacklist, top?.location.host)[0])
+          return
       } catch (e) {
         // do nothing, some times the frame is cross origin, and will throw error for `top.location.host`
       }

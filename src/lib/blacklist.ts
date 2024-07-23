@@ -1,6 +1,7 @@
 import { Messages, StorageKey } from '../constant'
 import { getSyncValue, getLocalValue } from './storage'
 import { DEFAULT_SETTINGS } from './settings'
+import { isMatchURLPattern } from './utils'
 
 export const readBlacklist = async () => {
   const settings = (await getSyncValue(StorageKey.settings)) ?? DEFAULT_SETTINGS
@@ -11,7 +12,7 @@ export const readBlacklist = async () => {
 const updateAppIcon = async () => {
   if (document.visibilityState !== 'hidden' && !chrome.tabs && window.top === window.self) {
     const blacklist = await readBlacklist()
-    const shouldAvailable = !blacklist.includes(top?.location.host)
+    const shouldAvailable = !isMatchURLPattern(blacklist, top?.location.host)[0]
     const isAppAvailable = (await getLocalValue(Messages.app_available as unknown as StorageKey)) ?? true
     if (isAppAvailable !== shouldAvailable) {
       chrome.runtime.sendMessage({ [Messages.app_available]: shouldAvailable })
