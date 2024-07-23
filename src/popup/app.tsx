@@ -53,11 +53,21 @@ export const App = () => {
     })
   }
 
+  function isInBlackList(blackList: string[], url: string) {
+    return blackList.some(item =>
+      new URLPattern({
+        hostname: `{*.}?${item}`
+      }).test({
+        hostname: url
+      })
+    )
+  }
+
   const getBannedState = async () => {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
     const host = new URL(tabs[0].url!).host
     const blacklist = settings()['blacklist']
-    const inBlocklist = blacklist.includes(host)
+    const inBlocklist = isInBlackList(blacklist, host)
     return [inBlocklist, host, blacklist] as const
   }
 
