@@ -271,11 +271,13 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
           newRange.setStart(node, endOffset)
           newRange.collapse(false)
 
-          transObjects.push({
-            range: newRange,
-            pNode: pNode,
-            trans
-          })
+          if (!pNode.isContentEditable && !pNode.parentElement?.isContentEditable) {
+            transObjects.push({
+              range: newRange,
+              pNode: pNode,
+              trans
+            })
+          }
         }
 
         let sameContainerRanges = highlightContainerMap.get(pNode) ?? new Set()
