@@ -25,3 +25,6 @@ build.pem
 
 # secrets
 secrets.*.js
+
+# IDEA IDE
+.idea
