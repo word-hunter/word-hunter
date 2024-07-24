@@ -10,7 +10,7 @@ import {
   cnRegex
 } from '../constant'
 import { createSignal } from 'solid-js'
-import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync, debounce } from '../lib'
+import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync } from '../lib'
 import { getMessagePort } from '../lib/port'
 
 export const unknownHL = new Highlight()
@@ -23,9 +23,11 @@ let fullDict: WordInfoMap = {}
 let dict: WordInfoMap = {}
 let contexts: ContextMap = {}
 let highlightContainerMap = new WeakMap<Node, Set<Range>>()
+let highlightContainerMapKeys = new Set<Node>()
 
 export const [zenExcludeWords, setZenExcludeWords] = createSignal<string[]>([])
 export const [wordContexts, setWordContexts] = createSignal<WordContext[]>([])
+export const [skimmedWords, setSkimmedWords] = createSignal<Set<string>>(new Set())
 
 export function getRangeWord(range: AbstractRange) {
   return range.toString().toLowerCase()
@@ -216,12 +218,20 @@ const intersectionObserver = new IntersectionObserver(entries => {
             }
             range.detach()
             obj.inserted = true
-            intersectionObserver.unobserve(pNode)
           }
         })
-        debounce(() => {
-          transObjects = transObjects.filter(obj => !obj.inserted)
-        }, 200)
+        transObjects = transObjects.filter(obj => !obj.inserted)
+
+        if (settings().preload) {
+          for (const node of highlightContainerMapKeys.values()) {
+            if (el == node) {
+              const ranges = highlightContainerMap.get(node) ?? new Set()
+              setSkimmedWords(new Set([...Array.from(ranges).map(getRangeWord), ...skimmedWords()]))
+            }
+          }
+        }
+
+        intersectionObserver.unobserve(el)
       }
     },
     { rootMargin: '50vh 0 50vh 0', threshold: 0 }
@@ -237,7 +247,7 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
   let toHighlightWords = []
   const segments = segmenterEn.segment(text)
 
-  let curNode = node
+  let pNode = node.parentElement!
 
   for (const segment of segments) {
     const w = segment.segment.toLowerCase()
@@ -246,9 +256,9 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
       if (!(originFormWord in wordsKnown)) {
         if (word && word !== originFormWord) continue
         const range = new Range()
-        range.setStart(curNode, segment.index)
+        range.setStart(node, segment.index)
         let endOffset = segment.index + w.length
-        range.setEnd(curNode, endOffset)
+        range.setEnd(node, endOffset)
 
         const trans = settings().showCnTrans && fullDict[originFormWord]?.t
         if (trans) {
@@ -258,20 +268,20 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
           }
 
           const newRange = new Range()
-          newRange.setStart(curNode, endOffset)
+          newRange.setStart(node, endOffset)
           newRange.collapse(false)
 
           transObjects.push({
             range: newRange,
-            pNode: curNode.parentElement!,
+            pNode: pNode,
             trans
           })
-
-          intersectionObserver.observe(curNode.parentElement!)
         }
 
-        let sameContainerRanges = highlightContainerMap.get(node.parentElement!) ?? new Set()
-        highlightContainerMap.set(node.parentElement!, sameContainerRanges.add(range))
+        let sameContainerRanges = highlightContainerMap.get(pNode) ?? new Set()
+        highlightContainerMap.set(pNode, sameContainerRanges.add(range))
+        highlightContainerMapKeys.add(pNode)
+        intersectionObserver.observe(pNode)
 
         const contextLength = getWordContexts(w)?.length ?? 0
         if (contextLength > 0) {
@@ -328,6 +338,7 @@ function resetHighlight() {
   unknownHL.clear()
   contextHL.clear()
   highlightContainerMap = new WeakMap()
+  highlightContainerMapKeys = new Set()
 }
 
 function observeDomChange() {
@@ -371,6 +382,7 @@ function observeDomChange() {
                 contextHL.delete(r)
               })
               highlightContainerMap.delete(node)
+              highlightContainerMapKeys.delete(node)
             }
           })
 
