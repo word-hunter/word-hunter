@@ -169,7 +169,7 @@ export async function mergeKnowns(gDriveKnowns: WordMap, gDriveUpdateTime: numbe
 
 export async function mergeContexts(remoteContext?: ContextMap, remoteUpdateTime: number = 0) {
   let localUpdateTime: number = (await getLocalValue(StorageKey.context_update_timestamp)) ?? 0
-  const contextLocal: ContextMap = await getLocalValue(StorageKey.context)
+  const contextLocal: ContextMap = (await getLocalValue(StorageKey.context)) ?? {}
 
   let mergedContexts = contextLocal
   let needUpdateLocal = false
