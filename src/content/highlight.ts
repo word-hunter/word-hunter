@@ -198,8 +198,10 @@ let transObjects: {
   range: Range
   pNode: Element
   trans: string
+  word: string
   inserted?: boolean
 }[] = []
+const transAppearCache = new Set<string>()
 
 const intersectionObserver = new IntersectionObserver(entries => {
   entries.forEach(
@@ -208,8 +210,9 @@ const intersectionObserver = new IntersectionObserver(entries => {
 
       if (entry.isIntersecting || entry.intersectionRatio > 0) {
         transObjects.forEach(obj => {
-          const { range, pNode, trans } = obj
-          if (!obj.inserted && pNode === el) {
+          const { range, pNode, trans, word } = obj
+          if (!obj.inserted && pNode === el && !transAppearCache.has(word)) {
+            transAppearCache.add(word)
             const transNode = document.createElement('w-mark-t')
             transNode.textContent = `(${cnRegex.exec(trans)?.[0] ?? trans})`
             transNode.dataset.trans = `(${trans})`
@@ -248,6 +251,8 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
   const segments = segmenterEn.segment(text)
 
   let pNode = node.parentElement!
+  let curNode = node
+  const showTrans = settings().showCnTrans
 
   for (const segment of segments) {
     const w = segment.segment.toLowerCase()
@@ -260,7 +265,7 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
         let endOffset = segment.index + w.length
         range.setEnd(node, endOffset)
 
-        const trans = settings().showCnTrans && fullDict[originFormWord]?.t
+        const trans = showTrans && fullDict[originFormWord]?.t
         if (trans) {
           // avoid duplicated
           if (range.endContainer.nextSibling?.nodeName === 'W-MARK-T') {
@@ -275,6 +280,7 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
             transObjects.push({
               range: newRange,
               pNode: pNode,
+              word: originFormWord,
               trans
             })
           }
@@ -443,6 +449,7 @@ window.__updateDicts = () => {
   document.querySelectorAll('w-mark-t').forEach(node => {
     node.remove()
     transObjects = []
+    transAppearCache.clear()
   })
   resetHighlight()
   readStorageAndHighlight()
