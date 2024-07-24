@@ -4,8 +4,9 @@ import dictStyles from './index.css?inline'
 import type { Adapter } from '../type'
 import { Messages } from '../../../constant'
 import { sendMessage } from '../../../lib/port'
+import { Cache } from '../cache'
 
-const cache: Record<string, string> = {}
+const cache = new Cache()
 
 export class OpenAiDict implements Adapter {
   readonly name = 'openai'
@@ -18,11 +19,11 @@ export class OpenAiDict implements Adapter {
   }
 
   async lookup({ word, text }: { word: string; text?: string }) {
-    if (cache[word]) return Promise.resolve(cache[word])
+    if (cache.get(word)) return Promise.resolve(cache.get(word)!)
     try {
       const html = await fetchExplain(word, text)
       const data = html
-      cache[word] = data
+      cache.set(word, data)
       return data
     } catch (e) {
       console.warn(e)

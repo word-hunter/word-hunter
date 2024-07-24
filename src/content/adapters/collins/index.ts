@@ -1,8 +1,9 @@
 import dictStyles from './index.css?inline'
 import type { Adapter } from '../type'
 import { fetchText } from '../fetch'
+import { Cache } from '../cache'
 
-const cache: Record<string, string> = {}
+const cache = new Cache()
 
 export class CollinsDict implements Adapter {
   readonly name = 'collins'
@@ -15,11 +16,11 @@ export class CollinsDict implements Adapter {
   }
 
   async lookup({ word }: { word: string; text?: string }) {
-    if (cache[word]) return Promise.resolve(cache[word])
+    if (cache.get(word)) return Promise.resolve(cache.get(word)!)
     try {
       const doc = await this.fetchDocument(word)
       const data = this.parseDocument(doc, word)
-      cache[word] = data
+      cache.set(word, data)
       return data
     } catch (e) {
       console.warn(e)

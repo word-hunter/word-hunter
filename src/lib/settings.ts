@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS = {
   dictOrder: Object.keys(DEFAULT_DICTS) as DictName[],
   showCnTrans: false,
   autoPronounce: false,
+  preload: true,
   mouseKey: 'NONE' as MouseKey,
   mouseHideDelay: 200,
   volume: 95,

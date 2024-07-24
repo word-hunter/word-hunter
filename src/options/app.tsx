@@ -7,6 +7,7 @@ import { LevelSetting } from './levels'
 import { CnTransSetting } from './cnTrans'
 import { ControlSetting } from './control'
 import { ColorsSetting } from './colors'
+import { PreloadSetting } from './preload'
 
 export const App = () => {
   return (
@@ -15,10 +16,11 @@ export const App = () => {
         <ColorsSetting />
         <CnTransSetting />
         <YoutubeSetting />
+        <PreloadSetting />
         <PronounceSetting />
         <DictsSetting />
-        <OpenAISetting />
         <LevelSetting />
+        <OpenAISetting />
         <ControlSetting />
         <Backup />
       </div>

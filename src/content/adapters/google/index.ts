@@ -3,8 +3,9 @@
 import dictStyles from './index.css?inline'
 import type { Adapter } from '../type'
 import { fetchText } from '../fetch'
+import { Cache } from '../cache'
 
-const cache: Record<string, string> = {}
+const cache = new Cache()
 
 export class GoogleDict implements Adapter {
   readonly name = 'google'
@@ -17,13 +18,13 @@ export class GoogleDict implements Adapter {
   }
 
   async lookup({ word }: { word: string; text?: string }) {
-    if (cache[word]) return Promise.resolve(cache[word])
+    if (cache.get(word)) return Promise.resolve(cache.get(word)!)
     try {
       const html = await this.fetch(word)
       const doc = new DOMParser().parseFromString(html, 'text/html')
 
       const data = this.parseDocument(doc, html, word)
-      cache[word] = data
+      cache.set(word, data)
       return data
     } catch (e) {
       console.warn(e)
