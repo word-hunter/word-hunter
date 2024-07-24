@@ -156,3 +156,29 @@ export function getRelativeTimeString(date1: number, date2: number, locale = 'en
     return rtf.format(-seconds, 'second')
   }
 }
+
+export function isMatchURLPattern(list: string[], checkURL?: string) {
+  checkURL = checkURL?.trim()
+
+  if (!checkURL) {
+    return [false, ''] as const
+  }
+
+  let matchedItem = ''
+
+  const isMatch = list.some(item => {
+    const isMatch = new URLPattern({
+      hostname: `{*.}?${item}`
+    }).test({
+      hostname: checkURL
+    })
+
+    if (isMatch) {
+      matchedItem = item
+    }
+
+    return isMatch
+  })
+
+  return [isMatch, matchedItem] as const
+}
