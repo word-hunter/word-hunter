@@ -10,7 +10,6 @@ export class Cache {
     if (this.cache.size > 50) {
       for (const key of [...this.cache.keys()].slice(0, 10)) {
         this.cache.delete(key)
-        console.log('Cache deleted:', key)
       }
     }
   }
