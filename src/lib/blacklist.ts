@@ -10,12 +10,15 @@ export const readBlacklist = async () => {
 }
 
 const updateAppIcon = async () => {
-  if (document.visibilityState !== 'hidden' && !chrome.tabs && window.top === window.self) {
+  if (document.visibilityState !== 'hidden' && window.top === window.self) {
     const blacklist = await readBlacklist()
     const shouldAvailable = !isMatchURLPattern(blacklist, top?.location.host)[0]
     const isAppAvailable = (await getLocalValue(Messages.app_available as unknown as StorageKey)) ?? true
     if (isAppAvailable !== shouldAvailable) {
       chrome.runtime.sendMessage({ [Messages.app_available]: shouldAvailable })
+      if (window.confirm('Reload page to take effect ?')) {
+        location.reload()
+      }
     }
   }
 }
@@ -24,9 +27,13 @@ document.addEventListener('visibilitychange', () => {
   updateAppIcon()
 })
 
-// register in context script and for call in popup page
-if (typeof window !== 'undefined') {
-  window.__updateAppIcon = updateAppIcon
-}
+chrome.storage.onChanged.addListener((changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
+  if (namespace === 'sync' && changes[StorageKey.settings]) {
+    const { oldValue, newValue } = changes[StorageKey.settings]
+    if (JSON.stringify(oldValue?.blacklist) !== JSON.stringify(newValue?.blacklist)) {
+      updateAppIcon()
+    }
+  }
+})
 
 updateAppIcon()

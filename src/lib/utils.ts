@@ -167,17 +167,18 @@ export function isMatchURLPattern(list: string[], checkURL?: string) {
   let matchedItem = ''
 
   const isMatch = list.some(item => {
-    const isMatch = new URLPattern({
-      hostname: `{*.}?${item}`
+    // @ts-ignore
+    const _isMatch = new URLPattern({
+      hostname: `{*.}?${item.replace(/:.*$/, '')}`
     }).test({
-      hostname: checkURL
+      hostname: checkURL.replace(/:.*$/, '')
     })
 
-    if (isMatch) {
+    if (_isMatch) {
       matchedItem = item
     }
 
-    return isMatch
+    return _isMatch
   })
 
   return [isMatch, matchedItem] as const
