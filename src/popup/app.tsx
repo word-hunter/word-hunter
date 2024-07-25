@@ -44,7 +44,6 @@ export const App = () => {
     const newBlacklist = inBlocklist ? blacklist.filter(h => h !== matchedRule) : [...blacklist, host]
     setIsBanned(!inBlocklist)
     await setSetting('blacklist', newBlacklist)
-    executeScript(() => window.__updateAppIcon())
   }
 
   const onWordReview = async () => {
