@@ -94,15 +94,11 @@ const setupOffscreenDocument = async (path: string) => {
 }
 
 const checkOffscreenDocumentExist = async (offscreenUrl: string) => {
-  // @ts-ignore
   if (chrome.runtime.getContexts) {
-    // @ts-ignore
     const existingContexts = await chrome.runtime.getContexts({
-      // @ts-ignore
-      contextTypes: ['OFFSCREEN_DOCUMENT'],
+      contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
       documentUrls: [offscreenUrl]
     })
-    // @ts-ignore
     return existingContexts.length > 0
     // @ts-ignore
   } else if (globalThis.clients) {
