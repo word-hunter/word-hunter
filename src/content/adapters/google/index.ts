@@ -17,27 +17,22 @@ export class GoogleDict implements Adapter {
     return dictStyles
   }
 
-  async lookup({ word }: { word: string; text?: string }) {
+  async lookup({ word, isPreload }: { word: string; text?: string; isPreload?: boolean }) {
     if (cache.get(word)) return Promise.resolve(cache.get(word)!)
-    try {
-      const html = await this.fetch(word)
-      const doc = new DOMParser().parseFromString(html, 'text/html')
+    const html = await this.fetch(word, isPreload)
+    const doc = new DOMParser().parseFromString(html, 'text/html')
 
-      const data = this.parseDocument(doc, html, word)
-      cache.set(word, data)
-      return data
-    } catch (e) {
-      console.warn(e)
-      return ''
-    }
+    const data = this.parseDocument(doc, html, word)
+    cache.set(word, data)
+    return data
   }
 
-  private async fetch(word: string) {
+  private async fetch(word: string, isPreload?: boolean) {
     const url = this.getPageUrl(word)
     try {
-      return await fetchText(url)
+      return await fetchText(url, isPreload)
     } catch (e) {
-      return await fetchText(url.replace('q=meaning', 'q=define'))
+      return await fetchText(url.replace('q=meaning', 'q=define'), isPreload)
     }
   }
 

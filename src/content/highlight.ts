@@ -12,6 +12,7 @@ import {
 import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync } from '../lib'
 import { getMessagePort } from '../lib/port'
+import { preloadQueue, setPreloadQueue } from '../lib/preload'
 
 export const unknownHL = new Highlight()
 export const contextHL = new Highlight()
@@ -27,7 +28,6 @@ let highlightContainerMapKeys = new Set<Node>()
 
 export const [zenExcludeWords, setZenExcludeWords] = createSignal<string[]>([])
 export const [wordContexts, setWordContexts] = createSignal<WordContext[]>([])
-export const [skimmedWords, setSkimmedWords] = createSignal<Set<string>>(new Set())
 
 export function getRangeWord(range: AbstractRange) {
   return range.toString().toLowerCase()
@@ -228,13 +228,24 @@ const intersectionObserver = new IntersectionObserver(entries => {
         if (settings().preload) {
           for (const node of highlightContainerMapKeys.values()) {
             if (el == node) {
+              el._intersected = true
               const ranges = highlightContainerMap.get(node) ?? new Set()
-              setSkimmedWords(new Set([...Array.from(ranges).map(getRangeWord), ...skimmedWords()]))
+              const words = new Set([...ranges].map(getRangeWord))
+              setPreloadQueue(new Set([...preloadQueue(), ...words]))
             }
           }
         }
-
-        intersectionObserver.unobserve(el)
+      } else {
+        if (settings().preload) {
+          for (const node of highlightContainerMapKeys.values()) {
+            if (el == node && el._intersected) {
+              el._intersected = false
+              const ranges = highlightContainerMap.get(node) ?? new Set()
+              const words = new Set([...ranges].map(getRangeWord))
+              setPreloadQueue(preloadQueue().difference?.(words))
+            }
+          }
+        }
       }
     },
     { rootMargin: '50vh 0 50vh 0', threshold: 0 }
@@ -251,7 +262,6 @@ function highlightTextNode(node: CharacterData, dict: WordInfoMap, wordsKnown: W
   const segments = segmenterEn.segment(text)
 
   let pNode = node.parentElement!
-  let curNode = node
   const showTrans = settings().showCnTrans
 
   for (const segment of segments) {

@@ -15,22 +15,17 @@ export class HaiCiDict implements Adapter {
     return dictStyles
   }
 
-  async lookup({ word }: { word: string; text?: string }) {
+  async lookup({ word, isPreload }: { word: string; text?: string; isPreload?: boolean }) {
     if (cache.get(word)) return Promise.resolve(cache.get(word)!)
-    try {
-      const doc = await this.fetchDocument(word)
-      const data = this.parseDocument(doc, word)
-      cache.set(word, data)
-      return data
-    } catch (e) {
-      console.warn(e)
-      return ''
-    }
+    const doc = await this.fetchDocument(word, isPreload)
+    const data = this.parseDocument(doc, word)
+    cache.set(word, data)
+    return data
   }
 
-  private async fetchDocument(word: string) {
+  private async fetchDocument(word: string, isPreload?: boolean) {
     const url = this.getPageUrl(word)
-    const html = await fetchText(url)
+    const html = await fetchText(url, isPreload)
     const doc = new DOMParser().parseFromString(html, 'text/html')
     return doc
   }

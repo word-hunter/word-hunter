@@ -218,12 +218,25 @@ chrome.runtime.onConnect.addListener(async port => {
           playAudio(msg.audio, word)
           break
         case Messages.fetch_html: {
-          const { url, uuid } = msg
-          const htmlRes = await fetch(url, {
-            mode: 'no-cors',
-            credentials: 'include'
-          })
-          const htmlText = await htmlRes.text()
+          const { url, uuid, isPreload } = msg
+          const option: RequestInit = isPreload
+            ? {
+                priority: 'low',
+                signal: AbortSignal.timeout(5000)
+              }
+            : {}
+
+          let htmlText: string | { isError: boolean; message: string }
+          try {
+            const htmlRes = await fetch(url, {
+              mode: 'no-cors',
+              credentials: 'include',
+              ...option
+            })
+            htmlText = await htmlRes.text()
+          } catch (e: any) {
+            htmlText = { isError: true, message: e.message }
+          }
           port.postMessage({ result: htmlText, uuid })
           break
         }

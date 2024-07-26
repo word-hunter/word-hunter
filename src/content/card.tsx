@@ -20,9 +20,9 @@ import {
   zenExcludeWords,
   setZenExcludeWords,
   getWordAllTenses,
-  skimmedWords,
   getRangeAtPoint
 } from './highlight'
+import { preload } from '../lib/preload'
 import { getMessagePort } from '../lib/port'
 import { Dict } from './dict'
 import { adapters, AdapterKey } from './adapters'
@@ -32,7 +32,6 @@ import {
   getFaviconByDomain,
   settings,
   explode,
-  debounce,
   isMatchURLPattern
 } from '../lib'
 import { readBlacklist } from '../lib/blacklist'
@@ -70,29 +69,9 @@ export const WhCard = customElement('wh-card', () => {
     })
   })
 
-  const [preloadedWords, setPreloadWords] = createSignal<Set<string>>(new Set())
-  function addPreLoadedWords(words: string[]) {
-    words.forEach(word => {
-      preloadedWords().add(word)
-    })
-    setPreloadWords(new Set([...preloadedWords()]))
-  }
-
-  const nextPreloadWords = () => {
-    return [...skimmedWords()].filter(word => !preloadedWords().has(word)).slice(0, 4)
-  }
-
-  const preloadDebounce = debounce(async (words: string[]) => {
-    await Promise.all(words.map(word => getDictAdapter().lookup({ word })))
-    addPreLoadedWords(words)
-  }, 500)
-
   createEffect(() => {
     if (settings().preload) {
-      const words = nextPreloadWords()
-      if (words.length > 0) {
-        preloadDebounce(words)
-      }
+      preload(getDictAdapter())
     }
   })
 
