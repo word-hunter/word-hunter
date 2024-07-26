@@ -12,13 +12,10 @@ export const readBlacklist = async () => {
 const updateAppIcon = async () => {
   if (document.visibilityState !== 'hidden' && window.top === window.self) {
     const blacklist = await readBlacklist()
-    const shouldAvailable = !isMatchURLPattern(blacklist, top?.location.host)[0]
+    const shouldDomainAvailable = !isMatchURLPattern(blacklist, top?.location.host)[0]
     const isAppAvailable = (await getLocalValue(Messages.app_available as unknown as StorageKey)) ?? true
-    if (isAppAvailable !== shouldAvailable) {
-      chrome.runtime.sendMessage({ [Messages.app_available]: shouldAvailable })
-      if (window.confirm('Reload page to take effect ?')) {
-        location.reload()
-      }
+    if (isAppAvailable !== shouldDomainAvailable) {
+      chrome.runtime.sendMessage({ [Messages.app_available]: shouldDomainAvailable })
     }
   }
 }
