@@ -3,7 +3,7 @@
 import dictStyles from './index.css?inline'
 import type { Adapter } from '../type'
 import { Messages } from '../../../constant'
-import { sendMessage } from '../../../lib/port'
+import { sendMessage } from 'webext-bridge/content-script'
 import { Cache } from '../cache'
 
 const cache = new Cache()
@@ -35,7 +35,7 @@ export class OpenAiDict implements Adapter {
   }
 }
 
-export async function fetchExplain(word: string, text?: string): Promise<string> {
-  const result = await sendMessage(Messages.ai_explain, { word, text })
+export async function fetchExplain(word: string, text: string = ''): Promise<string> {
+  const result = await sendMessage(Messages.ai_explain, { word, text }, 'background')
   return result ?? ''
 }

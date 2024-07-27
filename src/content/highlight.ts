@@ -11,7 +11,7 @@ import {
 } from '../constant'
 import { createSignal } from 'solid-js'
 import { getDocumentTitle, getFaviconUrl, settings, getSelectedDicts, getAllKnownSync } from '../lib'
-import { getMessagePort } from '../lib/port'
+import { sendMessage, onMessage } from 'webext-bridge/content-script'
 import { preloadQueue, setPreloadQueue } from '../lib/preload'
 
 export const unknownHL = new Highlight()
@@ -42,7 +42,7 @@ export function markAsKnown(word: string) {
 
   const originFormWord = getOriginForm(word)
   wordsKnown[originFormWord] = 'o'
-  getMessagePort().postMessage({ action: Messages.set_known, word: originFormWord })
+  sendMessage(Messages.set_known, { word: originFormWord }, 'background')
 }
 
 function _makeAsKnown(word: string) {
@@ -84,7 +84,7 @@ export function addContext(word: string, text: string) {
     timestamp: Date.now(),
     favicon: getFaviconUrl()
   }
-  getMessagePort().postMessage({ action: Messages.add_context, word: originFormWord, context })
+  sendMessage(Messages.add_context, { word: originFormWord, context }, 'background')
 }
 
 function _addContext(context: WordContext) {
@@ -104,7 +104,7 @@ function _addContext(context: WordContext) {
 }
 
 export function deleteContext(context: WordContext) {
-  getMessagePort().postMessage({ action: Messages.delete_context, word: context.word, context })
+  sendMessage(Messages.delete_context, { word: context.word, context }, 'background')
 }
 
 function _deleteContext(context: WordContext) {
@@ -131,7 +131,7 @@ export function markAsAllKnown() {
     .map(getRangeWord)
     .filter(word => wordRegex.test(word) && !zenExcludeWords().includes(word))
     .map(word => getOriginForm(word))
-  getMessagePort().postMessage({ action: Messages.set_all_known, words })
+  sendMessage(Messages.set_all_known, { words }, 'background')
 }
 
 function _makeAsAllKnown(words: string[]) {
@@ -466,27 +466,24 @@ window.__updateDicts = () => {
 }
 
 function listenBackgroundMessage() {
-  chrome.runtime.onMessage.addListener((msg, sender: chrome.runtime.MessageSender) => {
-    const { action, word, context } = msg
-    switch (action) {
-      case Messages.set_known:
-        _makeAsKnown(word)
-        break
-      case Messages.set_all_known:
-        _makeAsAllKnown(msg.words)
-        break
-      case Messages.set_unknown:
-        _makeAsUnknown(word)
-        break
-      case Messages.add_context:
-        _addContext(context)
-        break
-      case Messages.delete_context:
-        _deleteContext(context)
-        break
-      default:
-        break
-    }
+  onMessage(Messages.set_known, async ({ data }) => {
+    _makeAsKnown(data.word)
+  })
+
+  onMessage(Messages.set_all_known, async ({ data }) => {
+    _makeAsAllKnown(data.words)
+  })
+
+  onMessage(Messages.set_unknown, async ({ data }) => {
+    _makeAsUnknown(data.word)
+  })
+
+  onMessage(Messages.add_context, async ({ data }) => {
+    _addContext(data.context)
+  })
+
+  onMessage(Messages.delete_context, async ({ data }) => {
+    _deleteContext(data.context)
   })
 }
 

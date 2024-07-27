@@ -2,6 +2,7 @@ import { Messages, StorageKey } from '../constant'
 import { getSyncValue, getLocalValue } from './storage'
 import { DEFAULT_SETTINGS } from './settings'
 import { isMatchURLPattern } from './utils'
+import { sendMessage } from 'webext-bridge/content-script'
 
 export const readBlacklist = async () => {
   const settings = (await getSyncValue(StorageKey.settings)) ?? DEFAULT_SETTINGS
@@ -15,7 +16,7 @@ const updateAppIcon = async () => {
     const shouldDomainAvailable = !isMatchURLPattern(blacklist, top?.location.host)[0]
     const isAppAvailable = (await getLocalValue(Messages.app_available as unknown as StorageKey)) ?? true
     if (isAppAvailable !== shouldDomainAvailable) {
-      chrome.runtime.sendMessage({ [Messages.app_available]: shouldDomainAvailable })
+      sendMessage(Messages.app_available, { app_available: shouldDomainAvailable }, 'background')
     }
   }
 }
