@@ -77,10 +77,6 @@ export function executeScript<T>(func: () => T): Promise<{ result: T }[]> {
   })
 }
 
-export function uuidv4() {
-  return crypto.randomUUID()
-}
-
 export function debounce<T extends (...args: any[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
   let timer: number
 

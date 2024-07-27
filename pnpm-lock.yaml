@@ -26,6 +26,9 @@ importers:
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.3
+      webext-bridge:
+        specifier: ^6.0.1
+        version: 6.0.1
     devDependencies:
       '@crxjs/vite-plugin':
         specifier: ^2.0.0-beta.23
@@ -35,13 +38,13 @@ importers:
         version: 0.0.263
       daisyui:
         specifier: ^4.9.0
-        version: 4.9.0(postcss@8.4.38)
+        version: 4.9.0(postcss@8.4.29)
       postcss-import:
         specifier: ^16.1.0
-        version: 16.1.0(postcss@8.4.38)
+        version: 16.1.0(postcss@8.4.29)
       postcss-nesting:
         specifier: ^12.1.0
-        version: 12.1.0(postcss@8.4.38)
+        version: 12.1.0(postcss@8.4.29)
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -484,6 +487,9 @@ packages:
   '@types/har-format@1.2.15':
     resolution: {integrity: sha512-RpQH4rXLuvTXKR0zqHq3go0RVXYv/YVqv4TnPH95VbwUxZdQlK1EtcMvQvMpDngHbt13Csh9Z4qT9AbkiQH5BA==}
 
+  '@types/webextension-polyfill@0.8.3':
+    resolution: {integrity: sha512-GN+Hjzy9mXjWoXKmaicTegv3FJ0WFZ3aYz77Wk8TMp1IY3vEzvzj1vnsa0ggV7vMI1i+PUxe4qqnIJKCzf9aTg==}
+
   '@webcomponents/custom-elements@1.6.0':
     resolution: {integrity: sha512-CqTpxOlUCPWRNUPZDxT5v2NnHXA4oox612iUGnmTUGQFhZ1Gkj8kirtl/2wcF6MqX7+PqqicZzOCBKKfIn0dww==}
 
@@ -834,6 +840,10 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
+  nanoevents@6.0.2:
+    resolution: {integrity: sha512-FRS2otuFcPPYDPYViNWQ42+1iZqbXydinkRHTHFxrF4a1CpBfmydR9zkI44WSXAXCyPrkcGtPk5CnpW6Y3lFKQ==}
+    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+
   nanoid@3.3.6:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -1005,6 +1015,10 @@ packages:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
     hasBin: true
 
+  serialize-error@9.1.1:
+    resolution: {integrity: sha512-6uZQLGyUkNA4N+Zii9fYukmNu9PEA1F5rqcwXzN/3LtBjwl2dFBbVZ1Zyn08/CGkB4H440PIemdOQBt1Wvjbrg==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
   seroval-plugins@1.0.5:
     resolution: {integrity: sha512-8+pDC1vOedPXjKG7oz8o+iiHrtF2WswaMQJ7CKFpccvSYfrzmvKY9zOJWCg+881722wIHfwkdnRmiiDm9ym+zQ==}
     engines: {node: '>=10'}
@@ -1069,6 +1083,9 @@ packages:
   thenify@3.3.1:
     resolution: {integrity: sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==}
 
+  tiny-uid@1.1.2:
+    resolution: {integrity: sha512-0beRFXR+fv4C40ND2PqgNjq6iyB1dKXciKJjslLw0kPYCcR82aNd2b+Tt2yy06LimIlvtoehgvrm/fUZCutSfg==}
+
   to-fast-properties@2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==}
     engines: {node: '>=4'}
@@ -1082,6 +1099,10 @@ packages:
 
   tslib@2.4.1:
     resolution: {integrity: sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==}
+
+  type-fest@2.19.0:
+    resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
+    engines: {node: '>=12.20'}
 
   typescript@5.4.3:
     resolution: {integrity: sha512-KrPd3PKaCLr78MalgiwJnA25Nm8HAmdwN3mYUYZgG/wizIo9EainNVQI9/yDavtVFRN2h3k8uf3GLHuhDMgEHg==}
@@ -1152,6 +1173,12 @@ packages:
     peerDependenciesMeta:
       vite:
         optional: true
+
+  webext-bridge@6.0.1:
+    resolution: {integrity: sha512-GruIrN+vNwbxVCi8UW4Dqk5YkcGA9V0ZfJ57jXP9JXHbrsDs5k2N6NNYQR5e+wSCnQpGYOGAGihwUpKlhg8QIw==}
+
+  webextension-polyfill@0.9.0:
+    resolution: {integrity: sha512-LTtHb0yR49xa9irkstDxba4GATDAcDw3ncnFH9RImoFwDlW47U95ME5sn5IiQX2ghfaECaf6xyXM8yvClIBkkw==}
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
@@ -1556,6 +1583,8 @@ snapshots:
 
   '@types/har-format@1.2.15': {}
 
+  '@types/webextension-polyfill@0.8.3': {}
+
   '@webcomponents/custom-elements@1.6.0': {}
 
   acorn-walk@8.2.0: {}
@@ -1696,12 +1725,12 @@ snapshots:
 
   culori@3.3.0: {}
 
-  daisyui@4.9.0(postcss@8.4.38):
+  daisyui@4.9.0(postcss@8.4.29):
     dependencies:
       css-selector-tokenizer: 0.8.0
       culori: 3.3.0
       picocolors: 1.0.0
-      postcss-js: 4.0.1(postcss@8.4.38)
+      postcss-js: 4.0.1(postcss@8.4.29)
     transitivePeerDependencies:
       - postcss
 
@@ -1922,6 +1951,8 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
+  nanoevents@6.0.2: {}
+
   nanoid@3.3.6: {}
 
   nanoid@3.3.7: {}
@@ -1970,9 +2001,9 @@ snapshots:
       read-cache: 1.0.0
       resolve: 1.22.4
 
-  postcss-import@16.1.0(postcss@8.4.38):
+  postcss-import@16.1.0(postcss@8.4.29):
     dependencies:
-      postcss: 8.4.38
+      postcss: 8.4.29
       postcss-value-parser: 4.2.0
       read-cache: 1.0.0
       resolve: 1.22.4
@@ -1982,27 +2013,23 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.29
 
-  postcss-js@4.0.1(postcss@8.4.38):
-    dependencies:
-      camelcase-css: 2.0.1
-      postcss: 8.4.38
-
   postcss-load-config@4.0.2(postcss@8.4.29):
     dependencies:
       lilconfig: 3.0.0
-      postcss: 8.4.29
       yaml: 2.3.4
+    optionalDependencies:
+      postcss: 8.4.29
 
   postcss-nested@6.0.1(postcss@8.4.29):
     dependencies:
       postcss: 8.4.29
       postcss-selector-parser: 6.0.13
 
-  postcss-nesting@12.1.0(postcss@8.4.38):
+  postcss-nesting@12.1.0(postcss@8.4.29):
     dependencies:
       '@csstools/selector-resolve-nested': 1.1.0(postcss-selector-parser@6.0.16)
       '@csstools/selector-specificity': 3.0.2(postcss-selector-parser@6.0.16)
-      postcss: 8.4.38
+      postcss: 8.4.29
       postcss-selector-parser: 6.0.16
 
   postcss-selector-parser@6.0.13:
@@ -2088,6 +2115,10 @@ snapshots:
 
   semver@6.3.1: {}
 
+  serialize-error@9.1.1:
+    dependencies:
+      type-fest: 2.19.0
+
   seroval-plugins@1.0.5(seroval@1.0.5):
     dependencies:
       seroval: 1.0.5
@@ -2171,6 +2202,8 @@ snapshots:
     dependencies:
       any-promise: 1.3.0
 
+  tiny-uid@1.1.2: {}
+
   to-fast-properties@2.0.0: {}
 
   to-regex-range@5.0.1:
@@ -2180,6 +2213,8 @@ snapshots:
   ts-interface-checker@0.1.13: {}
 
   tslib@2.4.1: {}
+
+  type-fest@2.19.0: {}
 
   typescript@5.4.3: {}
 
@@ -2219,8 +2254,18 @@ snapshots:
       fsevents: 2.3.3
 
   vitefu@0.2.5(vite@5.2.7):
-    dependencies:
+    optionalDependencies:
       vite: 5.2.7
+
+  webext-bridge@6.0.1:
+    dependencies:
+      '@types/webextension-polyfill': 0.8.3
+      nanoevents: 6.0.2
+      serialize-error: 9.1.1
+      tiny-uid: 1.1.2
+      webextension-polyfill: 0.9.0
+
+  webextension-polyfill@0.9.0: {}
 
   wrappy@1.0.2: {}
 

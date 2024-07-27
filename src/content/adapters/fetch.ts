@@ -1,11 +1,8 @@
 import { Messages } from '../../constant'
-import { sendMessage } from '../../lib/port'
+import { sendMessage } from 'webext-bridge/content-script'
 
 export async function fetchText(url: string, isPreload?: boolean): Promise<string> {
-  const result: string | { isError: boolean; message: string } = await sendMessage(Messages.fetch_html, {
-    url,
-    isPreload
-  })
+  const result = await sendMessage(Messages.fetch_html, { url, isPreload }, 'background')
   if (typeof result === 'string') {
     return result
   } else {

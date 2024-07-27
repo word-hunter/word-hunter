@@ -23,7 +23,7 @@ import {
   getRangeAtPoint
 } from './highlight'
 import { preload } from '../lib/preload'
-import { getMessagePort } from '../lib/port'
+import { sendMessage } from 'webext-bridge/content-script'
 import { Dict } from './dict'
 import { adapters, AdapterKey } from './adapters'
 import {
@@ -432,7 +432,7 @@ const isCardVisible = () => {
 const playAudio = (node: HTMLElement, e?: MouseEvent) => {
   const audioSrc = node?.getAttribute('data-src-mp3') || node?.parentElement?.getAttribute('data-src-mp3')
   if (audioSrc) {
-    getMessagePort().postMessage({ action: Messages.play_audio, audio: audioSrc })
+    sendMessage(Messages.play_audio, { audio: audioSrc }, 'background')
     e && e.stopImmediatePropagation()
     node?.classList.add('active')
     setTimeout(() => {
@@ -492,7 +492,7 @@ function showPopup() {
     setTabIndex(tabCount())
     // use chrome.tts to pronounce the word in context
     requestIdleCallback(() => {
-      getMessagePort().postMessage({ action: Messages.play_audio, audio: null, word: curWord() })
+      sendMessage(Messages.play_audio, { audio: null, word: curWord() }, 'background')
     })
   } else if (tabIndex() === tabCount()) {
     setTabIndex(0)

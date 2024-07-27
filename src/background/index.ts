@@ -3,6 +3,8 @@ import { explainWord } from '../lib/openai'
 import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
 import { triggerGoogleDriveSyncJob, syncWithDrive } from '../lib/backup/sync'
+import { onMessage, sendMessage } from 'webext-bridge/background'
+import { ProtocolMap } from 'webext-bridge'
 
 let dict: WordInfoMap
 let knowns: WordMap
@@ -50,15 +52,15 @@ function updateBadge(wordsKnown: WordMap) {
   chrome.action.setTitle({ title: '✔ ' + String(knownWordsCount) })
 }
 
-const playAudio = async (audio: string, word: string) => {
+const playAudio = async (audio: string | null, word?: string) => {
   const volume = settings().volume ?? 100
-  if (!audio) {
+  if (!audio && word) {
     chrome.tts.speak(word, { lang: 'en-US', rate: 0.7, volume: volume / 100 })
     return
   }
   const audioPageUrl = chrome.runtime.getURL('audio.html')
 
-  if (!chrome.offscreen) {
+  if (audio && !chrome.offscreen) {
     return createAudioWindow(`${audioPageUrl}?audio=${encodeURIComponent(audio)}&?volume=${volume}`)
   }
 
@@ -127,126 +129,103 @@ const createAudioWindow = async (url: string) => {
   })
 }
 
-function sendMessageToAllTabs(msg: any) {
+function sendMessageToAllTabs<T extends Messages>(action: T, data: ProtocolMap[T]) {
   chrome.tabs.query({}, tabs => {
     for (const tab of tabs) {
-      if (!tab.url?.startsWith('chrome://extension')) {
-        chrome.tabs.sendMessage(tab.id!, msg)
-      }
+      sendMessage(action, data as any, { tabId: tab.id!, context: 'content-script' })
     }
   })
 }
 
-/**
- * https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension/66618269#66618269
- * chrome connection will be auto disconnected after 5 minutes
- * so, we manually disconnect it after 4 minutes, then reconnect it in context script
- * to make sure the connection is always alive
- */
-function autoDisconnectDelay(port: chrome.runtime.Port, tabId?: number) {
-  if (!tabId) return
-  setTimeout(() => {
-    chrome.tabs.query({ currentWindow: true }, tabs => {
-      const tab = tabs.find(t => t.id === tabId)
-      if (tab) {
-        port.disconnect()
-      }
-    })
-  }, 250000)
-}
+onMessage(Messages.set_known, async ({ data }) => {
+  knowns = knowns ?? (await getAllKnownSync())
+  const { word } = data
+  knowns[word] = 'o'
+  await syncUpKnowns([word], knowns, Date.now())
+  deleteContextWords([word])
+  updateBadge(knowns)
+  sendMessageToAllTabs(Messages.set_known, { word })
+  triggerGoogleDriveSyncJob()
+})
 
-chrome.runtime.onConnect.addListener(async port => {
-  if (port.name === 'word-hunter') {
-    knowns = knowns ?? (await getAllKnownSync())
-    const tabId = port.sender?.tab?.id
-    autoDisconnectDelay(port, tabId)
+onMessage(Messages.set_all_known, async ({ data }) => {
+  knowns = knowns ?? (await getAllKnownSync())
+  const { words } = data
+  const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' as LevelKey }), {})
+  Object.assign(knowns, addedWords)
+  await syncUpKnowns(words, knowns, Date.now())
+  deleteContextWords(words)
+  updateBadge(knowns)
+  sendMessageToAllTabs(Messages.set_all_known, { words })
+  triggerGoogleDriveSyncJob()
+})
 
-    port.onMessage.addListener(async msg => {
-      // here, word and words are all in origin form
-      const { action, word, words, context } = msg
-      switch (action) {
-        case Messages.set_known:
-          knowns[word] = 'o'
-          await syncUpKnowns([word], knowns, Date.now())
-          deleteContextWords([word])
-          updateBadge(knowns)
-          sendMessageToAllTabs({ action, word })
-          triggerGoogleDriveSyncJob()
-          break
-        case Messages.set_all_known:
-          const addedWords = words.reduce((acc: WordMap, cur: string) => ({ ...acc, [cur]: 'o' }), {})
-          Object.assign(knowns, addedWords)
-          await syncUpKnowns(words, knowns, Date.now())
-          deleteContextWords(words)
-          updateBadge(knowns)
-          sendMessageToAllTabs({ action, words })
-          triggerGoogleDriveSyncJob()
-          break
-        case Messages.add_context: {
-          const contexts = (await getLocalValue(StorageKey.context)) ?? {}
-          // record context in normal tense word key
-          const wordContexts = (contexts[word] ?? []) as WordContext[]
-          if (!wordContexts.find(c => c.text === context.text)) {
-            const newContexts = { ...contexts, [word]: [...wordContexts, context] }
-            chrome.storage.local.set({
-              [StorageKey.context]: newContexts,
-              [StorageKey.context_update_timestamp]: Date.now()
-            })
-          }
-          sendMessageToAllTabs({ action, context })
-          triggerGoogleDriveSyncJob()
-          break
-        }
-        case Messages.delete_context: {
-          const contexts = (await getLocalValue(StorageKey.context)) ?? {}
-          // delete context in normal tense word key
-          const wordContexts = (contexts[word] ?? []) as WordContext[]
-          const index = wordContexts.findIndex(c => c.text === context.text)
-          if (index > -1) {
-            wordContexts.splice(index, 1)
-            const { [word]: w, ...rest } = contexts
-            chrome.storage.local.set({
-              [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest,
-              [StorageKey.context_update_timestamp]: Date.now()
-            })
-            sendMessageToAllTabs({ action, context })
-            triggerGoogleDriveSyncJob()
-          }
-          break
-        }
-        case Messages.play_audio:
-          playAudio(msg.audio, word)
-          break
-        case Messages.fetch_html: {
-          const { url, uuid, isPreload } = msg
-          const option: RequestInit = isPreload
-            ? {
-                priority: 'low',
-                signal: AbortSignal.timeout(5000)
-              }
-            : {}
-
-          let htmlText: string | { isError: boolean; message: string }
-          try {
-            const htmlRes = await fetch(url, {
-              mode: 'no-cors',
-              credentials: 'include',
-              ...option
-            })
-            htmlText = await htmlRes.text()
-          } catch (e: any) {
-            htmlText = { isError: true, message: e.message }
-          }
-          port.postMessage({ result: htmlText, uuid })
-          break
-        }
-        case Messages.ai_explain:
-          const { text, uuid } = msg
-          const explain = await explainWord(word, text, settings().openai.model)
-          port.postMessage({ result: explain, uuid })
-      }
+onMessage(Messages.add_context, async ({ data }) => {
+  const { word, context } = data
+  const contexts = (await getLocalValue(StorageKey.context)) ?? {}
+  // record context in normal tense word key
+  const wordContexts = (contexts[word] ?? []) as WordContext[]
+  if (!wordContexts.find(c => c.text === context.text)) {
+    const newContexts = { ...contexts, [word]: [...wordContexts, context] }
+    chrome.storage.local.set({
+      [StorageKey.context]: newContexts,
+      [StorageKey.context_update_timestamp]: Date.now()
     })
   }
+  sendMessageToAllTabs(Messages.add_context, { word, context })
+  triggerGoogleDriveSyncJob()
+})
+
+onMessage(Messages.delete_context, async ({ data }) => {
+  const { word, context } = data
+  const contexts = (await getLocalValue(StorageKey.context)) ?? {}
+  // delete context in normal tense word key
+  const wordContexts = (contexts[word] ?? []) as WordContext[]
+  const index = wordContexts.findIndex(c => c.text === context.text)
+  if (index > -1) {
+    wordContexts.splice(index, 1)
+    const { [word]: w, ...rest } = contexts
+    chrome.storage.local.set({
+      [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest,
+      [StorageKey.context_update_timestamp]: Date.now()
+    })
+    sendMessageToAllTabs(Messages.delete_context, { word, context })
+    triggerGoogleDriveSyncJob()
+  }
+})
+
+onMessage(Messages.play_audio, async ({ data }) => {
+  const { audio, word } = data
+  playAudio(audio, word)
+})
+
+onMessage(Messages.fetch_html, async ({ data }) => {
+  const { url, isPreload } = data
+  const option: RequestInit = isPreload
+    ? {
+        priority: 'low',
+        signal: AbortSignal.timeout(5000)
+      }
+    : {}
+
+  let htmlText: string | { isError: boolean; message: string }
+  try {
+    const htmlRes = await fetch(url, {
+      mode: 'no-cors',
+      credentials: 'include',
+      ...option
+    })
+    htmlText = await htmlRes.text()
+  } catch (e: any) {
+    htmlText = { isError: true, message: e.message }
+  }
+  return htmlText
+})
+
+onMessage(Messages.ai_explain, async ({ data }) => {
+  const { word, text } = data
+  const explain = await explainWord(word, text, settings().openai.model)
+  return explain
 })
 
 async function deleteContextWords(words: string[]) {
@@ -265,6 +244,19 @@ async function deleteContextWords(words: string[]) {
     })
   }
 }
+
+onMessage(Messages.app_available, async ({ data }) => {
+  const { app_available } = data
+  chrome.action.setIcon({
+    path: {
+      128: app_available ? chrome.runtime.getURL('icon.png') : chrome.runtime.getURL('icons/blind.png')
+    }
+  })
+
+  chrome.storage.local.set({ [Messages.app_available]: app_available })
+  knowns = knowns ?? (await getAllKnownSync())
+  updateBadge(app_available ? knowns : {})
+})
 
 // https://developer.chrome.com/docs/extensions/reference/contextMenus/#event-onInstalled
 chrome.runtime.onInstalled.addListener(async details => {
@@ -318,20 +310,6 @@ chrome.runtime.onStartup.addListener(async () => {
   syncWithDrive(false)
 })
 
-chrome.runtime.onMessage.addListener(async msg => {
-  if (Messages.app_available in msg) {
-    chrome.action.setIcon({
-      path: {
-        128: msg.app_available ? chrome.runtime.getURL('icon.png') : chrome.runtime.getURL('icons/blind.png')
-      }
-    })
-
-    chrome.storage.local.set({ [Messages.app_available]: msg.app_available })
-    knowns = knowns ?? (await getAllKnownSync())
-    updateBadge(msg.app_available ? knowns : {})
-  }
-})
-
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === 'word-hunter') {
     const word = info.selectionText?.trim()?.toLowerCase()
@@ -342,7 +320,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       delete knowns[originFormWord]
       await syncUpKnowns([originFormWord], knowns, Date.now())
       updateBadge(knowns)
-      sendMessageToAllTabs({ action: Messages.set_unknown, word: originFormWord })
+      sendMessageToAllTabs(Messages.set_unknown, { word: originFormWord })
       triggerGoogleDriveSyncJob()
     }
   }
