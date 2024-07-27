@@ -8,6 +8,15 @@ declare interface Window extends WindowOrWorkerGlobalScope {
   __getPageStatistics: () => readonly [number, number, number]
 }
 
+interface HTMLElement {
+  _intersected?: boolean // Used by the IntersectionObserver
+}
+
+interface Set<T> {
+  difference(otherSet: Set<T>): Set<T>
+  union(otherSet: Set<T>): Set<T>
+}
+
 // Types for the AIModelAvailability enum
 type AIModelAvailability = 'readily' | 'after-download' | 'no'
 

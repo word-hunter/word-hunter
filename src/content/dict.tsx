@@ -45,7 +45,7 @@ export function Dict(props: Props) {
         <Match when={!def.loading && (def.error || !def())}>
           <div class="no_result">
             <img src={chrome.runtime.getURL('icons/robot.png')} alt="no definition" />
-            not found definition
+            {def.error ?? 'No definition found.'}
           </div>
         </Match>
         <Match when={!def.loading && def()}>

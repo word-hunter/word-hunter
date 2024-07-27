@@ -18,17 +18,12 @@ export class OpenAiDict implements Adapter {
     return dictStyles
   }
 
-  async lookup({ word, text }: { word: string; text?: string }) {
+  async lookup({ word, text }: { word: string; text?: string; isPreload?: boolean }) {
     if (cache.get(word)) return Promise.resolve(cache.get(word)!)
-    try {
-      const html = await fetchExplain(word, text)
-      const data = html
-      cache.set(word, data)
-      return data
-    } catch (e) {
-      console.warn(e)
-      return ''
-    }
+    const html = await fetchExplain(word, text)
+    const data = html
+    cache.set(word, data)
+    return data
   }
 
   getPageUrl(word: string) {

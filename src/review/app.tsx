@@ -89,11 +89,10 @@ export const App = () => {
   }
 
   const setFullScrren = () => {
-    var iframe = document.getElementById('youtube-player')
+    var iframe = document.getElementById('youtube-player') as HTMLIFrameElement
     if (iframe?.requestFullscreen) {
       iframe.requestFullscreen()
-      // @ts-ignore
-      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*')
+      iframe.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*')
     }
   }
 
