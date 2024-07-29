@@ -53,3 +53,10 @@ body {
 .loading-stripes button {
   display: block !important;
 }
+
+.neodrag-dragging {
+
+  iframe {
+    pointer-events: none;
+  }
+}

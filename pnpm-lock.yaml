@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@neodrag/solid':
+        specifier: ^2.0.4
+        version: 2.0.4(solid-js@1.8.16)
       '@thisbeyond/solid-dnd':
         specifier: ^0.7.5
         version: 0.7.5(solid-js@1.8.16)
@@ -362,6 +365,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@neodrag/solid@2.0.4':
+    resolution: {integrity: sha512-iTt2CaN1mEhvy7fMalizYWPzwUmt8FI6OUnNNTwjumn8I04uyfNMrBYOq8PMrf5QssYUL+LRWCrh7UQ1WOZ9+w==}
+    peerDependencies:
+      solid-js: ^1.0.0
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1480,6 +1488,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
+
+  '@neodrag/solid@2.0.4(solid-js@1.8.16)':
+    dependencies:
+      solid-js: 1.8.16
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
