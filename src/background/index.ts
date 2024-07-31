@@ -263,7 +263,7 @@ chrome.runtime.onInstalled.addListener(async details => {
   chrome.contextMenus.create({
     id: 'word-hunter',
     title: 'Mark As Unknown',
-    contexts: ['selection' as any]
+    contexts: ['selection']
   })
 
   readDict().then(async localDict => {

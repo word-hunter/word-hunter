@@ -243,8 +243,12 @@ export const WhCard = customElement('wh-card', () => {
           </a>
         </div>
         <div>
-          <a href={`https://www.playphrase.me/#/search?q=${curWord()}&language=en`} title="playphrase" target="_blank">
-            <img src={chrome.runtime.getURL('icons/cinema.png')} alt="playphrase" />
+          <a
+            href={`https://filmot.com/search/${curWord()}/1?category=18&lang=en&searchManualSubs=1&country=217&sortField=likecount&sortOrder=desc&gridView=1`}
+            title="search videos"
+            target="_blank"
+          >
+            <img src={chrome.runtime.getURL('icons/cinema.png')} alt="search videos" />
           </a>
           <button class="history_back" disabled={dictHistory().length < 2} title="back">
             <img src={chrome.runtime.getURL('icons/undo.png')} alt="back" />
