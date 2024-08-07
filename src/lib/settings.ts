@@ -2,7 +2,7 @@ import { createSignal } from 'solid-js'
 import { getSyncValue } from './storage'
 import { StorageKey, LevelKey, WordInfoMap } from '../constant'
 import { debounce } from '../lib/utils'
-import { triggerGoogleDriveSyncJob } from './backup/sync'
+import { triggerGithubGistSyncJob, triggerGoogleDriveSyncJob } from './backup/sync'
 
 const DEFAULT_DICTS = {
   collins: true,
@@ -60,6 +60,7 @@ export const [settings, setSettings] = createSignal({ ...DEFAULT_SETTINGS }, { e
 const syncSettingsDebounce = debounce(() => {
   syncSettings()
   triggerGoogleDriveSyncJob()
+  triggerGithubGistSyncJob()
 }, 100)
 
 export async function setSetting<T extends keyof SettingType>(key: T, value: SettingType[T]) {

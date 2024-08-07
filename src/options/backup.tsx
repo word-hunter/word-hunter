@@ -3,7 +3,7 @@ import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings } from '../lib'
 import { syncUpKnowns, getLocalValue } from '../lib/storage'
 import { Note } from './note'
-import { syncWithDrive, getBackupData } from '../lib/backup/sync'
+import { syncWithDrive, getBackupData, syncWithGist } from '../lib/backup/sync'
 import { formatTime } from '../lib/utils'
 import { isMobile, isValidAuthToken } from '../lib/backup/drive'
 
@@ -14,6 +14,11 @@ export const Backup = () => {
   const [latestSyncTime, setLatestSyncTime] = createSignal(0)
   const [syncFailedMessage, setSyncFailedMessage] = createSignal('')
   const [authToken, setAuthToken] = createSignal('')
+  const [githubSyning, setGithubSyning] = createSignal(false)
+  const [githubToken, setGithubToken] = createSignal('')
+  const [githubGistId, setGithubGistId] = createSignal('')
+  const [latestGistSyncTime, setLatestGistSyncTime] = createSignal(0)
+  const [gistSyncFailedMessage, setGistSyncFailedMessage] = createSignal('')
 
   const onAuthTokenInput = (e: Event) => {
     const target = e.target as HTMLTextAreaElement
@@ -27,6 +32,16 @@ export const Backup = () => {
         toastE('invalid auth token')
       }
     }
+  }
+
+  const onGithubTokenInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    setGithubToken(target.value)
+  }
+
+  const onGithubGistIdInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    setGithubGistId(target.value)
   }
 
   getLocalValue(StorageKey.latest_sync_time).then(time => {
@@ -44,6 +59,30 @@ export const Backup = () => {
   getLocalValue(StorageKey.mobile_auth_token).then(token => {
     if (token) {
       setAuthToken(token)
+    }
+  })
+
+  getLocalValue(StorageKey.github_token).then(token => {
+    if (token) {
+      setGithubToken(token)
+    }
+  })
+
+  getLocalValue(StorageKey.github_gist_id).then(gistId => {
+    if (gistId) {
+      setGithubGistId(gistId)
+    }
+  })
+
+  getLocalValue(StorageKey.latest_gist_sync_time).then(time => {
+    if (time) {
+      setLatestGistSyncTime(time)
+    }
+  })
+
+  getLocalValue(StorageKey.gist_sync_failed_message).then(message => {
+    if (message) {
+      setGistSyncFailedMessage(message)
     }
   })
 
@@ -126,6 +165,28 @@ export const Backup = () => {
     }
   }
 
+  const onGithubGistSync = async () => {
+    if (githubSyning()) return
+    const token = githubToken()
+    const gistId = githubGistId()
+    if (!token || !gistId) {
+      toastE('invalid token or gist id')
+      return
+    }
+    setGithubSyning(true)
+    try {
+      const latestSyncTime = await syncWithGist(token, gistId)
+      setLatestGistSyncTime(latestSyncTime)
+      setGistSyncFailedMessage('')
+      toastS('sync success')
+    } catch (e: any) {
+      setGistSyncFailedMessage(e.message)
+      toastE('Error during sync settings: ' + e.message)
+    } finally {
+      setGithubSyning(false)
+    }
+  }
+
   return (
     <>
       <section class="section">
@@ -170,6 +231,40 @@ export const Backup = () => {
           </Show>
           <Show when={!!syncFailedMessage()}>
             <div class="text-center text-error">❌ Sync Failed: {syncFailedMessage()}</div>
+          </Show>
+        </div>
+
+        <div class="divider">OR</div>
+
+        <div class="grid gap-4 pt-1 pb-2">
+          <input
+            type="text"
+            class="input"
+            placeholder="Github Token"
+            value={githubToken()}
+            oninput={onGithubTokenInput}
+          />
+          <input
+            type="text"
+            class="input"
+            placeholder="GitHub Gist Id"
+            value={githubGistId()}
+            oninput={onGithubGistIdInput}
+          />
+          <button class="btn btn-block btn-lg capitalize text-xs" onclick={onGithubGistSync}>
+            <img
+              src={chrome.runtime.getURL('icons/github.png')}
+              classList={{ 'animate-spin': githubSyning() }}
+              class="w-8 h-8"
+              alt="github"
+            />
+            Github Gist Sync
+          </button>
+          <Show when={latestGistSyncTime() > 0 && !gistSyncFailedMessage()}>
+            <div class="text-center text-accent">Latest sync: {formatTime(latestGistSyncTime())}</div>
+          </Show>
+          <Show when={githubToken() && githubGistId() && !!gistSyncFailedMessage()}>
+            <div class="text-center text-error">❌ Sync Failed: {gistSyncFailedMessage()}</div>
           </Show>
         </div>
       </section>

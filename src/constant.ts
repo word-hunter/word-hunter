@@ -50,6 +50,10 @@ export enum StorageKey {
   'latest_sync_time' = 'latest_sync_time',
   'sync_failed_message' = 'sync_failed_message',
   'mobile_auth_token' = 'mobile_auth_token',
+  'github_token' = 'github_token',
+  'github_gist_id' = 'github_gist_id',
+  'latest_gist_sync_time' = 'latest_gist_sync_time',
+  'gist_sync_failed_message' = 'gist_sync_failed_message',
   'local_knowns_log' = 'local_knowns_log',
   'version' = 'version'
 }

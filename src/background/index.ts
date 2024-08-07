@@ -2,7 +2,7 @@ import { Messages, WordMap, WordInfoMap, WordContext, StorageKey, LevelKey } fro
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
-import { triggerGoogleDriveSyncJob, syncWithDrive } from '../lib/backup/sync'
+import { triggerGoogleDriveSyncJob, syncWithDrive, triggerGithubGistSyncJob } from '../lib/backup/sync'
 import { onMessage, sendMessage } from 'webext-bridge/background'
 import { ProtocolMap } from 'webext-bridge'
 
@@ -146,6 +146,7 @@ onMessage(Messages.set_known, async ({ data }) => {
   updateBadge(knowns)
   sendMessageToAllTabs(Messages.set_known, { word })
   triggerGoogleDriveSyncJob()
+  triggerGithubGistSyncJob()
 })
 
 onMessage(Messages.set_all_known, async ({ data }) => {
@@ -158,6 +159,7 @@ onMessage(Messages.set_all_known, async ({ data }) => {
   updateBadge(knowns)
   sendMessageToAllTabs(Messages.set_all_known, { words })
   triggerGoogleDriveSyncJob()
+  triggerGithubGistSyncJob()
 })
 
 onMessage(Messages.add_context, async ({ data }) => {
@@ -174,6 +176,7 @@ onMessage(Messages.add_context, async ({ data }) => {
   }
   sendMessageToAllTabs(Messages.add_context, { word, context })
   triggerGoogleDriveSyncJob()
+  triggerGithubGistSyncJob()
 })
 
 onMessage(Messages.delete_context, async ({ data }) => {
@@ -191,6 +194,7 @@ onMessage(Messages.delete_context, async ({ data }) => {
     })
     sendMessageToAllTabs(Messages.delete_context, { word, context })
     triggerGoogleDriveSyncJob()
+    triggerGithubGistSyncJob()
   }
 })
 
@@ -322,6 +326,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       updateBadge(knowns)
       sendMessageToAllTabs(Messages.set_unknown, { word: originFormWord })
       triggerGoogleDriveSyncJob()
+      triggerGithubGistSyncJob()
     }
   }
 })

@@ -2,6 +2,7 @@ import { StorageKey, WordMap, ContextMap } from '../../constant'
 import { mergeKnowns, mergeContexts, cleanupContexts, getAllKnownSync, getLocalValue, getSyncValue } from '../storage'
 import { SettingType, mergeSetting } from '../settings'
 import * as GDrive from './drive'
+import { getGistData, updateGist } from './github'
 
 type BackupData = {
   known: WordMap
@@ -30,6 +31,32 @@ export async function getBackupData(): Promise<BackupData> {
   }
 }
 
+export async function getMergedData(appData: BackupData, remoteData: BackupData) {
+  const [mergedSettings, setting_update_time] = await mergeSetting(
+    appData[StorageKey.settings] ?? {},
+    remoteData[StorageKey.settings] ?? {},
+    appData[StorageKey.settings_update_timestamp],
+    remoteData[StorageKey.settings_update_timestamp]
+  )
+  const [mergedKnowns, knwon_update_timestamp] = await mergeKnowns(
+    remoteData[StorageKey.known],
+    remoteData[StorageKey.knwon_update_timestamp]
+  )
+  const [mergedContexts, context_update_timestamp] = await mergeContexts(
+    remoteData[StorageKey.context],
+    remoteData[StorageKey.context_update_timestamp]
+  )
+
+  return {
+    [StorageKey.known]: mergedKnowns,
+    [StorageKey.context]: cleanupContexts(mergedContexts, mergedKnowns),
+    [StorageKey.settings]: mergedSettings,
+    [StorageKey.settings_update_timestamp]: setting_update_time,
+    [StorageKey.knwon_update_timestamp]: knwon_update_timestamp,
+    [StorageKey.context_update_timestamp]: context_update_timestamp
+  }
+}
+
 export async function _syncWithDrive(interactive: boolean = true) {
   await GDrive.auth(interactive)
   let dirId = await GDrive.findDirId()
@@ -44,31 +71,7 @@ export async function _syncWithDrive(interactive: boolean = true) {
     // merge and sync
     const appData = await getBackupData()
     const gdriveData = (await GDrive.downloadFile(fileId)) as BackupData
-
-    const [mergedSettings, setting_update_time] = await mergeSetting(
-      appData[StorageKey.settings] ?? {},
-      gdriveData[StorageKey.settings] ?? {},
-      appData[StorageKey.settings_update_timestamp],
-      gdriveData[StorageKey.settings_update_timestamp]
-    )
-    const [mergedKnowns, knwon_update_timestamp] = await mergeKnowns(
-      gdriveData[StorageKey.known],
-      gdriveData[StorageKey.knwon_update_timestamp]
-    )
-    const [mergedContexts, context_update_timestamp] = await mergeContexts(
-      gdriveData[StorageKey.context],
-      gdriveData[StorageKey.context_update_timestamp]
-    )
-
-    const mergedData = {
-      [StorageKey.known]: mergedKnowns,
-      [StorageKey.context]: cleanupContexts(mergedContexts, mergedKnowns),
-      [StorageKey.settings]: mergedSettings,
-      [StorageKey.settings_update_timestamp]: setting_update_time,
-      [StorageKey.knwon_update_timestamp]: knwon_update_timestamp,
-      [StorageKey.context_update_timestamp]: context_update_timestamp
-    }
-
+    const mergedData = await getMergedData(appData, gdriveData)
     const file = new File([JSON.stringify(mergedData)], GDrive.FILE_NAME, { type: 'application/json' })
     await GDrive.uploadFile(file, 'application/json', dirId, fileId)
   } else {
@@ -94,7 +97,33 @@ export async function syncWithDrive(interactive: boolean): Promise<number> {
   }
 }
 
+export async function _syncWithGist(token: string, gistId: string) {
+  const appData = await getBackupData()
+  const gistData = await getGistData(token, gistId)
+  const mergedData = await getMergedData(appData, gistData)
+  await updateGist(token, gistId, mergedData)
+  // save token and gist id
+  chrome.storage.local.set({ [StorageKey.github_token]: token })
+  chrome.storage.local.set({ [StorageKey.github_gist_id]: gistId })
+}
+
+export async function syncWithGist(token: string, gistId: string): Promise<number> {
+  try {
+    await _syncWithGist(token, gistId)
+    const latest_gist_sync_time = Date.now()
+    await chrome.storage.local.set({
+      [StorageKey.latest_gist_sync_time]: latest_gist_sync_time,
+      [StorageKey.gist_sync_failed_message]: ''
+    })
+    return latest_gist_sync_time
+  } catch (e: any) {
+    await chrome.storage.local.set({ [StorageKey.gist_sync_failed_message]: e.message })
+    throw e
+  }
+}
+
 const SYNC_ALARM_NAME = 'SYNC_WITH_GDRIVE'
+const GIST_SYNC_ALARM_NAME = 'SYNC_WITH_GIST'
 
 export async function triggerGoogleDriveSyncJob() {
   if (!(await getLocalValue(StorageKey.latest_sync_time)) || !(await getSyncValue(StorageKey.latest_sync_time))) return
@@ -104,8 +133,23 @@ export async function triggerGoogleDriveSyncJob() {
   })
 }
 
-chrome.alarms?.onAlarm?.addListener(({ name }) => {
+export async function triggerGithubGistSyncJob() {
+  if (!(await getLocalValue(StorageKey.latest_gist_sync_time))) return
+  chrome.alarms.clear(GIST_SYNC_ALARM_NAME)
+  chrome.alarms.create(GIST_SYNC_ALARM_NAME, {
+    delayInMinutes: 1
+  })
+}
+
+chrome.alarms?.onAlarm?.addListener(async ({ name }) => {
   if (name === SYNC_ALARM_NAME) {
     syncWithDrive(false)
+  }
+  if (name === GIST_SYNC_ALARM_NAME) {
+    const token = await getLocalValue(StorageKey.github_token)
+    const gistId = await getLocalValue(StorageKey.github_gist_id)
+    if (token && gistId) {
+      syncWithGist(token, gistId)
+    }
   }
 })
