@@ -1,6 +1,6 @@
 import { StorageKey, WordMap, ContextMap } from '../../constant'
 import { mergeKnowns, mergeContexts, cleanupContexts, getAllKnownSync, getLocalValue, getSyncValue } from '../storage'
-import { SettingType, mergeSetting } from '../settings'
+import { SettingType, mergeSetting, settings } from '../settings'
 import * as GDrive from './drive'
 import { getGistData, updateGist } from './github'
 
@@ -102,9 +102,6 @@ export async function _syncWithGist(token: string, gistId: string) {
   const gistData = await getGistData(token, gistId)
   const mergedData = await getMergedData(appData, gistData)
   await updateGist(token, gistId, mergedData)
-  // save token and gist id
-  chrome.storage.local.set({ [StorageKey.github_token]: token })
-  chrome.storage.local.set({ [StorageKey.github_gist_id]: gistId })
 }
 
 export async function syncWithGist(token: string, gistId: string): Promise<number> {
@@ -146,10 +143,8 @@ chrome.alarms?.onAlarm?.addListener(async ({ name }) => {
     syncWithDrive(false)
   }
   if (name === GIST_SYNC_ALARM_NAME) {
-    const token = await getLocalValue(StorageKey.github_token)
-    const gistId = await getLocalValue(StorageKey.github_gist_id)
-    if (token && gistId) {
-      syncWithGist(token, gistId)
+    if (settings().githubToken && settings().githubGistId) {
+      syncWithGist(settings().githubToken, settings().githubGistId)
     }
   }
 })
