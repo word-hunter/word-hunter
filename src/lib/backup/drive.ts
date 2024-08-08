@@ -5,7 +5,10 @@ const UPLOAD_API_PATH = 'https://www.googleapis.com/upload/drive/v3/files'
 export const FOLDER_NAME = 'Word Hunter Backup'
 export const FILE_NAME = 'word_hunter_backup.json'
 
-export const isMobile = navigator.userAgent.includes('Mobile') || navigator.userAgent.includes('Android')
+export const isMobile =
+  navigator.userAgent.includes('Mobile') ||
+  navigator.userAgent.includes('Android') ||
+  new URLSearchParams(location.search).get('mobile') === '1'
 
 export function isValidAuthToken(token: string) {
   return !!token && /ya29.[0-9A-Za-z-_]+/.test(token)
@@ -65,8 +68,6 @@ export async function downloadFile(fileId: string) {
   const file = await makeRequest('GET', `${API_PATH}/${fileId}?alt=media`, 'json')
   return file
 }
-
-export async function mergeAndSync() {}
 
 async function makeRequest(
   method: 'GET' | 'POST' | 'PUT' | 'PATCH',
