@@ -2,7 +2,7 @@ import { createSignal } from 'solid-js'
 import { getSyncValue } from './storage'
 import { StorageKey, LevelKey, WordInfoMap } from '../constant'
 import { debounce } from '../lib/utils'
-import { triggerGoogleDriveSyncJob } from './backup/sync'
+import { triggerGithubGistSyncJob, triggerGoogleDriveSyncJob } from './backup/sync'
 
 const DEFAULT_DICTS = {
   collins: true,
@@ -46,7 +46,9 @@ export const DEFAULT_SETTINGS = {
     apiProxy: 'https://api.openai.com/v1/chat/completions',
     model: 'gpt-3.5-turbo',
     prompt: 'explain the word ${word} in the sentence "${context}" with grade 2 English words'
-  }
+  },
+  githubToken: '',
+  githubGistId: ''
 }
 
 export type SettingType = typeof DEFAULT_SETTINGS
@@ -60,6 +62,7 @@ export const [settings, setSettings] = createSignal({ ...DEFAULT_SETTINGS }, { e
 const syncSettingsDebounce = debounce(() => {
   syncSettings()
   triggerGoogleDriveSyncJob()
+  triggerGithubGistSyncJob()
 }, 100)
 
 export async function setSetting<T extends keyof SettingType>(key: T, value: SettingType[T]) {

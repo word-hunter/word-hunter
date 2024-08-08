@@ -1,9 +1,9 @@
 import { createSignal, Show } from 'solid-js'
 import { StorageKey } from '../constant'
-import { downloadAsJsonFile, resotreSettings } from '../lib'
+import { downloadAsJsonFile, resotreSettings, settings, setSetting } from '../lib'
 import { syncUpKnowns, getLocalValue } from '../lib/storage'
 import { Note } from './note'
-import { syncWithDrive, getBackupData } from '../lib/backup/sync'
+import { syncWithDrive, getBackupData, syncWithGist } from '../lib/backup/sync'
 import { formatTime } from '../lib/utils'
 import { isMobile, isValidAuthToken } from '../lib/backup/drive'
 
@@ -13,11 +13,14 @@ export const Backup = () => {
   const [syning, setSyning] = createSignal(false)
   const [latestSyncTime, setLatestSyncTime] = createSignal(0)
   const [syncFailedMessage, setSyncFailedMessage] = createSignal('')
-  const [authToken, setAuthToken] = createSignal('')
+  const [gdriveToken, setGdriveToken] = createSignal('')
+  const [githubSyning, setGithubSyning] = createSignal(false)
+  const [latestGistSyncTime, setLatestGistSyncTime] = createSignal(0)
+  const [gistSyncFailedMessage, setGistSyncFailedMessage] = createSignal('')
 
-  const onAuthTokenInput = (e: Event) => {
+  const onGDriveTokenInput = (e: Event) => {
     const target = e.target as HTMLTextAreaElement
-    setAuthToken(target.value)
+    setGdriveToken(target.value)
     if (target.value.trim() === '') {
       chrome.storage.local.remove([StorageKey.mobile_auth_token])
     } else {
@@ -27,6 +30,16 @@ export const Backup = () => {
         toastE('invalid auth token')
       }
     }
+  }
+
+  const onGithubTokenInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    setSetting('githubToken', target.value)
+  }
+
+  const onGithubGistIdInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    setSetting('githubGistId', target.value)
   }
 
   getLocalValue(StorageKey.latest_sync_time).then(time => {
@@ -43,7 +56,19 @@ export const Backup = () => {
 
   getLocalValue(StorageKey.mobile_auth_token).then(token => {
     if (token) {
-      setAuthToken(token)
+      setGdriveToken(token)
+    }
+  })
+
+  getLocalValue(StorageKey.latest_gist_sync_time).then(time => {
+    if (time) {
+      setLatestGistSyncTime(time)
+    }
+  })
+
+  getLocalValue(StorageKey.gist_sync_failed_message).then(message => {
+    if (message) {
+      setGistSyncFailedMessage(message)
     }
   })
 
@@ -126,6 +151,28 @@ export const Backup = () => {
     }
   }
 
+  const onGithubGistSync = async () => {
+    if (githubSyning()) return
+    const token = settings().githubToken
+    const gistId = settings().githubGistId
+    if (!token || !gistId) {
+      toastE('invalid token or gist id')
+      return
+    }
+    setGithubSyning(true)
+    try {
+      const latestSyncTime = await syncWithGist(token, gistId)
+      setLatestGistSyncTime(latestSyncTime)
+      setGistSyncFailedMessage('')
+      toastS('sync success')
+    } catch (e: any) {
+      setGistSyncFailedMessage(e.message)
+      toastE('Error during sync settings: ' + e.message)
+    } finally {
+      setGithubSyning(false)
+    }
+  }
+
   return (
     <>
       <section class="section">
@@ -145,14 +192,14 @@ export const Backup = () => {
 
         <div class="divider">OR</div>
 
-        <div class="grid gap-4 pt-1 pb-2">
+        <div class="grid gap-4 mt-1 mb-2">
           <Show when={isMobile}>
             <textarea
               placeholder="Only for Mobile browser:\n Run `await chrome.identity.getAuthToken()` in Desktop Chrome console in option page to get the token, then paste it here."
               class="textarea textarea-bordered textarea-lg w-full h-24 text-sm leading-5"
-              classList={{ 'textarea-error': !!authToken() && !isValidAuthToken(authToken()) }}
-              value={authToken()}
-              oninput={onAuthTokenInput}
+              classList={{ 'textarea-error': !!gdriveToken() && !isValidAuthToken(gdriveToken()) }}
+              value={gdriveToken()}
+              oninput={onGDriveTokenInput}
             />
           </Show>
           <button onclick={onDriveSync} class="btn btn-block btn-lg capitalize text-xs">
@@ -170,6 +217,40 @@ export const Backup = () => {
           </Show>
           <Show when={!!syncFailedMessage()}>
             <div class="text-center text-error">❌ Sync Failed: {syncFailedMessage()}</div>
+          </Show>
+        </div>
+
+        <div class="divider">OR</div>
+
+        <div class="grid gap-4 mt-1 mb-2">
+          <input
+            type="text"
+            class="input input-bordered text-sm"
+            placeholder="Github Token"
+            value={settings().githubToken}
+            oninput={onGithubTokenInput}
+          />
+          <input
+            type="text"
+            class="input input-bordered text-sm"
+            placeholder="GitHub Gist Id"
+            value={settings().githubGistId}
+            oninput={onGithubGistIdInput}
+          />
+          <button class="btn btn-block btn-lg capitalize text-xs" onclick={onGithubGistSync}>
+            <img
+              src={chrome.runtime.getURL('icons/github.png')}
+              classList={{ 'animate-spin': githubSyning() }}
+              class="w-8 h-8"
+              alt="github"
+            />
+            Github Gist Sync
+          </button>
+          <Show when={latestGistSyncTime() > 0 && !gistSyncFailedMessage()}>
+            <div class="text-center text-accent">Latest sync: {formatTime(latestGistSyncTime())}</div>
+          </Show>
+          <Show when={settings().githubToken && settings().githubGistId && !!gistSyncFailedMessage()}>
+            <div class="text-center text-error">❌ Sync Failed: {gistSyncFailedMessage()}</div>
           </Show>
         </div>
       </section>
