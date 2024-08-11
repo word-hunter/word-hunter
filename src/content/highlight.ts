@@ -51,6 +51,12 @@ function _makeAsKnown(word: string) {
       const rangeWord = getRangeWord(range)
       if (isOriginFormSame(rangeWord, word)) {
         hl.delete(range)
+        if (settings().showCnTrans) {
+          const transNode = range.endContainer.nextSibling as HTMLElement
+          if (transNode?.nodeName === 'W-MARK-T' && transNode.dataset.word === word) {
+            transNode.remove()
+          }
+        }
         detachRange(range as Range)
       }
     })
@@ -135,15 +141,7 @@ export function markAsAllKnown() {
 }
 
 function _makeAsAllKnown(words: string[]) {
-  ;[unknownHL, contextHL].forEach(hl => {
-    hl.forEach(range => {
-      const rangeWord = getRangeWord(range)
-      if (words.includes(rangeWord)) {
-        hl.delete(range)
-        detachRange(range as Range)
-      }
-    })
-  })
+  words.forEach(_makeAsKnown)
 }
 
 function detachRange(range: Range) {
@@ -216,6 +214,7 @@ const intersectionObserver = new IntersectionObserver(entries => {
             const transNode = document.createElement('w-mark-t')
             transNode.textContent = `(${cnRegex.exec(trans)?.[0] ?? trans})`
             transNode.dataset.trans = `(${trans})`
+            transNode.dataset.word = word
             if (range.endContainer.nextSibling?.nodeName !== 'W-MARK-T') {
               range.insertNode(transNode)
             }

@@ -2,7 +2,8 @@
 
 w-mark-t {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   line-height: normal;
   vertical-align: middle;
   overflow: hidden;
