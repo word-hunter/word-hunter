@@ -244,7 +244,7 @@ export const WhCard = customElement('wh-card', () => {
         </div>
         <div>
           <a
-            href={`https://filmot.com/search/${curWord()}/1?category=18&lang=en&searchManualSubs=1&country=217&sortField=likecount&sortOrder=desc&gridView=1`}
+            href={`https://filmot.com/search/${curWord()}/1?excludeCategory=8,35,46,9,2,6,19,30,14,12,0,7,39,32&lang=en&searchManualSubs=1&country=217&sortField=likecount&sortOrder=desc&gridView=1`}
             title="search videos"
             target="_blank"
           >
