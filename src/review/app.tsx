@@ -120,7 +120,7 @@ export const App = () => {
   )
 
   return (
-    <div class="bg-[#ECEFF7] dark:bg-[#282828] font-sans">
+    <div class="min-h-full bg-[#ECEFF7] dark:bg-[#282828] font-sans">
       <div class="rounded-xl pb-10">
         <div class="container mx-auto p-4 grid gap-5">
           <div class="py-4 flex justify-end items-center gap-10">
@@ -426,7 +426,7 @@ function getEmbedYoutubeUrl(urlString: string) {
     if (url.pathname === '/watch') {
       const videoId = url.searchParams.get('v')
       const timeStart = url.searchParams.get('t')?.replace('s', '') ?? '0'
-      return `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${timeStart}&cc_load_policy=1&cc_lang_pref=en&origin=http://filmot.com`
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${timeStart}&cc_load_policy=1&cc_lang_pref=en&rel=0&origin=http://filmot.com`
     }
   }
   return urlString
@@ -434,7 +434,7 @@ function getEmbedYoutubeUrl(urlString: string) {
 
 async function getFilmotVideos(word: string): Promise<Video[]> {
   if (!word) return []
-  const url = `https://filmot.com/search/${word}/1?category=18&lang=en&searchManualSubs=1&country=217&sortField=likecount&sortOrder=desc&gridView=1`
+  const url = `https://filmot.com/search/${word}/1?excludeCategory=8,35,46,9,2,6,19,30,14,12,0,7,39,32&lang=en&searchManualSubs=1&country=217&sortField=likecount&sortOrder=desc&gridView=1`
   const res = await fetch(url)
   const html = await res.text()
   const parser = new DOMParser()
