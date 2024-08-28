@@ -3,7 +3,7 @@ import { explainWord } from '../lib/openai'
 import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
 import { triggerGoogleDriveSyncJob, syncWithDrive, triggerGithubGistSyncJob } from '../lib/backup/sync'
-import { onMessage, sendMessage } from 'webext-bridge/background'
+import { onMessage } from 'webext-bridge/background'
 import { ProtocolMap } from 'webext-bridge'
 
 let dict: WordInfoMap
@@ -129,12 +129,14 @@ const createAudioWindow = async (url: string) => {
   })
 }
 
-function sendMessageToAllTabs<T extends Messages>(action: T, data: ProtocolMap[T]) {
-  chrome.tabs.query({}, tabs => {
-    for (const tab of tabs) {
-      sendMessage(action, data as any, { tabId: tab.id!, context: 'content-script' })
-    }
-  })
+async function sendMessageToAllTabs<T extends Messages>(action: T, data: ProtocolMap[T]) {
+  const tabs = await chrome.tabs.query({})
+  for (const tab of tabs) {
+    // Note: use chrome.tabs.sendMessage instead of sendMessage from webext-bridge
+    // because the sendMessage from webext-bridge is only send to main frame by default
+    // but we need to send message to all frames
+    chrome.tabs.sendMessage(tab.id!, { action, ...data })
+  }
 }
 
 onMessage(Messages.set_known, async ({ data }) => {
