@@ -391,7 +391,11 @@ function observeDomChange() {
 
         // when remove node, remove highlight range
         if (mutation.removedNodes.length > 0) {
+          let oldWhRoot: HTMLElement
           mutation.removedNodes.forEach(node => {
+            if (node.nodeName === 'WH-ROOT') {
+              oldWhRoot = node as HTMLElement
+            }
             if (highlightContainerMap.has(node)) {
               const ranges = highlightContainerMap.get(node)!
               ranges.forEach(r => {
@@ -407,8 +411,7 @@ function observeDomChange() {
           // it uses `document.body.innerHTML` when page changes between book thumb and book contents
           // which will cause word-hunter card node removed
           // we need to clone the removed wh-root node and append to body, to make card work again
-          if (mutation.removedNodes[0].nodeName === 'WH-ROOT') {
-            const oldWhRoot = mutation.removedNodes[0] as HTMLElement
+          if (oldWhRoot!) {
             const whRoot = oldWhRoot.cloneNode(true)
             oldWhRoot.remove()
             document.body.appendChild(whRoot)
