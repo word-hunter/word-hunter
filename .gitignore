@@ -28,3 +28,10 @@ secrets.*.js
 
 # IDEA IDE
 .idea
+
+# playwright test
+/test-results/
+/test-user-data/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
