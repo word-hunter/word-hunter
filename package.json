@@ -18,11 +18,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "playwright test",
     "fmt": "prettier --write '**/*.{tsx,ts,json,css,md}'"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.23",
+    "@playwright/test": "^1.46.1",
     "@types/chrome": "^0.0.263",
+    "@types/node": "^22.5.1",
     "daisyui": "^4.9.0",
     "postcss-import": "^16.1.0",
     "postcss-nesting": "^12.1.0",
