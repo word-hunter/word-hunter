@@ -19,9 +19,16 @@ export const getDocumentTitle = () => {
   return document.title.substring(0, 40)
 }
 
+function isPDFjsReaderSpan(node: HTMLElement) {
+  return (
+    location.host === 'mozilla.github.io' &&
+    (node.getAttribute('role') === 'presentation' || node.classList.contains('markedContent'))
+  )
+}
+
 export const getWordContext = (range: Range, originWord?: string): string => {
   let pNode = range.commonAncestorContainer?.parentElement as HTMLElement
-  while (getComputedStyle(pNode).display.startsWith('inline')) {
+  while (getComputedStyle(pNode).display.startsWith('inline') || isPDFjsReaderSpan(pNode)) {
     pNode = pNode.parentElement as HTMLElement
   }
   // remove all <w-mark-t> tags in context
@@ -78,7 +85,7 @@ export function executeScript<T>(func: () => T): Promise<{ result: T }[]> {
 }
 
 export function debounce<T extends (...args: any[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
-  let timer: number
+  let timer: NodeJS.Timeout
 
   return function (...args: Parameters<T>) {
     clearTimeout(timer)
