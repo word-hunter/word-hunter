@@ -19,7 +19,11 @@ export const getDocumentTitle = () => {
   return document.title.substring(0, 40)
 }
 
+const wordContextCache = new WeakMap<Range, string>()
 export const getWordContext = (range: Range, originWord?: string): string => {
+  if (wordContextCache.has(range)) {
+    return wordContextCache.get(range) ?? ''
+  }
   let pNode = range.commonAncestorContainer?.parentElement as HTMLElement
   while (getComputedStyle(pNode).display.startsWith('inline')) {
     pNode = pNode.parentElement as HTMLElement
@@ -37,7 +41,9 @@ export const getWordContext = (range: Range, originWord?: string): string => {
   if (text.at(end) === '.') end++
 
   pNodeClone.remove()
-  return text.slice(start, end)
+  const result = text.slice(start, end)
+  wordContextCache.set(range, result)
+  return result
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {
@@ -78,7 +84,7 @@ export function executeScript<T>(func: () => T): Promise<{ result: T }[]> {
 }
 
 export function debounce<T extends (...args: any[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
-  let timer: number
+  let timer: NodeJS.Timeout
 
   return function (...args: Parameters<T>) {
     clearTimeout(timer)
