@@ -2,7 +2,16 @@
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   theme: {
-    extend: {}
+    extend: {
+      spacing: {
+        1: '1px',
+        2: '2px',
+        3: '3px',
+        4: '4px',
+        5: '5px',
+        6: '6px'
+      }
+    }
   },
   plugins: [require('tailwindcss/nesting'), require('daisyui')],
   daisyui: {

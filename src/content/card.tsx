@@ -48,6 +48,7 @@ const [zenModeWords, setZenModeWords] = createSignal<string[]>([])
 const [cardDisabledInZenMode, setCardDisabledInZenMode] = createSignal(false)
 const [curContextText, setCurContextText] = createSignal('')
 const [tabIndex, setTabIndex] = createSignal(0)
+const [isEditingContext, setIsEditingContext] = createSignal(false)
 
 export const WhCard = customElement('wh-card', () => {
   const dictTabs = () => settings()['dictTabs']
@@ -159,7 +160,7 @@ export const WhCard = customElement('wh-card', () => {
   const onKeydown = (e: KeyboardEvent) => {
     const cardNode = getCardNode()
     const container = cardNode.querySelector('.dict_container')!
-    if (isCardVisible()) {
+    if (isCardVisible() && !isEditingContext()) {
       if (!e.altKey && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
           const selector = getDictAdapter().sectionSelector
@@ -386,6 +387,57 @@ export function ZenMode() {
 
 function ContextList(props: { contexts: WordContext[] }) {
   const allTensionWords = () => getWordAllTenses(curWord()).reverse()
+  const [editingContext, setEditingContext] = createSignal<WordContext | null>(null)
+  const [prevText, setPrevText] = createSignal<string>('')
+  let editRef: HTMLDivElement | undefined
+
+  function enterEditMode(context: WordContext) {
+    setIsEditingContext(true)
+    setEditingContext(context)
+    setPrevText(context.text)
+  }
+
+  function exitEditMode() {
+    setIsEditingContext(false)
+    setEditingContext(null)
+    setPrevText('')
+  }
+
+  function updateContextText() {
+    const currentContext = editingContext()
+
+    if (!editRef || !currentContext) {
+      exitEditMode()
+      return
+    }
+    currentContext.text = (editRef.textContent ?? '').trim()
+  }
+
+  function saveContext() {
+    const currentContext = editingContext()
+
+    if (!currentContext) {
+      exitEditMode()
+      return
+    }
+
+    updateContextText()
+    deleteContext({
+      ...currentContext,
+      text: prevText(),
+      timestamp: Date.now()
+    })
+    addContext(currentContext.word, currentContext.text)
+    exitEditMode()
+  }
+
+  function updateAndFocusEl(el: HTMLDivElement) {
+    editRef = el
+    setTimeout(() => {
+      editRef?.focus()
+    })
+  }
+
   return (
     <Show
       when={props.contexts.length > 0}
@@ -405,16 +457,33 @@ function ContextList(props: { contexts: WordContext[] }) {
             link = link.replaceAll('-', '%2D')
             return (
               <div>
-                <pre innerHTML={highlightedContext}></pre>
+                <Show when={editingContext() === context}>
+                  <div
+                    ref={el => updateAndFocusEl(el)}
+                    onblur={() => saveContext()}
+                    oninput={() => updateContextText()}
+                    contenteditable
+                  >
+                    {context.text}
+                  </div>
+                </Show>
+                <Show when={editingContext() !== context}>
+                  <pre innerHTML={highlightedContext}></pre>
+                </Show>
                 <p>
                   <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
                   <a href={link} target="_blank">
                     {context.title}
                   </a>
                 </p>
-                <button title="delete context" onclick={() => deleteContext(context)}>
-                  <img src={chrome.runtime.getURL('icons/cancel.png')} alt="delete" />
-                </button>
+                <div class="flex items-center absolute top-5 right-0 gap-4">
+                  <button title="edit context" onClick={() => enterEditMode(context)}>
+                    <img src={chrome.runtime.getURL('icons/edit.png')} alt="edit" />
+                  </button>
+                  <button title="delete context" onClick={() => deleteContext(context)}>
+                    <img src={chrome.runtime.getURL('icons/cancel.png')} alt="delete" />
+                  </button>
+                </div>
               </div>
             )
           }}

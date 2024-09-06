@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .word_card {
   --bg-color: #fff;
   --border-color: rgba(0, 0, 0, 0.3);
@@ -195,9 +199,6 @@
 
       button {
         opacity: 0;
-        position: absolute;
-        right: 0px;
-        top: 5px;
         border: none;
         background: none;
         cursor: pointer;
