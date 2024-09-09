@@ -4,12 +4,12 @@ module.exports = {
   theme: {
     extend: {
       spacing: {
-        1: '1px',
-        2: '2px',
-        3: '3px',
-        4: '4px',
-        5: '5px',
-        6: '6px'
+        1: '4px',
+        2: '8px',
+        3: '12px',
+        4: '16px',
+        5: '20px',
+        6: '24px'
       }
     }
   },
