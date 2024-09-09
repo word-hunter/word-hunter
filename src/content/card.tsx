@@ -472,7 +472,7 @@ function ContextList(props: { contexts: WordContext[] }) {
                     {context.title}
                   </a>
                 </p>
-                <div class="flex items-center absolute top-5 right-0 gap-4">
+                <div class="flex items-center absolute top-1 right-0 gap-1">
                   <button title="edit context" onClick={() => enterEditMode(context)}>
                     <img src={chrome.runtime.getURL('icons/edit.png')} alt="edit" />
                   </button>
