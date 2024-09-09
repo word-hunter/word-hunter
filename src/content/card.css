@@ -120,6 +120,7 @@
       max-height: var(--max-height);
       display: grid;
       place-content: center;
+      margin: auto;
       path {
         stroke: var(--color-main);
         fill: var(--loading-svg-color);
