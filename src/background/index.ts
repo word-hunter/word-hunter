@@ -181,7 +181,7 @@ onMessage(Messages.add_context, async ({ data }) => {
 onMessage(Messages.edit_context, async ({ data }) => {
   const { word, context, oldText } = data
   const contexts = (await getLocalValue(StorageKey.context)) ?? {}
-  // // delete context in normal tense word key
+  // edit context in normal tense word key
   const wordContexts = (contexts[word] ?? []) as WordContext[]
   const index = wordContexts.findIndex(c => c.text === oldText)
   if (index > -1) {
