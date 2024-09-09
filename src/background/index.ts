@@ -178,6 +178,24 @@ onMessage(Messages.add_context, async ({ data }) => {
   triggerSyncJob()
 })
 
+onMessage(Messages.edit_context, async ({ data }) => {
+  const { word, context, oldText } = data
+  const contexts = (await getLocalValue(StorageKey.context)) ?? {}
+  // // delete context in normal tense word key
+  const wordContexts = (contexts[word] ?? []) as WordContext[]
+  const index = wordContexts.findIndex(c => c.text === oldText)
+  if (index > -1) {
+    wordContexts.splice(index, 1, context)
+    const { [word]: w, ...rest } = contexts
+    chrome.storage.local.set({
+      [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest,
+      [StorageKey.context_update_timestamp]: Date.now()
+    })
+    sendMessageToAllTabs(Messages.edit_context, { word, context, oldText })
+    triggerSyncJob()
+  }
+})
+
 onMessage(Messages.delete_context, async ({ data }) => {
   const { word, context } = data
   const contexts = (await getLocalValue(StorageKey.context)) ?? {}

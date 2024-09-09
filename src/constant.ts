@@ -62,6 +62,7 @@ export enum Messages {
   'set_unknown' = 'set_unknown',
   'add_context' = 'add_context',
   'delete_context' = 'delete_context',
+  'edit_context' = 'edit_context',
   'app_available' = 'app_available',
   'play_audio' = 'play_audio',
   'fetch_html' = 'fetch_html',

@@ -12,6 +12,7 @@ import {
   markAsAllKnown,
   addContext,
   deleteContext,
+  editContext,
   isInDict,
   getWordContexts,
   wordContexts,
@@ -422,12 +423,7 @@ function ContextList(props: { contexts: WordContext[] }) {
     }
 
     updateContextText()
-    deleteContext({
-      ...currentContext,
-      text: prevText(),
-      timestamp: Date.now()
-    })
-    addContext(currentContext.word, currentContext.text)
+    editContext(currentContext, prevText())
     exitEditMode()
   }
 
