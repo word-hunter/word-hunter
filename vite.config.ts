@@ -41,5 +41,8 @@ export default defineConfig({
     },
     sourcemap: false
   },
+  server: {
+    cors: false
+  },
   plugins: [solidPlugin(), crx({ manifest: manifest as ManifestV3Export }), updateManifestPlugin()]
 })
