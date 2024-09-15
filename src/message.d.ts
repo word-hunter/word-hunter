@@ -7,6 +7,7 @@ declare module 'webext-bridge' {
     [Messages.set_all_known]: { words: string[] }
     [Messages.set_unknown]: { word: string }
     [Messages.add_context]: { word: string; context: WordContext }
+    [Messages.edit_context]: { word: string; context: WordContext; oldText: string }
     [Messages.delete_context]: { word: string; context: WordContext }
     [Messages.app_available]: { app_available: boolean }
     [Messages.play_audio]: { audio: string | null; word?: string }

@@ -138,6 +138,11 @@ export async function triggerGithubGistSyncJob() {
   })
 }
 
+export async function triggerSyncJob() {
+  triggerGoogleDriveSyncJob()
+  triggerGithubGistSyncJob()
+}
+
 chrome.alarms?.onAlarm?.addListener(async ({ name }) => {
   if (name === SYNC_ALARM_NAME) {
     syncWithDrive(false)

@@ -2,7 +2,7 @@ import { Messages, WordMap, WordInfoMap, WordContext, StorageKey, LevelKey } fro
 import { explainWord } from '../lib/openai'
 import { syncUpKnowns, getLocalValue, getAllKnownSync } from '../lib/storage'
 import { settings } from '../lib/settings'
-import { triggerGoogleDriveSyncJob, syncWithDrive, triggerGithubGistSyncJob } from '../lib/backup/sync'
+import { syncWithDrive, triggerSyncJob } from '../lib/backup/sync'
 import { onMessage } from 'webext-bridge/background'
 import { ProtocolMap } from 'webext-bridge'
 
@@ -147,8 +147,7 @@ onMessage(Messages.set_known, async ({ data }) => {
   deleteContextWords([word])
   updateBadge(knowns)
   sendMessageToAllTabs(Messages.set_known, { word })
-  triggerGoogleDriveSyncJob()
-  triggerGithubGistSyncJob()
+  triggerSyncJob()
 })
 
 onMessage(Messages.set_all_known, async ({ data }) => {
@@ -160,8 +159,7 @@ onMessage(Messages.set_all_known, async ({ data }) => {
   deleteContextWords(words)
   updateBadge(knowns)
   sendMessageToAllTabs(Messages.set_all_known, { words })
-  triggerGoogleDriveSyncJob()
-  triggerGithubGistSyncJob()
+  triggerSyncJob()
 })
 
 onMessage(Messages.add_context, async ({ data }) => {
@@ -177,8 +175,25 @@ onMessage(Messages.add_context, async ({ data }) => {
     })
   }
   sendMessageToAllTabs(Messages.add_context, { word, context })
-  triggerGoogleDriveSyncJob()
-  triggerGithubGistSyncJob()
+  triggerSyncJob()
+})
+
+onMessage(Messages.edit_context, async ({ data }) => {
+  const { word, context, oldText } = data
+  const contexts = (await getLocalValue(StorageKey.context)) ?? {}
+  // edit context in normal tense word key
+  const wordContexts = (contexts[word] ?? []) as WordContext[]
+  const index = wordContexts.findIndex(c => c.text === oldText)
+  if (index > -1) {
+    wordContexts.splice(index, 1, context)
+    const { [word]: w, ...rest } = contexts
+    chrome.storage.local.set({
+      [StorageKey.context]: wordContexts.length > 0 ? { ...rest, [word]: wordContexts } : rest,
+      [StorageKey.context_update_timestamp]: Date.now()
+    })
+    sendMessageToAllTabs(Messages.edit_context, { word, context, oldText })
+    triggerSyncJob()
+  }
 })
 
 onMessage(Messages.delete_context, async ({ data }) => {
@@ -195,8 +210,7 @@ onMessage(Messages.delete_context, async ({ data }) => {
       [StorageKey.context_update_timestamp]: Date.now()
     })
     sendMessageToAllTabs(Messages.delete_context, { word, context })
-    triggerGoogleDriveSyncJob()
-    triggerGithubGistSyncJob()
+    triggerSyncJob()
   }
 })
 
@@ -327,8 +341,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       await syncUpKnowns([originFormWord], knowns, Date.now())
       updateBadge(knowns)
       sendMessageToAllTabs(Messages.set_unknown, { word: originFormWord })
-      triggerGoogleDriveSyncJob()
-      triggerGithubGistSyncJob()
+      triggerSyncJob()
     }
   }
 })

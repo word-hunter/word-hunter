@@ -93,13 +93,21 @@ export function addContext(word: string, text: string) {
   sendMessage(Messages.add_context, { word: originFormWord, context }, 'background')
 }
 
-function _addContext(context: WordContext) {
+function _addOrUpdateContext(context: WordContext, isAdd: boolean) {
   const word = context.word
-  if (!(contexts[word] ?? []).find(c => c.text === context.text)) {
-    contexts[word] = [...(contexts[word] ?? []), context]
+  const index = (contexts[word] ?? []).findIndex(c => c.text === context.text)
+
+  if (isAdd) {
+    if (index === -1) {
+      contexts[word] = [...(contexts[word] ?? []), context]
+    }
+  } else {
+    if (index > -1) {
+      contexts[word].splice(index, 1, context)
+    }
   }
 
-  setWordContexts(contexts[word])
+  setWordContexts([...contexts[word]])
   unknownHL.forEach(range => {
     const rangeWord = getRangeWord(range)
     if (isOriginFormSame(rangeWord, word)) {
@@ -107,6 +115,10 @@ function _addContext(context: WordContext) {
       contextHL.add(range)
     }
   })
+}
+
+export function editContext(context: WordContext, oldText: string) {
+  sendMessage(Messages.edit_context, { word: context.word, context, oldText }, 'background')
 }
 
 export function deleteContext(context: WordContext) {
@@ -481,7 +493,10 @@ function listenBackgroundMessage() {
         _makeAsUnknown(word)
         break
       case Messages.add_context:
-        _addContext(context)
+        _addOrUpdateContext(context, true)
+        break
+      case Messages.edit_context:
+        _addOrUpdateContext(context, false)
         break
       case Messages.delete_context:
         _deleteContext(context)

@@ -19,32 +19,76 @@ export const getDocumentTitle = () => {
   return document.title.substring(0, 40)
 }
 
-function isPDFjsReaderSpan(node: HTMLElement) {
-  return (
-    location.host === 'mozilla.github.io' &&
-    (node.getAttribute('role') === 'presentation' || node.classList.contains('markedContent'))
-  )
+const MAX_CONTEXT_WORDS_LENGTH = 100
+function getTextAroundPoint(x: number, y: number) {
+  const yStart = y - 30
+  const yEnd = y + 30
+  let rangeStart
+  let rangeEnd
+  let textNodeStart
+  let textNodeEnd
+
+  // @ts-ignore
+  if (document.caretPositionFromPoint) {
+    // @ts-ignore
+    rangeStart = document.caretPositionFromPoint(x, yStart)
+    textNodeStart = rangeStart.offsetNode
+    // @ts-ignore
+    rangeEnd = document.caretPositionFromPoint(x, yEnd)
+    textNodeEnd = rangeEnd.offsetNode
+  } else if (document.caretRangeFromPoint) {
+    rangeStart = document.caretRangeFromPoint(x, yStart)
+    rangeEnd = document.caretRangeFromPoint(x, yEnd)
+    textNodeStart = rangeStart!.startContainer
+    textNodeEnd = rangeEnd!.startContainer
+  }
+
+  const textRange = document.createRange()
+  textRange.setStart(textNodeStart, 0)
+  textRange.setEnd(textNodeEnd, textNodeEnd.textContent.length - 1)
+
+  return textRange.toString().trim()
 }
 
-export const getWordContext = (range: Range, originWord?: string): string => {
-  let pNode = range.commonAncestorContainer?.parentElement as HTMLElement
-  while (getComputedStyle(pNode).display.startsWith('inline') || isPDFjsReaderSpan(pNode)) {
-    pNode = pNode.parentElement as HTMLElement
+const wordContextCache = new WeakMap<Range, string>()
+export function getWordContext(range: Range) {
+  if (wordContextCache.has(range)) {
+    return wordContextCache.get(range) ?? ''
   }
-  // remove all <w-mark-t> tags in context
-  const pNodeClone = pNode.cloneNode(true) as HTMLElement
-  pNodeClone.querySelectorAll('w-mark-t').forEach(t => t.remove())
 
-  const text = pNodeClone?.textContent ?? originWord ?? ''
-  const sliceStart = text.indexOf(range.commonAncestorContainer?.textContent ?? originWord ?? '') ?? 0
-  let start = sliceStart + range.startOffset
-  let end = sliceStart + range.endOffset
-  while (start > 0 && text.at(start - 1) !== '.') start--
-  while (end < text.length && text.at(end) !== '.') end++
-  if (text.at(end) === '.') end++
+  const word = range.toString().trim()
+  const rect = range.getBoundingClientRect()
+  let text = getTextAroundPoint(rect.x, rect.y)
 
-  pNodeClone.remove()
-  return text.slice(start, end)
+  if (text.split(' ').length > MAX_CONTEXT_WORDS_LENGTH) {
+    // split sentence
+    const sentences = text.split(/[.?;]/g)
+    let wordIndexStart = text.indexOf(word)
+    let wordIndexEnd = wordIndexStart + word.length
+
+    // has multiple sentences
+    if (sentences.length > 1) {
+      let sentenceStart = 0
+      sentences.some(s => {
+        const sentenceEnd = sentenceStart + s.length
+
+        if (wordIndexStart >= sentenceStart) {
+          wordIndexStart = sentenceStart
+
+          if (wordIndexEnd <= sentenceEnd) {
+            text = text.substring(sentenceStart, sentenceEnd + 1).trim()
+            return true
+          } else {
+            wordIndexStart = sentenceEnd + 1
+          }
+        }
+        sentenceStart = sentenceEnd + 1
+      })
+    }
+  }
+
+  wordContextCache.set(range, text)
+  return text
 }
 
 export const downloadAsJsonFile = (content: string, filename: string) => {
