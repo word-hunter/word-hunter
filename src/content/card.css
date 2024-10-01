@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 .word_card {
   --bg-color: #fff;
   --border-color: rgba(0, 0, 0, 0.3);
@@ -169,6 +165,7 @@
         white-space: normal;
         word-break: break-word;
         word-wrap: break-word;
+        text-justify: balance;
       }
 
       b {
@@ -196,6 +193,15 @@
             opacity: 0.8;
           }
         }
+      }
+
+      .buttons {
+        position: absolute;
+        top: 4px;
+        right: 0;
+        display: flex;
+        gap: 4px;
+        align-items: center;
       }
 
       button {

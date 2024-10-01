@@ -390,7 +390,7 @@ function ContextList(props: { contexts: WordContext[] }) {
   const allTensionWords = () => getWordAllTenses(curWord()).reverse()
   const [editingContext, setEditingContext] = createSignal<WordContext | null>(null)
   const [prevText, setPrevText] = createSignal<string>('')
-  let editRef: HTMLDivElement | undefined
+  let editRef: HTMLPreElement | undefined
 
   function enterEditMode(context: WordContext) {
     setIsEditingContext(true)
@@ -427,12 +427,13 @@ function ContextList(props: { contexts: WordContext[] }) {
     exitEditMode()
   }
 
-  function updateAndFocusEl(el: HTMLDivElement) {
-    editRef = el
-    setTimeout(() => {
-      editRef?.focus()
-    })
-  }
+  createEffect(() => {
+    if (isEditingContext()) {
+      setTimeout(() => {
+        editRef?.focus()
+      })
+    }
+  })
 
   return (
     <Show
@@ -454,17 +455,12 @@ function ContextList(props: { contexts: WordContext[] }) {
             return (
               <div>
                 <Show when={editingContext() === context}>
-                  <div
-                    ref={el => updateAndFocusEl(el)}
-                    onblur={() => saveContext()}
-                    oninput={() => updateContextText()}
-                    contenteditable
-                  >
+                  <pre ref={editRef} onblur={() => saveContext()} oninput={() => updateContextText()} contenteditable>
                     {context.text}
-                  </div>
+                  </pre>
                 </Show>
                 <Show when={editingContext() !== context}>
-                  <pre innerHTML={highlightedContext}></pre>
+                  <pre innerHTML={highlightedContext} ondblclick={() => enterEditMode(context)}></pre>
                 </Show>
                 <p>
                   <img src={context.favicon || getFaviconByDomain(context.url)} alt="favicon" />
@@ -472,7 +468,7 @@ function ContextList(props: { contexts: WordContext[] }) {
                     {context.title}
                   </a>
                 </p>
-                <div class="flex items-center absolute top-1 right-0 gap-1">
+                <div class="buttons">
                   <button title="edit context" onClick={() => enterEditMode(context)}>
                     <img src={chrome.runtime.getURL('icons/edit.png')} alt="edit" />
                   </button>
