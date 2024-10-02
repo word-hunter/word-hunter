@@ -57,6 +57,8 @@ export const WhCard = customElement('wh-card', () => {
   const adapterName = () => (availableDicts()[tabIndex()] ?? availableDicts()[0]) as AdapterKey
   const getDictAdapter = () => adapters[adapterName()]
   const tabCount = () => availableDicts().length
+  let scrollPositions: Record<string, number> = {}
+  let dictContainerRef: HTMLDivElement | undefined
 
   onMount(() => {
     readBlacklist().then(async blacklist => {
@@ -116,7 +118,7 @@ export const WhCard = customElement('wh-card', () => {
     if (node.tagName === 'A' && node.getAttribute('href') === '#') {
       e.stopImmediatePropagation()
       e.preventDefault()
-      getCardNode().querySelector('.dict_container')!.scrollTop = 0
+      dictContainerRef?.scrollTo({ top: 0 })
       return false
     }
 
@@ -146,8 +148,19 @@ export const WhCard = customElement('wh-card', () => {
       adjustCardPosition(rangeRect, inDirecting)
       inDirecting = false
       runAutoPronounce()
+
+      const scrollTop = scrollPositions[adapterName()] ?? 0
+      dictContainerRef?.scrollTo({ top: scrollTop })
     }
   }
+
+  // reset scroll position when word changed
+  createEffect(prevWord => {
+    if (curWord() !== prevWord) {
+      scrollPositions = {}
+    }
+    return curWord()
+  }, '')
 
   const inWordContexts = () => {
     return !!wordContexts().find(c => c.text === curContextText())
@@ -158,9 +171,14 @@ export const WhCard = customElement('wh-card', () => {
     e.stopImmediatePropagation()
   }
 
+  const onScroll = (e: Event) => {
+    e.stopImmediatePropagation()
+    const scrollTop = (e.target as HTMLElement).scrollTop
+    scrollPositions[adapterName()] = scrollTop
+  }
+
   const onKeydown = (e: KeyboardEvent) => {
-    const cardNode = getCardNode()
-    const container = cardNode.querySelector('.dict_container')!
+    const container = dictContainerRef!
     if (isCardVisible() && !isEditingContext()) {
       if (!e.altKey && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
@@ -274,7 +292,7 @@ export const WhCard = customElement('wh-card', () => {
           </button>
         </div>
       </div>
-      <div class="dict_container" onWheel={onWheel}>
+      <div class="dict_container" ref={dictContainerRef} onWheel={onWheel} onscroll={onScroll}>
         <Show when={curWord()}>
           <Switch fallback={null}>
             <Match when={tabIndex() === tabCount()}>

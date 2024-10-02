@@ -20,7 +20,6 @@ export function Dict(props: Props) {
   createEffect(() => {
     if (!def.loading) {
       props.onSettle()
-      root?.scrollTo(0, 0)
     }
   })
 
