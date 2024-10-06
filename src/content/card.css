@@ -162,9 +162,10 @@
         line-height: 1.6em;
         font-family: 'system-ui';
         font-weight: 400;
-        white-space: normal;
+        white-space: pre-wrap;
+        hyphens: none;
         word-break: break-word;
-        word-wrap: break-word;
+        overflow-wrap: break-word;
         text-justify: balance;
       }
 
