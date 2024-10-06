@@ -414,6 +414,19 @@ function ContextList(props: { contexts: WordContext[] }) {
     setIsEditingContext(true)
     setEditingContext(context)
     setPrevText(context.text)
+
+    // Set cursor position at the end of edit area
+    setTimeout(() => {
+      if (editRef) {
+        const range = document.createRange()
+        const selection = window.getSelection()
+        range.selectNodeContents(editRef)
+        range.collapse(false) // Collapse to the end
+        selection?.removeAllRanges()
+        selection?.addRange(range)
+        editRef.focus()
+      }
+    }, 0)
   }
 
   function exitEditMode() {
@@ -429,7 +442,7 @@ function ContextList(props: { contexts: WordContext[] }) {
       exitEditMode()
       return
     }
-    currentContext.text = (editRef.textContent ?? '').trim()
+    currentContext.text = (editRef.innerText ?? '').trim()
   }
 
   function saveContext() {
@@ -445,13 +458,9 @@ function ContextList(props: { contexts: WordContext[] }) {
     exitEditMode()
   }
 
-  createEffect(() => {
-    if (isEditingContext()) {
-      setTimeout(() => {
-        editRef?.focus()
-      })
-    }
-  })
+  const stopPropagation = (e: KeyboardEvent) => {
+    e.stopPropagation()
+  }
 
   return (
     <Show
@@ -473,7 +482,15 @@ function ContextList(props: { contexts: WordContext[] }) {
             return (
               <div>
                 <Show when={editingContext() === context}>
-                  <pre ref={editRef} onblur={() => saveContext()} oninput={() => updateContextText()} contenteditable>
+                  <pre
+                    ref={editRef}
+                    onblur={() => saveContext()}
+                    oninput={() => updateContextText()}
+                    // @ts-ignore
+                    on:keydown={stopPropagation}
+                    on:keyup={stopPropagation}
+                    contenteditable
+                  >
                     {context.text}
                   </pre>
                 </Show>
