@@ -45,7 +45,8 @@ export const DEFAULT_SETTINGS = {
     apiKey: '',
     apiProxy: 'https://api.openai.com/v1/chat/completions',
     model: 'gpt-3.5-turbo',
-    prompt: 'explain the word ${word} in the sentence "${context}" with grade 2 English words'
+    prompt: 'explain the word ${word} in the sentence "${context}" with grade 2 English words',
+    customModel: ''
   },
   githubToken: '',
   githubGistId: ''
