@@ -244,7 +244,8 @@ onMessage(Messages.fetch_html, async ({ data }) => {
 
 onMessage(Messages.ai_explain, async ({ data }) => {
   const { word, text } = data
-  const explain = await explainWord(word, text, settings().openai.model)
+  const model = settings().openai.model === "custom" ? settings().openai.customModel : settings().openai.model
+  const explain = await explainWord(word, text, model)
   return explain
 })
 

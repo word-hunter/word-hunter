@@ -26,6 +26,12 @@ export const OpenAISetting = () => {
     setSetting('openai', { ...openai, model: target.value })
   }
 
+  const onCustomModelChange = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const openai = settings().openai
+    setSetting('openai', { ...openai, customModel: target.value })
+  }
+
   return (
     <Show when={settings().dictTabs.openai}>
       <section class="section">
@@ -43,8 +49,18 @@ export const OpenAISetting = () => {
               <option value="gpt-4">gpt-4</option>
               <option value="gpt-4o">gpt-4o</option>
               <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="custom">custom model</option>
             </select>
           </div>
+          {settings().openai.model === 'custom' && (
+            <input
+              type="text"
+              placeholder="input custom model"
+              class="input input-bordered input-sm w-full max-w-xs text-xs"
+              value={settings().openai.customModel}
+              oninput={onCustomModelChange}
+            />
+          )}
           <textarea
             placeholder="input your openai apikey"
             class="textarea textarea-bordered textarea-lg w-full h-24 max-w-xs text-xs leading-5"
