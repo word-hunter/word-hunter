@@ -1,6 +1,6 @@
 import { StorageKey, WordMap, ContextMap } from '../../constant'
 import { mergeKnowns, mergeContexts, cleanupContexts, getAllKnownSync, getLocalValue, getSyncValue } from '../storage'
-import { SettingType, mergeSetting, settings } from '../settings'
+import { SettingType, mergeSetting, settings, getGithubToken, getGithubGistId } from '../settings'
 import * as GDrive from './drive'
 import { getGistData, updateGist } from './github'
 
@@ -21,9 +21,14 @@ export async function getBackupData(): Promise<BackupData> {
     StorageKey.settings_update_timestamp
   ])
   const knowns = await getAllKnownSync()
+  const settings = syncs[StorageKey.settings] || {}
+  // Sanitize settings to remove sensitive data if it exists from old versions
+  delete (settings as any).githubToken
+  delete (settings as any).githubGistId
+
   return {
     [StorageKey.known]: knowns,
-    [StorageKey.settings]: syncs[StorageKey.settings] || null,
+    [StorageKey.settings]: settings,
     [StorageKey.context]: cleanupContexts(locals[StorageKey.context] || {}, knowns),
     [StorageKey.knwon_update_timestamp]: syncs[StorageKey.knwon_update_timestamp] ?? 0,
     [StorageKey.settings_update_timestamp]: syncs[StorageKey.settings_update_timestamp] ?? 0,
@@ -148,8 +153,10 @@ chrome.alarms?.onAlarm?.addListener(async ({ name }) => {
     syncWithDrive(false)
   }
   if (name === GIST_SYNC_ALARM_NAME) {
-    if (settings().githubToken && settings().githubGistId) {
-      syncWithGist(settings().githubToken, settings().githubGistId)
+    const token = await getGithubToken()
+    const gistId = await getGithubGistId()
+    if (token && gistId) {
+      syncWithGist(token, gistId)
     }
   }
 })
