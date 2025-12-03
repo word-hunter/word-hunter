@@ -1,6 +1,12 @@
 import { createSignal, Show } from 'solid-js'
 import { StorageKey } from '../constant'
 import { downloadAsJsonFile, resotreSettings, settings, setSetting } from '../lib'
+import {
+  getGithubToken as getGithubTokenFromStorage,
+  setGithubToken as setGithubTokenToStorage,
+  getGithubGistId as getGithubGistIdFromStorage,
+  setGithubGistId as setGithubGistIdToStorage
+} from '../lib/settings'
 import { syncUpKnowns, getLocalValue } from '../lib/storage'
 import { Note } from './note'
 import { syncWithDrive, getBackupData, syncWithGist } from '../lib/backup/sync'
@@ -17,6 +23,8 @@ export const Backup = () => {
   const [githubSyning, setGithubSyning] = createSignal(false)
   const [latestGistSyncTime, setLatestGistSyncTime] = createSignal(0)
   const [gistSyncFailedMessage, setGistSyncFailedMessage] = createSignal('')
+  const [githubToken, setGithubToken] = createSignal('')
+  const [githubGistId, setGithubGistId] = createSignal('')
 
   const onGDriveTokenInput = (e: Event) => {
     const target = e.target as HTMLTextAreaElement
@@ -34,12 +42,16 @@ export const Backup = () => {
 
   const onGithubTokenInput = (e: Event) => {
     const target = e.target as HTMLInputElement
-    setSetting('githubToken', target.value)
+    const value = target.value
+    setGithubToken(value)
+    setGithubTokenToStorage(value)
   }
 
   const onGithubGistIdInput = (e: Event) => {
     const target = e.target as HTMLInputElement
-    setSetting('githubGistId', target.value)
+    const value = target.value
+    setGithubGistId(value)
+    setGithubGistIdToStorage(value)
   }
 
   getLocalValue(StorageKey.latest_sync_time).then(time => {
@@ -70,6 +82,23 @@ export const Backup = () => {
     if (message) {
       setGistSyncFailedMessage(message)
     }
+  })
+
+  // Load and migrate github token/gistId
+  Promise.all([getGithubTokenFromStorage(), getGithubGistIdFromStorage()]).then(([token, gistId]) => {
+    // Migration: check if they exist in old settings
+    const currentSettings = settings() as any
+    if (!token && currentSettings.githubToken) {
+      token = currentSettings.githubToken
+      setGithubTokenToStorage(token)
+    }
+    if (!gistId && currentSettings.githubGistId) {
+      gistId = currentSettings.githubGistId
+      setGithubGistIdToStorage(gistId)
+    }
+
+    if (token) setGithubToken(token)
+    if (gistId) setGithubGistId(gistId)
   })
 
   const toastS = (message: string) => {
@@ -153,8 +182,8 @@ export const Backup = () => {
 
   const onGithubGistSync = async () => {
     if (githubSyning()) return
-    const token = settings().githubToken
-    const gistId = settings().githubGistId
+    const token = githubToken()
+    const gistId = githubGistId()
     if (!token || !gistId) {
       toastE('invalid token or gist id')
       return
@@ -227,14 +256,14 @@ export const Backup = () => {
             type="text"
             class="input input-bordered text-sm"
             placeholder="Github Token"
-            value={settings().githubToken}
+            value={githubToken()}
             oninput={onGithubTokenInput}
           />
           <input
             type="text"
             class="input input-bordered text-sm"
             placeholder="GitHub Gist Id"
-            value={settings().githubGistId}
+            value={githubGistId()}
             oninput={onGithubGistIdInput}
           />
           <button class="btn btn-block btn-lg capitalize text-xs" onclick={onGithubGistSync}>
@@ -249,7 +278,7 @@ export const Backup = () => {
           <Show when={latestGistSyncTime() > 0 && !gistSyncFailedMessage()}>
             <div class="text-center text-accent">Latest sync: {formatTime(latestGistSyncTime())}</div>
           </Show>
-          <Show when={settings().githubToken && settings().githubGistId && !!gistSyncFailedMessage()}>
+          <Show when={githubToken() && githubGistId() && !!gistSyncFailedMessage()}>
             <div class="text-center text-error">❌ Sync Failed: {gistSyncFailedMessage()}</div>
           </Show>
         </div>
