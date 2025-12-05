@@ -53,7 +53,9 @@ export enum StorageKey {
   'latest_gist_sync_time' = 'latest_gist_sync_time',
   'gist_sync_failed_message' = 'gist_sync_failed_message',
   'local_knowns_log' = 'local_knowns_log',
-  'version' = 'version'
+  'version' = 'version',
+  'github_token' = 'github_token',
+  'github_gist_id' = 'github_gist_id'
 }
 
 export enum Messages {
