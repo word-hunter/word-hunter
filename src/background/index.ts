@@ -231,7 +231,7 @@ onMessage(Messages.fetch_html, async ({ data }) => {
   let htmlText: string | { isError: boolean; message: string }
   try {
     const htmlRes = await fetch(url, {
-      mode: 'no-cors',
+      mode: 'cors',
       credentials: 'include',
       ...option
     })
